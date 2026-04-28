@@ -796,7 +796,7 @@ function IdVerify({ go }) {
             <div className="pre-qual-banner fade-up">
               <div className="pre-qual-icon">🏡</div>
               <div className="pre-qual-title">Homeowner confirmed</div>
-              <div className="pre-qual-sub">Thabo Nkosi · Kempton Park, Gauteng<br/>Next: verify it's really you</div>
+              <div className="pre-qual-sub">Mutoda Ndivho · Kempton Park, Gauteng<br/>Next: verify it's really you</div>
             </div>
           )}
 
@@ -920,7 +920,7 @@ function OtpVerify({ go }) {
           </div>
           <div className="wa-preview-body">
             <div className="wa-bubble">
-              <div className="wa-bubble-greeting">Hi Thabo 👋 Your Muḽo verification code is:</div>
+              <div className="wa-bubble-greeting">Hi Mutoda 👋 Your Muḽo verification code is:</div>
               <div className="wa-bubble-otp">123456</div>
               <div className="wa-bubble-footer">Valid for <strong>10 minutes</strong>. Never share this code with anyone — Muḽo will never ask for it.<br/>🔒 DHA-linked number verified.</div>
               <div className="wa-bubble-meta">
@@ -1058,7 +1058,7 @@ function LivenessCheck({ go }) {
             <div className="camera-instruction">
               {phase==="idle"&&"Position face in oval"}
               {phase==="scanning"&&(steps[livenessStep]?.label||"Hold still…")}
-              {phase==="verified"&&"✓ Match confirmed — Thabo Nkosi"}
+              {phase==="verified"&&"✓ Match confirmed — Mutoda Ndivho"}
             </div>
             <div className="camera-sub-instruction">
               {phase==="idle"&&"Tap 'Start verification' below"}
@@ -1118,7 +1118,7 @@ function Signup({ go }) {
       <div className="screen-scroll">
         <div className="form-pad" style={{paddingTop:8}}>
           <div style={{background:"rgba(18,194,107,0.06)",border:"1px solid rgba(18,194,107,0.2)",borderRadius:14,padding:"12px 14px",marginBottom:20,fontSize:12,color:"#12C26B",display:"flex",gap:8,alignItems:"center"}}>
-            ✓ &nbsp;ID · OTP · Face verified — Thabo Nkosi · Homeowner
+            ✓ &nbsp;ID · OTP · Face verified — Mutoda Ndivho · Homeowner
           </div>
 
           {/* Name locked from DHA */}
@@ -1129,11 +1129,11 @@ function Signup({ go }) {
             <div className="name-row">
               <div>
                 <div style={{fontSize:10,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:5}}>First name</div>
-                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>Thabo</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>Mutoda</div>
               </div>
               <div>
                 <div style={{fontSize:10,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:5}}>Last name</div>
-                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>Nkosi</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>Ndivho</div>
               </div>
             </div>
             <div style={{fontSize:11,color:"#8FA3BE",marginTop:10,display:"flex",alignItems:"center",gap:5}}>
@@ -1466,7 +1466,7 @@ function BondConfirm({ go }) {
 
           {confirmed && !disputed && (
             <div style={{background:"rgba(18,194,107,0.06)",border:"1px solid rgba(18,194,107,0.2)",borderRadius:12,padding:"12px 16px",marginTop:8,fontSize:12,color:"#12C26B",display:"flex",gap:8,alignItems:"center"}} className="fade-up">
-              ✓ Bond details confirmed · Proceeding to your offer
+              ✓ Bond details confirmed · Next: confirm your bank account
             </div>
           )}
         </div>
@@ -1476,14 +1476,132 @@ function BondConfirm({ go }) {
         <button className="btn btn-primary"
           style={{opacity: confirmed && !disputed ? 1 : 0.35}}
           disabled={!confirmed || disputed}
-          onClick={() => go("offer")}>
-          View my offer →
+          onClick={() => go("bank-account")}>
+          Confirm bank account →
         </button>
         {!confirmed && !disputed && (
           <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>
             Please confirm or dispute the data above to continue
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   SCREEN 5C — BANK ACCOUNT CONFIRMATION
+   Account retrieved from TruID — read only.
+   Client confirms. No alternative allowed.
+───────────────────────────────────────────── */
+function BankAccountConfirm({ go }) {
+  const [confirmed, setConfirmed] = useState(false);
+
+  const ACCOUNT = {
+    bank:        "Nedbank",
+    logo:        "🏦",
+    type:        "Cheque Account",
+    holder:      "Mutoda Ndivho",
+    number:      "••• ••• 2847",
+    branch:      "198765",
+    source:      "TruID — verified 11 Apr 2026",
+    nameMatch:   true,
+  };
+
+  const fmt = (label, value, highlight) => (
+    <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 0",borderBottom:"1px solid #F7F9FC"}}>
+      <span style={{fontSize:12,color:"#8FA3BE"}}>{label}</span>
+      <span style={{fontSize:13,fontWeight:700,color: highlight ? "#12C26B" : "#0A1628",fontFamily:"'Sora',sans-serif"}}>{value}</span>
+    </div>
+  );
+
+  return (
+    <div className="screen fade-in">
+      <div className="screen-header">
+        <div className="back-btn" onClick={() => go("bond-confirm")}>←</div>
+        <div className="screen-header-text">
+          <div className="screen-header-title">Confirm bank account</div>
+          <div className="screen-header-sub">Disbursement account</div>
+        </div>
+      </div>
+      <div className="progress-track"><div className="progress-fill" style={{width:"75%"}} /></div>
+
+      <div className="screen-scroll">
+        <div style={{padding:"8px 16px 24px"}}>
+
+          {/* Intro */}
+          <div style={{background:"rgba(0,184,169,0.06)",border:"1px solid rgba(0,184,169,0.18)",borderRadius:14,padding:"13px 15px",marginBottom:16,fontSize:12,color:"#0A1628",lineHeight:1.7,display:"flex",gap:10}}>
+            <span style={{fontSize:16,flexShrink:0}}>💳</span>
+            <div>We retrieved the following bank account from <strong>TruID</strong> during your affordability assessment. Loan tranches will be disbursed into this account only.</div>
+          </div>
+
+          {/* Bank card */}
+          <div style={{background:"linear-gradient(135deg,#0A1628,#1B3A5E)",borderRadius:18,padding:20,marginBottom:12,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",right:-20,top:-20,width:100,height:100,borderRadius:"50%",background:"rgba(0,184,169,0.1)"}}/>
+            <div style={{position:"absolute",right:-10,bottom:-30,width:140,height:140,borderRadius:"50%",background:"rgba(26,115,232,0.08)"}}/>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:1,marginBottom:16,position:"relative",zIndex:1}}>Disbursement Account · TruID Verified</div>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20,position:"relative",zIndex:1}}>
+              <div style={{width:48,height:48,borderRadius:14,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{ACCOUNT.logo}</div>
+              <div>
+                <div style={{fontFamily:"'Sora',sans-serif",fontSize:18,fontWeight:800,color:"#fff"}}>{ACCOUNT.bank}</div>
+                <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginTop:2}}>{ACCOUNT.type}</div>
+              </div>
+            </div>
+            <div style={{fontFamily:"'Sora',sans-serif",fontSize:22,fontWeight:700,color:"#fff",letterSpacing:4,marginBottom:16,position:"relative",zIndex:1}}>{ACCOUNT.number}</div>
+            <div style={{display:"flex",justifyContent:"space-between",position:"relative",zIndex:1}}>
+              <div>
+                <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>Account holder</div>
+                <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>{ACCOUNT.holder}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.5,marginBottom:3}}>Branch code</div>
+                <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>{ACCOUNT.branch}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Verification details */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 14px rgba(0,0,0,0.06)",marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:4}}>Verification details</div>
+            {fmt("Bank", ACCOUNT.bank)}
+            {fmt("Account type", ACCOUNT.type)}
+            {fmt("Account number", ACCOUNT.number)}
+            {fmt("Branch code", ACCOUNT.branch)}
+            {fmt("Account holder", ACCOUNT.holder)}
+            {fmt("Name match", "✓ Matches DHA records", true)}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 0"}}>
+              <span style={{fontSize:12,color:"#8FA3BE"}}>Verified by</span>
+              <span style={{fontSize:11,fontWeight:600,color:"#00B8A9"}}>{ACCOUNT.source}</span>
+            </div>
+          </div>
+
+          {/* Lock notice */}
+          <div style={{background:"#F7F9FC",border:"1px solid #E2E9F0",borderRadius:14,padding:"13px 15px",marginBottom:16,fontSize:12,color:"#8FA3BE",lineHeight:1.7,display:"flex",gap:10}}>
+            <span style={{fontSize:15,flexShrink:0}}>🔒</span>
+            <div>For your protection, funds can <strong style={{color:"#0A1628"}}>only</strong> be disbursed into this verified account. This cannot be changed as it is linked to your verified identity via TruID.</div>
+          </div>
+
+          {/* Confirmed state */}
+          {confirmed && (
+            <div style={{background:"rgba(18,194,107,0.06)",border:"1px solid rgba(18,194,107,0.2)",borderRadius:12,padding:"12px 16px",fontSize:12,color:"#12C26B",display:"flex",gap:8,alignItems:"center"}} className="fade-up">
+              ✓ Bank account confirmed · Proceeding to your offer
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bottom-cta">
+        {!confirmed
+          ? <button className="btn btn-primary" onClick={() => setConfirmed(true)}>
+              ✓ Confirm this account →
+            </button>
+          : <button className="btn btn-primary" onClick={() => go("offer")}>
+              View my offer →
+            </button>
+        }
+        <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>
+          Disbursement account: Nedbank ••• ••• 2847
+        </div>
       </div>
     </div>
   );
@@ -1559,7 +1677,7 @@ function Offer({ go }) {
             <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Offer valid 48 hrs</div>
           </div>
           <div className="offer-eyebrow">PERSONALISED EQUITY OFFER</div>
-          <div className="offer-name">Thabo Nkosi · 34 Jacaranda Ave, Kempton Park</div>
+          <div className="offer-name">Mutoda Ndivho · 34 Jacaranda Ave, Kempton Park</div>
 
           {/* Muḽo score */}
           <div className="mulo-score">
@@ -1932,7 +2050,7 @@ function LoanSign({ go }) {
             <div className="esign-doc-body">
               <div className="esign-clause">
                 <strong>1. Parties</strong><br/>
-                This agreement is entered into between <strong>Muḽo (Pty) Ltd</strong> ("the Lender") and <strong>Thabo Nkosi</strong>, ID 800101 5009 087 ("the Borrower") on 11 April 2026.
+                This agreement is entered into between <strong>Muḽo (Pty) Ltd</strong> ("the Lender") and <strong>Mutoda Ndivho</strong>, ID 800101 5009 087 ("the Borrower") on 11 April 2026.
               </div>
               <div className="esign-clause">
                 <strong>2. Loan amount &amp; purpose</strong><br/>
@@ -1973,7 +2091,7 @@ function LoanSign({ go }) {
                 <div className="sig-section-label" style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:8}}>Borrower initials (page 1 of 2)</div>
                 <div className={`signature-pad ${initialled?"signed":""}`} onClick={() => setInitialled(true)}>
                   {initialled
-                    ? <><span className="sig-rendered">T.N.</span><span className="sig-verified-badge">✓ Initialled</span><span className="sig-date-stamp">11 Apr 2026 · 11:44</span></>
+                    ? <><span className="sig-rendered">M.N.</span><span className="sig-verified-badge">✓ Initialled</span><span className="sig-date-stamp">11 Apr 2026 · 11:44</span></>
                     : <div className="sig-placeholder"><span style={{fontSize:20}}>✍️</span>Tap to initial here</div>
                   }
                 </div>
@@ -1988,7 +2106,7 @@ function LoanSign({ go }) {
               </div>
               <div className={`signature-pad ${signed?"signed":""}`} onClick={() => signed ? null : setScrolled(true) && setSigned(true) || setSigned(true)}>
                 {signed
-                  ? <><span className="sig-rendered">Thabo Nkosi</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:45 · IP 41.13.xxx.xxx</span></>
+                  ? <><span className="sig-rendered">Mutoda Ndivho</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:45 · IP 41.13.xxx.xxx</span></>
                   : <div className="sig-placeholder"><span style={{fontSize:20}}>✍️</span><span>Tap to sign</span>{!scrolled&&<span style={{fontSize:10,color:"#FF7043"}}>Scroll to read full agreement first</span>}</div>
                 }
               </div>
@@ -2086,10 +2204,10 @@ function Conveyancing({ go }) {
               <div className="esign-doc-body">
                 <div className="esign-clause">
                   <strong>Property:</strong> Erf 4821, 34 Jacaranda Avenue, Kempton Park Ext 2, Gauteng<br/>
-                  <strong>Title Deed:</strong> T 48291/2019 · Registered owner: Thabo Nkosi
+                  <strong>Title Deed:</strong> T 48291/2019 · Registered owner: Mutoda Ndivho
                 </div>
                 <div className="esign-clause">
-                  <strong>Consent:</strong> I, <strong>Thabo Nkosi</strong>, hereby consent to the registration of a second mortgage bond over the above property in favour of <strong>Muḽo (Pty) Ltd</strong> for the sum of <strong>R517,500</strong>, as security for the equity loan advanced under agreement REF-2026-48291.
+                  <strong>Consent:</strong> I, <strong>Mutoda Ndivho</strong>, hereby consent to the registration of a second mortgage bond over the above property in favour of <strong>Muḽo (Pty) Ltd</strong> for the sum of <strong>R517,500</strong>, as security for the equity loan advanced under agreement REF-2026-48291.
                 </div>
                 <div className="esign-highlight">
                   ⚖️ <strong>Your rights:</strong> You have 5 business days to cancel this consent without penalty. The bond will be registered at the Deeds Office and reflected on your title deed. You retain full ownership of the property.
@@ -2108,7 +2226,7 @@ function Conveyancing({ go }) {
                 </div>
                 <div className={`signature-pad ${signed?"signed":""}`} onClick={() => setSigned(true)}>
                   {signed
-                    ? <><span className="sig-rendered">Thabo Nkosi</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:52</span></>
+                    ? <><span className="sig-rendered">Mutoda Ndivho</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:52</span></>
                     : <div className="sig-placeholder"><span style={{fontSize:20}}>✍️</span><span>Tap to sign conveyancing consent</span></div>
                   }
                 </div>
@@ -2557,9 +2675,9 @@ function Dashboard({ go }) {
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div className="dash-greeting">Good morning 👋</div>
-            <div className="dash-name">Thabo Nkosi</div>
+            <div className="dash-name">Mutoda Ndivho</div>
           </div>
-          <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif"}}>TN</div>
+          <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif"}}>MN</div>
         </div>
         <div className="status-card">
           <div className="status-top">
@@ -2652,7 +2770,7 @@ function Dashboard({ go }) {
 /* ─────────────────────────────────────────────
    ROOT
 ───────────────────────────────────────────── */
-const SCREENS = { landing:Landing, "id-verify":IdVerify, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
+const SCREENS = { landing:Landing, "id-verify":IdVerify, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
