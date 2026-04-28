@@ -559,33 +559,134 @@ function Landing({ go }) {
 }
 
 /* ─────────────────────────────────────────────
+   SA ID VALIDATION UTILITIES
+───────────────────────────────────────────── */
+function validateSAID(id) {
+  if (!/^\d{13}$/.test(id)) return { valid: false, error: "Must be exactly 13 digits" };
+
+  // Extract components
+  const yy    = parseInt(id.slice(0, 2));
+  const mm    = parseInt(id.slice(2, 4));
+  const dd    = parseInt(id.slice(4, 6));
+  const gender = parseInt(id.slice(6, 10));
+  const citizen = parseInt(id.slice(10, 11));
+
+  // 1. Validate date of birth
+  const year  = yy <= new Date().getFullYear() % 100 ? 2000 + yy : 1900 + yy;
+  const dob   = new Date(year, mm - 1, dd);
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31 || dob.getMonth() !== mm - 1 || dob.getDate() !== dd) {
+    return { valid: false, error: "Invalid date of birth in ID number" };
+  }
+
+  // 2. Validate age (must be 18+)
+  const today = new Date();
+  const age   = today.getFullYear() - dob.getFullYear() - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0);
+  if (age < 18) return { valid: false, error: "Applicant must be 18 or older" };
+  if (age > 100) return { valid: false, error: "Date of birth appears invalid" };
+
+  // 3. Validate citizenship digit (0 = SA citizen, 1 = permanent resident)
+  if (citizen !== 0 && citizen !== 1) {
+    return { valid: false, error: "Invalid citizenship digit — must be 0 or 1" };
+  }
+
+  // 4. Luhn algorithm checksum
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    let digit = parseInt(id[i]);
+    if (i % 2 === 1) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+  }
+  const checkDigit = (10 - (sum % 10)) % 10;
+  if (checkDigit !== parseInt(id[12])) {
+    return { valid: false, error: "Checksum failed — please check your ID number" };
+  }
+
+  // Extract readable info
+  const genderStr   = gender >= 5000 ? "Male" : "Female";
+  const citizenStr  = citizen === 0 ? "SA Citizen" : "Permanent Resident";
+  const dobFormatted = dob.toLocaleDateString("en-ZA", { day:"numeric", month:"long", year:"numeric" });
+
+  return { valid: true, dob: dobFormatted, age, gender: genderStr, citizen: citizenStr };
+}
+
+/* ─────────────────────────────────────────────
    SCREEN 2 — ID VERIFICATION
 ───────────────────────────────────────────── */
 function IdVerify({ go }) {
-  const [idNum, setIdNum] = useState("");
-  const [phase, setPhase] = useState("idle");
+  const [idNum, setIdNum]   = useState("");
+  const [phase, setPhase]   = useState("idle"); // idle | validating | invalid | checking | done
+  const [validation, setValidation] = useState(null);
   const [checks, setChecks] = useState([
-    { label:"ID number valid", sub:"Luhn check & format", status:"wait" },
-    { label:"Homeowner status", sub:"Deeds Office verification", status:"wait" },
-    { label:"No sequestration", sub:"Master of High Court check", status:"wait" },
+    { label:"Valid SA ID format",    sub:"13 digits · Luhn checksum · Date of birth", status:"wait" },
+    { label:"Homeowner status",      sub:"Deeds Office verification", status:"wait" },
+    { label:"No sequestration",      sub:"Master of High Court check", status:"wait" },
   ]);
 
-  const handleCheck = () => {
-    if(idNum.length < 13) return;
-    setPhase("checking");
-    let i = 0;
-    const run = () => {
-      if(i >= checks.length){ setPhase("done"); return; }
-      setChecks(c => c.map((x,idx) => idx === i ? {...x,status:"loading"} : x));
-      setTimeout(() => {
-        setChecks(c => c.map((x,idx) => idx === i ? {...x,status:"ok"} : x));
-        i++; setTimeout(run, 400);
-      }, 900);
-    };
-    run();
+  const fmt = v => v.replace(/\D/g,"").slice(0,13);
+
+  const handleChange = (val) => {
+    const cleaned = fmt(val);
+    setIdNum(cleaned);
+    setPhase("idle");
+    setValidation(null);
+    setChecks(c => c.map(x => ({ ...x, status:"wait" })));
+
+    // Live validate as soon as 13 digits entered
+    if (cleaned.length === 13) {
+      const result = validateSAID(cleaned);
+      setValidation(result);
+      if (!result.valid) setPhase("invalid");
+    }
   };
 
-  const fmt = v => v.replace(/\D/g,"").slice(0,13);
+  const handleCheck = () => {
+    if (idNum.length < 13) return;
+    const result = validateSAID(idNum);
+    if (!result.valid) { setPhase("invalid"); setValidation(result); return; }
+
+    setPhase("checking");
+    // Step 1: mark ID format check as loading then ok
+    setChecks(c => c.map((x,i) => i===0 ? {...x,status:"loading"} : x));
+    setTimeout(() => {
+      setChecks(c => c.map((x,i) => i===0 ? {...x,status:"ok",sub:`DOB: ${result.dob} · ${result.gender} · ${result.citizen}`} : x));
+      // Step 2: homeowner
+      setTimeout(() => {
+        setChecks(c => c.map((x,i) => i===1 ? {...x,status:"loading"} : x));
+        setTimeout(() => {
+          setChecks(c => c.map((x,i) => i===1 ? {...x,status:"ok"} : x));
+          // Step 3: sequestration
+          setTimeout(() => {
+            setChecks(c => c.map((x,i) => i===2 ? {...x,status:"loading"} : x));
+            setTimeout(() => {
+              setChecks(c => c.map((x,i) => i===2 ? {...x,status:"ok"} : x));
+              setPhase("done");
+            }, 900);
+          }, 400);
+        }, 900);
+      }, 400);
+    }, 900);
+  };
+
+  // Colour the input border based on state
+  const inputClass = phase==="invalid" ? "input-field error"
+                   : phase==="done"    ? "input-field success"
+                   : "input-field";
+
+  // Live format hint shown below input
+  const renderHint = () => {
+    if (idNum.length === 0) return null;
+    if (idNum.length < 13) return <div className="input-hint">{idNum.length}/13 digits</div>;
+    if (phase === "invalid" && validation) return <div className="input-hint err">✕ {validation.error}</div>;
+    if (validation?.valid) return (
+      <div className="input-hint ok">
+        ✓ Valid · DOB {validation.dob} · {validation.gender} · {validation.citizen}
+      </div>
+    );
+    return null;
+  };
 
   return (
     <div className="screen fade-in">
@@ -597,39 +698,100 @@ function IdVerify({ go }) {
         </div>
       </div>
       <div className="progress-track"><div className="progress-fill" style={{width:"16%"}} /></div>
+
       <div className="screen-scroll">
         <div className="id-graphic">
           <div className="id-card-label">South African ID Number</div>
-          <div className="id-card-number">{idNum || "000000 0000 000"}</div>
-          <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",marginTop:8}}>13-digit identity number</div>
+          <div className="id-card-number" style={{letterSpacing: idNum ? 3 : 1}}>
+            {idNum
+              ? `${idNum.slice(0,6)} ${idNum.slice(6,10)} ${idNum.slice(10)}`
+              : "000000 0000 000"}
+          </div>
+          {validation?.valid && (
+            <div style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginTop:8,display:"flex",gap:12}}>
+              <span>🎂 {validation.dob}</span>
+              <span>{validation.gender}</span>
+            </div>
+          )}
           <div className="id-card-flag">🇿🇦</div>
         </div>
+
         <div className="form-pad">
           <div className="input-group">
             <label className="input-label">SA ID Number</label>
             <input
-              className={`input-field ${phase==="done"?"success":""}`}
+              className={inputClass}
               placeholder="e.g. 8001015009087"
               value={idNum}
               maxLength={13}
-              onChange={e => { setIdNum(fmt(e.target.value)); setPhase("idle"); setChecks(c=>c.map(x=>({...x,status:"wait"}))); }}
+              inputMode="numeric"
+              onChange={e => handleChange(e.target.value)}
             />
-            <div className={`input-hint ${idNum.length===13?"ok":""}`}>
-              {idNum.length===13 ? "✓ Format looks good" : `${idNum.length}/13 digits`}
-            </div>
+            {renderHint()}
           </div>
-          <div style={{padding:"4px 0 20px"}}>
-            {checks.map((c,i) => (
-              <div className="check-row" key={i}>
-                <div className={`check-icon ${c.status==="wait"?"pending":c.status}`}>
-                  {c.status==="ok"?"✓":c.status==="loading"?"⟳":"○"}
+
+          {/* Validation breakdown — shown as soon as 13 digits entered */}
+          {idNum.length === 13 && (
+            <div style={{marginBottom:16}} className="fade-up">
+              <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Format validation</div>
+              {[
+                {
+                  label:"13 digits",
+                  ok: idNum.length === 13,
+                  detail:"Correct length"
+                },
+                {
+                  label:"Valid date of birth",
+                  ok: validation?.valid || (validation?.error !== "Invalid date of birth in ID number" && validation?.error !== "Applicant must be 18 or older" && validation?.error !== "Date of birth appears invalid"),
+                  detail: validation?.valid ? `${validation.dob} · Age ${validation.age}` : (["Invalid date of birth in ID number","Applicant must be 18 or older","Date of birth appears invalid"].includes(validation?.error) ? validation.error : "Checking...")
+                },
+                {
+                  label:"Citizenship digit",
+                  ok: validation?.valid || validation?.error !== "Invalid citizenship digit — must be 0 or 1",
+                  detail: validation?.valid ? validation.citizen : validation?.error === "Invalid citizenship digit — must be 0 or 1" ? "Invalid — must be 0 or 1" : "SA Citizen or Permanent Resident"
+                },
+                {
+                  label:"Luhn checksum",
+                  ok: validation?.valid,
+                  detail: validation?.valid ? "Mathematically valid" : validation?.error === "Checksum failed — please check your ID number" ? "Checksum failed — typo?" : "Verifying..."
+                },
+              ].map((row, i) => (
+                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"9px 0",borderBottom:"1px solid #F7F9FC"}}>
+                  <div style={{
+                    width:24,height:24,borderRadius:8,flexShrink:0,
+                    background: row.ok ? "rgba(18,194,107,0.1)" : "rgba(255,112,67,0.1)",
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:12,color: row.ok ? "#12C26B" : "#FF7043"
+                  }}>{row.ok ? "✓" : "✕"}</div>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:600,color:"#0A1628"}}>{row.label}</div>
+                    <div style={{fontSize:11,color: row.ok ? "#8FA3BE" : "#FF7043",marginTop:1}}>{row.detail}</div>
+                  </div>
                 </div>
-                <div><div className="check-text">{c.label}</div><div className="check-sub">{c.sub}</div></div>
-                {c.status==="ok" && <div style={{fontSize:11,color:"#12C26B",fontWeight:600}}>Passed</div>}
-                {c.status==="loading" && <div style={{fontSize:11,color:"#00B8A9",fontWeight:600}}>Checking...</div>}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bureau checks — shown after clicking Verify */}
+          {(phase === "checking" || phase === "done") && (
+            <div style={{padding:"4px 0 20px"}} className="fade-up">
+              <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Database checks</div>
+              {checks.map((c,i) => (
+                <div className="check-row" key={i}>
+                  <div className={`check-icon ${c.status==="wait"?"pending":c.status}`}>
+                    {c.status==="ok"?"✓":c.status==="loading"?"⟳":"○"}
+                  </div>
+                  <div style={{flex:1}}>
+                    <div className="check-text">{c.label}</div>
+                    <div className="check-sub">{c.sub}</div>
+                  </div>
+                  {c.status==="ok" && <div style={{fontSize:11,color:"#12C26B",fontWeight:600,flexShrink:0}}>Passed</div>}
+                  {c.status==="loading" && <div style={{fontSize:11,color:"#00B8A9",fontWeight:600,flexShrink:0}}>Checking…</div>}
+                </div>
+              ))}
+            </div>
+          )}
+
           {phase==="done" && (
             <div className="pre-qual-banner fade-up">
               <div className="pre-qual-icon">🏡</div>
@@ -637,14 +799,30 @@ function IdVerify({ go }) {
               <div className="pre-qual-sub">Thabo Nkosi · Kempton Park, Gauteng<br/>Next: verify it's really you</div>
             </div>
           )}
+
+          {phase==="invalid" && validation && (
+            <div style={{background:"rgba(255,112,67,0.06)",border:"1px solid rgba(255,112,67,0.25)",borderRadius:14,padding:16,marginBottom:16}} className="fade-up">
+              <div style={{fontSize:14,fontWeight:700,color:"#FF7043",marginBottom:6}}>✕ Invalid ID number</div>
+              <div style={{fontSize:13,color:"#0A1628",lineHeight:1.6}}>{validation.error}</div>
+              <div style={{fontSize:11,color:"#8FA3BE",marginTop:8,lineHeight:1.6}}>
+                Please double-check your 13-digit SA ID number and try again.
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
       <div className="bottom-cta">
         {phase !== "done"
-          ? <button className="btn btn-primary" disabled={idNum.length<13} style={{opacity:idNum.length<13?.5:1}} onClick={handleCheck}>
-              {phase==="checking"?"Verifying...":"Verify my ID →"}
+          ? <button className="btn btn-primary"
+              disabled={idNum.length < 13 || phase === "invalid" || phase === "checking"}
+              style={{opacity: idNum.length < 13 || phase === "invalid" ? 0.4 : 1}}
+              onClick={handleCheck}>
+              {phase === "checking" ? "Verifying…" : "Verify my ID →"}
             </button>
-          : <button className="btn btn-primary" onClick={() => go("otp")}>Send OTP to my phone →</button>
+          : <button className="btn btn-primary" onClick={() => go("otp")}>
+              Send WhatsApp OTP →
+            </button>
         }
       </div>
     </div>
