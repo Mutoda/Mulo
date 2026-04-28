@@ -1679,26 +1679,110 @@ function Offer({ go }) {
           <div className="offer-eyebrow">PERSONALISED EQUITY OFFER</div>
           <div className="offer-name">Thabo Nkosi · 34 Jacaranda Ave, Kempton Park</div>
 
-          {/* Muḽo score */}
-          <div className="mulo-score">
-            <div className="score-ring-wrap">
-              <svg className="score-svg" viewBox="0 0 56 56">
-                <defs>
-                  <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#00B8A9"/>
-                    <stop offset="100%" stopColor="#1A73E8"/>
-                  </linearGradient>
-                </defs>
-                <circle className="score-track" cx="28" cy="28" r="22"/>
-                <circle className="score-fill" cx="28" cy="28" r="22"/>
-              </svg>
-              <div className="score-num">82</div>
-            </div>
-            <div>
-              <div className="score-label">Muḽo Score: Excellent</div>
-              <div className="score-sub">Top 15% of applicants · Strong equity position</div>
-            </div>
-          </div>
+          {/* ── ML ENGINE SCORES ── */}
+          {(() => {
+            // ML Engine inputs (simulated from bureau data)
+            const MULO_SCORE = 82;
+            const PD = 3.2; // Probability of Default %
+            const PD_BAND = PD < 5 ? "Very Low" : PD < 10 ? "Low" : PD < 15 ? "Medium" : "High";
+            const PD_COLOR = PD < 5 ? "#12C26B" : PD < 10 ? "#00B8A9" : PD < 15 ? "#F4B942" : "#FF7043";
+
+            // SHAP feature contributions (sum to 100%)
+            const SHAP = [
+              { label:"Credit score (TransUnion)", pct:34, direction:"positive", val:"Score 724" },
+              { label:"LTV ratio post-loan",        pct:22, direction:"positive", val:"56% LTV" },
+              { label:"Salary consistency",         pct:18, direction:"positive", val:"Regular deposits" },
+              { label:"Affordability surplus",      pct:15, direction:"positive", val:"R4,200/mo" },
+              { label:"Cash withdrawal ratio",      pct:7,  direction:"negative", val:"28% of income" },
+              { label:"Months since last missed",   pct:4,  direction:"positive", val:"18 months" },
+            ];
+
+            return (
+              <>
+                {/* Dual score row */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+
+                  {/* Muḽo Score */}
+                  <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:16}}>
+                    <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Muḽo Score</div>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div className="score-ring-wrap">
+                        <svg className="score-svg" viewBox="0 0 56 56">
+                          <defs>
+                            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#00B8A9"/>
+                              <stop offset="100%" stopColor="#1A73E8"/>
+                            </linearGradient>
+                          </defs>
+                          <circle className="score-track" cx="28" cy="28" r="22"/>
+                          <circle className="score-fill" cx="28" cy="28" r="22"/>
+                        </svg>
+                        <div className="score-num">{MULO_SCORE}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize:12,fontWeight:700,color:"#fff"}}>Excellent</div>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>Top 15%<br/>of applicants</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PD Score */}
+                  <div style={{background:"rgba(255,255,255,0.07)",border:`1px solid ${PD_COLOR}30`,borderRadius:16,padding:16}}>
+                    <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Prob. of Default</div>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      {/* PD gauge */}
+                      <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
+                        <svg width="56" height="56" viewBox="0 0 56 56" style={{transform:"rotate(-90deg)"}}>
+                          <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5"/>
+                          <circle cx="28" cy="28" r="22" fill="none"
+                            stroke={PD_COLOR} strokeWidth="5" strokeLinecap="round"
+                            strokeDasharray={`${2*Math.PI*22}`}
+                            strokeDashoffset={`${2*Math.PI*22 * (1 - PD/30)}`}
+                          />
+                        </svg>
+                        <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+                          <div style={{fontFamily:"'Sora',sans-serif",fontSize:13,fontWeight:800,color:PD_COLOR,lineHeight:1}}>{PD}%</div>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{fontSize:12,fontWeight:700,color:PD_COLOR}}>{PD_BAND} Risk</div>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>XGBoost ML<br/>model · v1.0</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SHAP Explainability */}
+                <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:14,marginBottom:16}}>
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:12}}>
+                    Why this decision — SHAP feature contributions
+                  </div>
+                  {SHAP.map((f,i) => (
+                    <div key={i} style={{marginBottom:8}}>
+                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.6)"}}>{f.label}</div>
+                        <div style={{fontSize:10,fontWeight:600,color:f.direction==="positive"?"#12C26B":"#FF7043"}}>{f.direction==="positive"?"▲":"▼"} {f.val}</div>
+                      </div>
+                      <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:99,overflow:"hidden"}}>
+                        <div style={{
+                          height:"100%",
+                          width:`${f.pct}%`,
+                          background:f.direction==="positive"
+                            ? "linear-gradient(90deg,#00B8A9,#12C26B)"
+                            : "linear-gradient(90deg,#FF7043,#FF8A65)",
+                          borderRadius:99,
+                          transition:"width 1s ease",
+                        }}/>
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginTop:10,lineHeight:1.6}}>
+                    Powered by Amazon SageMaker · XGBoost · SHAP explainability · NCA compliant
+                  </div>
+                </div>
+              </>
+            );
+          })()}
 
           <div className="offer-amount-label">APPROVED EQUITY LOAN</div>
           <div className="offer-amount"><span>R</span> {LOAN_AMOUNT.toLocaleString("en-ZA")}</div>
