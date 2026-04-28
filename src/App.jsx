@@ -1480,6 +1480,9 @@ function BondConfirm({ go }) {
     </div>
   );
 }
+
+/* ─────────────────────────────────────────────
+   SCREEN 6 — OFFER
    Equity logic:
      homeValue        = R 1,850,000  (Lightstone AVM)
      bondOutstanding  = R 1,070,000  (current mortgage)
