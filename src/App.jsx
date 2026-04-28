@@ -1100,9 +1100,10 @@ function LivenessCheck({ go }) {
    SCREEN 3 — ACCOUNT CREATION
 ───────────────────────────────────────────── */
 function Signup({ go }) {
-  const [form, setForm] = useState({ first:"", last:"", email:"", phone:"", pass:"" });
+  const [form, setForm] = useState({ first:"", last:"", email:"", phone:"", pass:"", confirm:"" });
   const s = (k,v) => setForm(f=>({...f,[k]:v}));
-  const ready = form.first && form.email && form.phone && form.pass.length >= 8;
+  const passwordsMatch = form.pass.length >= 8 && form.confirm === form.pass;
+  const ready = form.first && form.email && form.phone && passwordsMatch;
 
   return (
     <div className="screen fade-in">
@@ -1119,11 +1120,7 @@ function Signup({ go }) {
           <div style={{background:"rgba(18,194,107,0.06)",border:"1px solid rgba(18,194,107,0.2)",borderRadius:14,padding:"12px 14px",marginBottom:20,fontSize:12,color:"#12C26B",display:"flex",gap:8,alignItems:"center"}}>
             ✓ &nbsp;ID · OTP · Face verified — Thabo Nkosi · Homeowner
           </div>
-          <div className="social-row">
-            <div className="social-btn">🏦 Absa</div>
-            <div className="social-btn">📱 FNB</div>
-          </div>
-          <div className="or-divider"><div className="or-line"/><div className="or-text">or sign up with email</div><div className="or-line"/></div>
+          <div style={{marginBottom:16}}/>
           <div className="name-row">
             <div className="input-group" style={{marginBottom:0}}>
               <label className="input-label">First name</label>
@@ -1151,6 +1148,21 @@ function Signup({ go }) {
                 {[form.pass.length>=8, /[A-Z]/.test(form.pass), /[0-9]/.test(form.pass)].map((ok,i) => (
                   <div key={i} style={{flex:1,height:3,borderRadius:99,background:ok?"#00B8A9":"#E2E9F0",transition:"background .3s"}} />
                 ))}
+              </div>
+            )}
+          </div>
+          <div className="input-group">
+            <label className="input-label">Confirm Password</label>
+            <input
+              className={`input-field ${form.confirm.length > 0 ? (passwordsMatch ? "success" : "error") : ""}`}
+              type="password"
+              placeholder="Re-enter your password"
+              value={form.confirm}
+              onChange={e=>s("confirm",e.target.value)}
+            />
+            {form.confirm.length > 0 && (
+              <div className={`input-hint ${passwordsMatch ? "ok" : "err"}`}>
+                {passwordsMatch ? "✓ Passwords match" : "✕ Passwords do not match"}
               </div>
             )}
           </div>
