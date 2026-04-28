@@ -1266,7 +1266,7 @@ function Loading({ go }) {
   }, [step]);
 
   useEffect(() => {
-    if(done) { const t = setTimeout(() => go("offer"), 800); return () => clearTimeout(t); }
+    if(done) { const t = setTimeout(() => go("bond-confirm"), 800); return () => clearTimeout(t); }
   }, [done]);
 
   return (
@@ -1278,7 +1278,7 @@ function Loading({ go }) {
           {done && <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>✅</div>}
         </div>
         <div className="loading-title">{done ? "Analysis complete!" : "Analysing your profile"}</div>
-        <div className="loading-sub">{done ? "Your personalised offer is ready." : "Securely connecting to your financial data sources…"}</div>
+        <div className="loading-sub">{done ? "Please confirm your bond details." : "Securely connecting to your financial data sources…"}</div>
         <div className="data-checks">
           {items.map((item, i) => (
             <div className="data-check-item" key={i} style={{opacity: i > step ? 0.4 : 1, transition:"opacity .3s"}}>
@@ -1296,7 +1296,190 @@ function Loading({ go }) {
 }
 
 /* ─────────────────────────────────────────────
-   SCREEN 6 — OFFER
+   SCREEN 5B — BOND CONFIRMATION
+   Shows bureau-retrieved bond data and asks
+   client to confirm accuracy before offer
+───────────────────────────────────────────── */
+function BondConfirm({ go }) {
+  const [confirmed, setConfirmed] = useState(false);
+  const [disputed, setDisputed]   = useState(false);
+  const [disputeText, setDisputeText] = useState("");
+  const [disputeSubmitted, setDisputeSubmitted] = useState(false);
+
+  const fmt = n => "R " + n.toLocaleString("en-ZA");
+
+  // Bond data as retrieved from bureau (Lightstone + TransUnion)
+  const BOND = {
+    property:    "34 Jacaranda Avenue, Kempton Park Ext 2, Gauteng",
+    erf:         "Erf 4821",
+    titleDeed:   "T 48291/2019",
+    bondholder:  "Nedbank Home Loans",
+    accountNo:   "••• ••• 2847",
+    originalAmt: 1_400_000,
+    outstanding: 1_070_000,
+    monthlyRepay: 13_850,
+    interestRate: "prime + 0.5% (12.25% p.a.)",
+    startDate:   "March 2019",
+    term:        "240 months (20 years)",
+    remaining:   "~156 months remaining",
+    sources:     ["Lightstone AVM", "TransUnion", "Deeds Office"],
+  };
+
+  if (disputeSubmitted) return (
+    <div className="screen fade-in">
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flex:1,padding:"40px 24px",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:20}}>📋</div>
+        <div style={{fontFamily:"'Sora',sans-serif",fontSize:20,fontWeight:800,color:"#0A1628",marginBottom:10}}>Dispute logged</div>
+        <div style={{fontSize:13,color:"#8FA3BE",lineHeight:1.7,marginBottom:24,maxWidth:300}}>
+          Thank you for flagging this. A Muḽo compliance officer will review your dispute within <strong style={{color:"#0A1628"}}>1 business day</strong> and contact you on WhatsApp.
+        </div>
+        <div style={{background:"rgba(0,184,169,0.06)",border:"1px solid rgba(0,184,169,0.18)",borderRadius:14,padding:"14px 16px",fontSize:12,color:"#0A1628",lineHeight:1.7,textAlign:"left",width:"100%",marginBottom:24}}>
+          <div style={{fontWeight:700,marginBottom:6}}>Reference: DISP-2026-00481</div>
+          <div style={{color:"#8FA3BE"}}>Your application is paused until the dispute is resolved. No credit decisions will be made on incorrect data.</div>
+        </div>
+        <button className="btn btn-outline" style={{width:"100%"}} onClick={() => go("dashboard")}>Go to my dashboard</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="screen fade-in">
+      <div className="screen-header">
+        <div className="back-btn" onClick={() => go("loading")}>←</div>
+        <div className="screen-header-text">
+          <div className="screen-header-title">Confirm your bond</div>
+          <div className="screen-header-sub">Please verify this is correct</div>
+        </div>
+      </div>
+      <div className="progress-track"><div className="progress-fill" style={{width:"70%"}} /></div>
+
+      <div className="screen-scroll">
+        <div style={{padding:"8px 16px 24px"}}>
+
+          {/* Intro */}
+          <div style={{background:"rgba(0,184,169,0.06)",border:"1px solid rgba(0,184,169,0.18)",borderRadius:14,padding:"13px 15px",marginBottom:16,fontSize:12,color:"#0A1628",lineHeight:1.7,display:"flex",gap:10}}>
+            <span style={{fontSize:16,flexShrink:0}}>🔍</span>
+            <div>We retrieved the following bond information from <strong>Lightstone</strong>, <strong>TransUnion</strong> and the <strong>Deeds Office</strong>. Please confirm it is accurate before we calculate your offer.</div>
+          </div>
+
+          {/* Property card */}
+          <div style={{background:"linear-gradient(135deg,#0A1628,#1B3A5E)",borderRadius:18,padding:20,marginBottom:12,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",right:-20,top:-20,width:100,height:100,borderRadius:"50%",background:"rgba(0,184,169,0.1)"}}/>
+            <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:1,marginBottom:6}}>Property · Lightstone AVM</div>
+            <div style={{fontFamily:"'Sora',sans-serif",fontSize:15,fontWeight:700,color:"#fff",marginBottom:4,lineHeight:1.4}}>{BOND.property}</div>
+            <div style={{display:"flex",gap:16,marginTop:10}}>
+              {[["Title Deed", BOND.titleDeed],["Erf",BOND.erf]].map(([l,v])=>(
+                <div key={l}>
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.5,marginBottom:2}}>{l}</div>
+                  <div style={{fontSize:12,fontWeight:600,color:"#fff"}}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bond details card */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 14px rgba(0,0,0,0.06)",marginBottom:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+              <div style={{width:36,height:36,borderRadius:12,background:"#EBF0FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏦</div>
+              <div>
+                <div style={{fontSize:14,fontWeight:700,color:"#0A1628"}}>{BOND.bondholder}</div>
+                <div style={{fontSize:11,color:"#8FA3BE"}}>Account {BOND.accountNo}</div>
+              </div>
+              <div style={{marginLeft:"auto"}}>
+                <div style={{fontSize:9,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.5,marginBottom:2}}>Source</div>
+                <div style={{fontSize:10,fontWeight:600,color:"#00B8A9"}}>TransUnion</div>
+              </div>
+            </div>
+
+            {[
+              ["Original bond amount",  fmt(BOND.originalAmt)],
+              ["Outstanding balance",   fmt(BOND.outstanding)],
+              ["Monthly repayment",     fmt(BOND.monthlyRepay)],
+              ["Interest rate",         BOND.interestRate],
+              ["Bond start date",       BOND.startDate],
+              ["Original term",         BOND.term],
+              ["Remaining term",        BOND.remaining],
+            ].map(([label, val]) => (
+              <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #F7F9FC"}}>
+                <span style={{fontSize:12,color:"#8FA3BE"}}>{label}</span>
+                <span style={{fontSize:13,fontWeight:700,color:"#0A1628",fontFamily:"'Sora',sans-serif",textAlign:"right",maxWidth:"55%"}}>{val}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Data sources */}
+          <div style={{display:"flex",gap:8,marginBottom:16}}>
+            {BOND.sources.map(s => (
+              <div key={s} style={{flex:1,background:"#F7F9FC",border:"1px solid #E2E9F0",borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
+                <div style={{fontSize:10,fontWeight:600,color:"#00B8A9"}}>✓</div>
+                <div style={{fontSize:9,color:"#8FA3BE",marginTop:2,lineHeight:1.4}}>{s}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Dispute section */}
+          {!disputed ? (
+            <div style={{marginBottom:8}}>
+              <div style={{fontSize:12,color:"#8FA3BE",textAlign:"center",marginBottom:12,lineHeight:1.6}}>
+                Is the above information correct?
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                <button className="btn btn-outline" style={{justifyContent:"center",fontSize:13,borderColor:"rgba(255,112,67,0.3)",color:"#FF7043"}} onClick={() => setDisputed(true)}>
+                  ✕ Dispute data
+                </button>
+                <button className="btn btn-primary" style={{justifyContent:"center",fontSize:13}} onClick={() => setConfirmed(true)}>
+                  ✓ Confirm correct
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{background:"rgba(255,112,67,0.04)",border:"1px solid rgba(255,112,67,0.2)",borderRadius:16,padding:16,marginBottom:8}} className="fade-up">
+              <div style={{fontSize:13,fontWeight:700,color:"#FF7043",marginBottom:8}}>What's incorrect?</div>
+              <div style={{fontSize:12,color:"#8FA3BE",marginBottom:12,lineHeight:1.6}}>Please describe what information is wrong. A compliance officer will review and contact you on WhatsApp within 1 business day.</div>
+              <textarea
+                style={{width:"100%",background:"#fff",border:"1.5px solid rgba(255,112,67,0.3)",borderRadius:12,padding:"12px 14px",fontFamily:"'IBM Plex Sans',sans-serif",fontSize:13,color:"#0A1628",outline:"none",resize:"none",minHeight:90,lineHeight:1.6,boxSizing:"border-box"}}
+                placeholder="e.g. The outstanding balance is incorrect, or this is not my property..."
+                value={disputeText}
+                onChange={e => setDisputeText(e.target.value)}
+              />
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:12}}>
+                <button className="btn btn-ghost" style={{justifyContent:"center",fontSize:13}} onClick={() => setDisputed(false)}>
+                  ← Back
+                </button>
+                <button className="btn btn-primary"
+                  style={{justifyContent:"center",fontSize:13,background:"linear-gradient(135deg,#FF7043,#FF8A65)",opacity:disputeText.length > 10 ? 1 : 0.4}}
+                  disabled={disputeText.length <= 10}
+                  onClick={() => setDisputeSubmitted(true)}>
+                  Submit dispute
+                </button>
+              </div>
+            </div>
+          )}
+
+          {confirmed && !disputed && (
+            <div style={{background:"rgba(18,194,107,0.06)",border:"1px solid rgba(18,194,107,0.2)",borderRadius:12,padding:"12px 16px",marginTop:8,fontSize:12,color:"#12C26B",display:"flex",gap:8,alignItems:"center"}} className="fade-up">
+              ✓ Bond details confirmed · Proceeding to your offer
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="bottom-cta">
+        <button className="btn btn-primary"
+          style={{opacity: confirmed && !disputed ? 1 : 0.35}}
+          disabled={!confirmed || disputed}
+          onClick={() => go("offer")}>
+          View my offer →
+        </button>
+        {!confirmed && !disputed && (
+          <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>
+            Please confirm or dispute the data above to continue
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
    Equity logic:
      homeValue        = R 1,850,000  (Lightstone AVM)
      bondOutstanding  = R 1,070,000  (current mortgage)
@@ -2458,7 +2641,7 @@ function Dashboard({ go }) {
 /* ─────────────────────────────────────────────
    ROOT
 ───────────────────────────────────────────── */
-const SCREENS = { landing:Landing, "id-verify":IdVerify, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
+const SCREENS = { landing:Landing, "id-verify":IdVerify, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
