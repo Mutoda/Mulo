@@ -1653,7 +1653,7 @@ function BankAccountConfirm({ go }) {
    Only debts that fit within maxLoan are included.
 ───────────────────────────────────────────── */
 function Offer({ go }) {
-  const MULO_API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/engine';
+  const MULO_API = `${API}/offer`;
   const [engineResult, setEngineResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
