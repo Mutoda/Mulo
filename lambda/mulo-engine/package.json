@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.1041.0",
+    "@aws-sdk/s3-request-presigner": "^3.1041.0",
     "pg": "^8.20.0"
   }
 }

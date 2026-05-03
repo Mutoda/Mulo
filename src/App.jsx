@@ -2089,7 +2089,7 @@ function DocUpload({ go }) {
               ].map(r => <div className="doc-rule-item" key={r}><span style={{color:"#F4B942",flexShrink:0}}>•</span>{r}</div>)}
             </div>
             {!payslip ? (
-              <div className="doc-upload-zone" onClick={() => fakeUpload(setPayslip, "Payslip_March2026.pdf", "284 KB")}>
+              <div className="doc-upload-zone" onClick={() => { const i = document.createElement('input'); i.type='file'; i.accept='.pdf,.jpg,.jpeg,.png'; i.onchange=e=>uploadFile(e.target.files[0],'payslip',setPayslip); i.click(); }}>
                 <div className="doc-upload-icon">📄</div>
                 <div className="doc-upload-label">Tap to upload payslip</div>
                 <div className="doc-upload-hint">or drag & drop · PDF, JPG, PNG</div>

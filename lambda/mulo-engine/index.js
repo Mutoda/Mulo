@@ -1,8 +1,10 @@
-const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { Client } = require('pg');
 const crypto = require('crypto');
 
-const sm = new SecretsManagerClient({ region: 'af-south-1' });
+const s3 = new S3Client({ region: 'af-south-1' });
+const DOCS_BUCKET = 'mulo-documents-prod';
 let dbCredentials = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -160,6 +162,35 @@ const getOffer = async (body) => {
   });
 };
 
+const getUploadUrl = async (body) => {
+  const { id_number, doc_type, file_name, content_type } = body;
+  if (!id_number || !doc_type || !file_name) return resp(400, { error: 'id_number, doc_type and file_name are required' });
+  const allowed = ['payslip', 'proof_of_address'];
+  if (!allowed.includes(doc_type)) return resp(400, { error: 'doc_type must be payslip or proof_of_address' });
+  const hash = hashId(id_number);
+  const ext = file_name.split('.').pop().toLowerCase();
+  const key = `documents/${hash}/${doc_type}_${Date.now()}.${ext}`;
+  const command = new PutObjectCommand({
+    Bucket: DOCS_BUCKET,
+    Key: key,
+    ContentType: content_type || 'application/pdf'
+  });
+  const url = await getSignedUrl(s3, command, { expiresIn: 300 });
+  const db = await getDb();
+  try {
+    const applicant = await db.query('SELECT id FROM applicants WHERE id_number_hash = $1', [hash]);
+    if (applicant.rows.length > 0) {
+      await db.query(
+        'INSERT INTO documents (applicant_id, doc_type, s3_key) VALUES ($1, $2, $3)',
+        [applicant.rows[0].id, doc_type, key]
+      );
+    }
+  } finally {
+    await db.end();
+  }
+  return resp(200, { upload_url: url, key });
+};
+
 // ── Main Handler ──────────────────────────────────────────────────────────────
 
 exports.handler = async (event) => {
@@ -179,6 +210,7 @@ exports.handler = async (event) => {
     if (path.endsWith('/otp/verify') && method === 'POST') return await verifyOtp(body);
     if (path.endsWith('/consent') && method === 'POST') return await saveConsent(body);
     if (path.endsWith('/offer') && method === 'POST') return await getOffer(body);
+    if (path.endsWith('/upload-url') && method === 'POST') return await getUploadUrl(body);
     return resp(404, { error: `Route not found: ${method} ${path}` });
   } catch (err) {
     console.error('Handler error:', err);
