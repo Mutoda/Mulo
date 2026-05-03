@@ -873,12 +873,18 @@ function OtpVerify({ go }) {
     if(pasted.length === 6) { setDigits(pasted.split("")); inputRefs.current[5]?.focus(); }
   };
 
-  const verify = () => {
+const verify = async () => {
     const code = digits.join("");
     if(code.length < 6) return;
     setPhase("checking");
-    setTimeout(() => {
-      if(code === "123456") {
+    try {
+      const res = await fetch(`${API}/otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_number: window._muloIdNumber || "demo", otp: code })
+      });
+      const data = await res.json();
+      if(data.verified) {
         setPhase("done");
         setTimeout(() => go("liveness"), 900);
       } else {
@@ -887,7 +893,12 @@ function OtpVerify({ go }) {
         setDigits(["","","","","",""]);
         inputRefs.current[0]?.focus();
       }
-    }, 1200);
+    } catch(err) {
+      setAttempts(a => a+1);
+      setPhase("error");
+      setDigits(["","","","","",""]);
+      inputRefs.current[0]?.focus();
+    }
   };
 
   const resend = () => { setTimer(59); setDigits(["","","","","",""]); setPhase("idle"); };
