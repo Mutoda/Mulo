@@ -1262,7 +1262,18 @@ function Consent({ go }) {
         </div>
       </div>
       <div className="bottom-cta">
-        <button className="btn btn-primary" onClick={() => go("loading")} style={{opacity:allOn?1:.5}}>
+        <button className="btn btn-primary" onClick={async () => {
+            if (!allOn) return;
+            const sources = Object.keys(toggles).filter(k => toggles[k]);
+            try {
+              await fetch(`${API}/consent`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id_number: window._muloIdNumber || "demo", sources })
+              });
+            } catch(e) { console.error("Consent save failed", e); }
+            go("loading");
+          }} style={{opacity:allOn?1:.5}}>
           {allOn ? "Authorise & continue →" : "Please enable all sources"}
         </button>
       </div>
