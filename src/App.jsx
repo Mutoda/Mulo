@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
+const API = "https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod";
+
 /* ─────────────────────────────────────────────
    DESIGN TOKENS
 ───────────────────────────────────────────── */
@@ -642,22 +644,26 @@ function IdVerify({ go }) {
     }
   };
 
-  const handleCheck = () => {
+  const handleCheck = async () => {
     if (idNum.length < 13) return;
     const result = validateSAID(idNum);
     if (!result.valid) { setPhase("invalid"); setValidation(result); return; }
 
-    setPhase("checking");
-    // Step 1: mark ID format check as loading then ok
+setPhase("checking");
     setChecks(c => c.map((x,i) => i===0 ? {...x,status:"loading"} : x));
-    setTimeout(() => {
+    try {
+      const res = await fetch(`${API}/verify-id`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_number: idNum })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Verification failed");
       setChecks(c => c.map((x,i) => i===0 ? {...x,status:"ok",sub:`DOB: ${result.dob} · ${result.gender} · ${result.citizen}`} : x));
-      // Step 2: homeowner
       setTimeout(() => {
         setChecks(c => c.map((x,i) => i===1 ? {...x,status:"loading"} : x));
         setTimeout(() => {
           setChecks(c => c.map((x,i) => i===1 ? {...x,status:"ok"} : x));
-          // Step 3: sequestration
           setTimeout(() => {
             setChecks(c => c.map((x,i) => i===2 ? {...x,status:"loading"} : x));
             setTimeout(() => {
@@ -667,7 +673,11 @@ function IdVerify({ go }) {
           }, 400);
         }, 900);
       }, 400);
-    }, 900);
+    } catch(err) {
+      setPhase("invalid");
+      setValidation({ valid: false, error: err.message });
+      setChecks(c => c.map(x => ({ ...x, status:"wait" })));
+    }
   };
 
   // Colour the input border based on state
@@ -1621,6 +1631,29 @@ function BankAccountConfirm({ go }) {
    Only debts that fit within maxLoan are included.
 ───────────────────────────────────────────── */
 function Offer({ go }) {
+  const MULO_API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/engine';
+  const [engineResult, setEngineResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
+
+  useEffect(() => {
+    fetch(MULO_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
+      .then(r => r.json())
+      .then(data => { setEngineResult(data); setLoading(false); })
+      .catch(err => { setApiError(err.message); setLoading(false); });
+  }, []);
+
+  const loanAmount = engineResult?.offer?.loan_amount || 517500;
+  const monthlyRepayment = engineResult?.offer?.monthly_repayment || 11316;
+  const muloScore = engineResult?.offer?.mulo_score || 82;
+  const rateAnnual = engineResult?.offer?.rate_annual || 11.25;
+  const rateLabel = engineResult?.offer?.rate_label || 'Prime − 0.5%';
+  const monthlySaving = engineResult?.offer?.monthly_saving || 5987;
+  const pdScore = engineResult?.gates?.gate4?.scores?.pd_score || 3.2;
   const HOME_VALUE      = 1_850_000;
   const BOND_BALANCE    = 1_070_000;
   const EQUITY          = HOME_VALUE - BOND_BALANCE;          // 780 000
@@ -1635,7 +1668,13 @@ function Offer({ go }) {
     { name:"FNB Credit Card",            type:"Credit card",      cat:"credit",   icon:"💳", bg:"#FFF0EB", monthly:980,   balance:31_500  },
     { name:"Wesbank Vehicle Finance",    type:"Vehicle finance",  cat:"vehicle",  icon:"🚗", bg:"#EBFFF5", monthly:5_200, balance:245_000 },
   ];
-
+if (loading) return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',gap:16,padding:32}}>
+      <div style={{fontSize:40}}>⚙️</div>
+      <div style={{fontFamily:'Sora,sans-serif',fontWeight:700,fontSize:18,color:'#0A1628'}}>Calculating your offer...</div>
+      <div style={{fontSize:13,color:'#8FA3BE',marginTop:4}}>Running Muḽo Engine</div>
+    </div>
+  );
   // Greedily include debts in priority order up to MAX_LOAN
   let running = 0;
   const settled = [];
