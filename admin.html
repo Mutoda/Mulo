@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muḽo Admin</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sora', -apple-system, sans-serif; background: #F7F9FC; color: #0A1628; min-height: 100vh; }
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap');
+  .topbar { background: #0A1628; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+  .logo span { color: #00B8A9; }
+  .admin-tag { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 400; margin-left: 8px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .last-updated { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .refresh-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: inherit; transition: background 0.2s; }
+  .refresh-btn:hover { background: rgba(255,255,255,0.2); }
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .metric { background: #fff; border-radius: 16px; padding: 20px 24px; border: 1px solid rgba(0,0,0,0.06); }
+  .metric-label { font-size: 12px; color: #8FA3BE; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-value { font-size: 28px; font-weight: 800; color: #0A1628; line-height: 1; }
+  .metric-sub { font-size: 12px; color: #8FA3BE; margin-top: 4px; }
+  .card { background: #fff; border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); overflow: hidden; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .card-title { font-size: 15px; font-weight: 700; }
+  .search { border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 7px 12px; font-size: 13px; font-family: inherit; outline: none; width: 220px; transition: border-color 0.2s; }
+  .search:focus { border-color: #00B8A9; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 12px 24px; font-size: 11px; font-weight: 600; color: #8FA3BE; border-bottom: 1px solid rgba(0,0,0,0.06); text-transform: uppercase; letter-spacing: 0.5px; background: #F7F9FC; }
+  td { padding: 14px 24px; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #F7F9FC; }
+  .hash { font-family: 'Courier New', monospace; font-size: 11px; color: #8FA3BE; background: #F7F9FC; padding: 3px 6px; border-radius: 4px; }
+  .badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-block; }
+  .badge-offered { background: rgba(18,194,107,0.1); color: #0A8F4F; }
+  .badge-pending { background: rgba(244,185,66,0.1); color: #A07810; }
+  .badge-declined { background: rgba(255,86,86,0.1); color: #C0392B; }
+  .badge-signed { background: rgba(26,115,232,0.1); color: #1A73E8; }
+  .score { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; font-size: 12px; font-weight: 700; }
+  .score-excellent { background: rgba(18,194,107,0.12); color: #0A8F4F; }
+  .score-good { background: rgba(26,115,232,0.12); color: #1A73E8; }
+  .score-fair { background: rgba(244,185,66,0.12); color: #A07810; }
+  .verified-yes { color: #12C26B; font-size: 16px; }
+  .verified-no { color: #FF5656; font-size: 16px; }
+  .amount { font-weight: 600; color: #0A1628; }
+  .loading { padding: 60px; text-align: center; color: #8FA3BE; font-size: 14px; }
+  .empty { padding: 60px; text-align: center; color: #8FA3BE; }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .error { padding: 40px; text-align: center; color: #C0392B; font-size: 13px; background: rgba(255,86,86,0.05); }
+  @media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } .container { padding: 16px; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Mu<span>ḽ</span>o <span class="admin-tag">Admin Dashboard</span></div>
+  <div class="topbar-right">
+    <span class="last-updated" id="last-updated"></span>
+    <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total applicants</div>
+      <div class="metric-value" id="m-total">—</div>
+      <div class="metric-sub">All time</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Offers made</div>
+      <div class="metric-value" id="m-apps">—</div>
+      <div class="metric-sub">With loan offer</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total loan book</div>
+      <div class="metric-value" id="m-value">—</div>
+      <div class="metric-sub">Offered value</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Avg Muḽo Score</div>
+      <div class="metric-value" id="m-score">—</div>
+      <div class="metric-sub">Across applications</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Applicants</span>
+      <input class="search" type="text" id="search" placeholder="Search by ID hash..." oninput="filterRows()">
+    </div>
+    <div id="table-container">
+      <div class="loading">Loading applicants...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod';
+let allData = [];
+
+const fmt = n => n ? 'R ' + Math.round(n).toLocaleString('en-ZA') : '—';
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-ZA', {day:'numeric',month:'short',year:'numeric'}) : '—';
+const truncHash = h => h ? h.substring(0,10) + '...' : '—';
+
+const statusBadge = s => {
+  if (!s) return '<span class="badge badge-pending">Pending</span>';
+  if (s === 'offered') return '<span class="badge badge-offered">Offered</span>';
+  if (s === 'declined') return '<span class="badge badge-declined">Declined</span>';
+  if (s === 'signed') return '<span class="badge badge-signed">Signed</span>';
+  return `<span class="badge badge-pending">${s}</span>`;
+};
+
+const scoreEl = score => {
+  if (!score) return '<span style="color:#8FA3BE">—</span>';
+  const cls = score >= 75 ? 'score-excellent' : score >= 60 ? 'score-good' : 'score-fair';
+  return `<div class="score ${cls}">${score}</div>`;
+};
+
+function renderTable(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById('table-container').innerHTML = '<div class="empty"><div class="empty-icon">👤</div><div>No applicants yet</div></div>';
+    return;
+  }
+  document.getElementById('table-container').innerHTML = `
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr>
+        <th>ID hash</th>
+        <th>Verified</th>
+        <th>Date of birth</th>
+        <th>Applied</th>
+        <th>Status</th>
+        <th>Score</th>
+        <th>Loan amount</th>
+        <th>Monthly repay</th>
+        <th>Monthly saving</th>
+        <th>Docs</th>
+        <th>Consents</th>
+      </tr></thead>
+      <tbody>
+      ${rows.map(r => `<tr>
+        <td><span class="hash" title="${r.id_number_hash}">${truncHash(r.id_number_hash)}</span></td>
+        <td><span class="${r.dha_verified ? 'verified-yes' : 'verified-no'}">${r.dha_verified ? '✓' : '✗'}</span></td>
+        <td>${fmtDate(r.date_of_birth)}</td>
+        <td>${fmtDate(r.created_at)}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>${scoreEl(r.mulo_score)}</td>
+        <td><span class="amount">${fmt(r.loan_amount)}</span></td>
+        <td>${fmt(r.monthly_repayment)}</td>
+        <td>${fmt(r.monthly_saving)}</td>
+        <td>${r.doc_count || 0}</td>
+        <td>${r.consent_count || 0}</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+function filterRows() {
+  const q = document.getElementById('search').value.toLowerCase();
+  renderTable(q ? allData.filter(r => r.id_number_hash && r.id_number_hash.toLowerCase().includes(q)) : allData);
+}
+
+async function loadData() {
+  document.getElementById('table-container').innerHTML = '<div class="loading">Loading applicants...</div>';
+  try {
+    const res = await fetch(`${API}/admin/applications`);
+    const data = await res.json();
+    allData = data.applicants || [];
+
+    document.getElementById('m-total').textContent = allData.length;
+    const withOffer = allData.filter(r => r.loan_amount);
+    document.getElementById('m-apps').textContent = withOffer.length;
+    const totalValue = withOffer.reduce((s, r) => s + (Number(r.loan_amount) || 0), 0);
+    document.getElementById('m-value').textContent = totalValue > 0 ? 'R ' + (Math.round(totalValue/1000)).toLocaleString('en-ZA') + 'k' : '—';
+    const scores = withOffer.filter(r => r.mulo_score).map(r => Number(r.mulo_score));
+    document.getElementById('m-score').textContent = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '—';
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-ZA', {hour:'2-digit',minute:'2-digit'});
+    renderTable(allData);
+  } catch(err) {
+    document.getElementById('table-container').innerHTML = `<div class="error">Failed to load: ${err.message}</div>`;
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
