@@ -3,7 +3,7 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { Client } = require('pg');
 const crypto = require('crypto');
 
-const s3 = new S3Client({ region: 'af-south-1' });
+const s3 = new S3Client({ region: 'af-south-1', requestChecksumCalculation: 'WHEN_REQUIRED', responseChecksumValidation: 'WHEN_REQUIRED' });
 const DOCS_BUCKET = 'mulo-documents-prod';
 let dbCredentials = null;
 
@@ -173,23 +173,21 @@ const getUploadUrl = async (body) => {
   const command = new PutObjectCommand({
     Bucket: DOCS_BUCKET,
     Key: key,
-    ContentType: content_type || 'application/pdf',
-    ChecksumAlgorithm: undefined
+    ContentType: content_type || 'application/pdf'
   });
-  const url = await getSignedUrl(s3, command, { expiresIn: 300, unhoistableHeaders: new Set(['x-amz-checksum-crc32', 'x-amz-sdk-checksum-algorithm']) });
+  const url = await getSignedUrl(s3, command, { expiresIn: 300 });
+  // Strip checksum params that cause 403
+  const cleanUrl = url.split('&').filter(p => !p.startsWith('x-amz-checksum') && !p.startsWith('x-amz-sdk-checksum')).join('&');
   const db = await getDb();
   try {
     const applicant = await db.query('SELECT id FROM applicants WHERE id_number_hash = $1', [hash]);
     if (applicant.rows.length > 0) {
-      await db.query(
-        'INSERT INTO documents (applicant_id, doc_type, s3_key) VALUES ($1, $2, $3)',
-        [applicant.rows[0].id, doc_type, key]
-      );
+      await db.query('INSERT INTO documents (applicant_id, doc_type, s3_key) VALUES ($1, $2, $3)', [applicant.rows[0].id, doc_type, key]);
     }
   } finally {
     await db.end();
   }
-  return resp(200, { upload_url: url, key });
+  return resp(200, { upload_url: cleanUrl, key });
 };
 
 // ── Main Handler ──────────────────────────────────────────────────────────────
