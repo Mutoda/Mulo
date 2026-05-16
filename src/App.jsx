@@ -830,7 +830,7 @@ setPhase("checking");
               onClick={handleCheck}>
               {phase === "checking" ? "Verifying…" : "Verify my ID →"}
             </button>
-          : <button className="btn btn-primary" onClick={() => go("otp")}>
+          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; go("otp"); }}>
               Send WhatsApp OTP →
             </button>
         }
