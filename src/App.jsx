@@ -36,7 +36,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8;min-height:100vh}
 
 /* ── SHELL ── */
 .shell{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:32px 16px}
-.phone{width:390px;min-height:780px;background:#F7F9FC;border-radius:44px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.08);position:relative;display:flex;flex-direction:column}
+.phone{width:390px;height:min(780px,92vh);min-height:600px;background:#F7F9FC;border-radius:44px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.08);position:relative;display:flex;flex-direction:column}
 .phone-notch{width:126px;height:34px;background:#0A1628;border-radius:0 0 20px 20px;margin:0 auto;flex-shrink:0}
 
 /* ── SCREENS ── */
@@ -1653,7 +1653,7 @@ function BankAccountConfirm({ go }) {
    Only debts that fit within maxLoan are included.
 ───────────────────────────────────────────── */
 function Offer({ go }) {
-  const MULO_API = `${API}/offer`;
+  const MULO_API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/engine';
   const [engineResult, setEngineResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
@@ -2048,8 +2048,18 @@ function DocUpload({ go }) {
   const [address, setAddress] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const fakeUpload = (setter, name, size) => {
-    setTimeout(() => setter({ name, size }), 600);
+const uploadFile = async (file, docType, setter) => {
+    if (!file) return;
+    try {
+      const res = await fetch(API + '/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_number: window._muloIdNumber || 'demo', doc_type: docType, file_name: file.name, content_type: file.type })
+      });
+      const data = await res.json();
+      await fetch(data.upload_url, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+      setter({ name: file.name, size: Math.round(file.size/1024) + ' KB' });
+    } catch(err) { console.error('Upload failed', err); }
   };
 
   const ready = payslip && address;
@@ -2118,7 +2128,7 @@ function DocUpload({ go }) {
               ].map(r => <div className="doc-rule-item" key={r}><span style={{color:"#F4B942",flexShrink:0}}>•</span>{r}</div>)}
             </div>
             {!address ? (
-              <div className="doc-upload-zone" onClick={() => fakeUpload(setAddress, "CityPower_Bill_Feb2026.pdf", "412 KB")}>
+              <div className="doc-upload-zone" onClick={() => { const i = document.createElement('input'); i.type='file'; i.accept='.pdf,.jpg,.jpeg,.png'; i.onchange=e=>uploadFile(e.target.files[0],'proof_of_address',setAddress); i.click(); }}>
                 <div className="doc-upload-icon">🏠</div>
                 <div className="doc-upload-label">Tap to upload proof of address</div>
                 <div className="doc-upload-hint">Utility bill · Bank statement · Lease</div>

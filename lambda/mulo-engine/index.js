@@ -173,9 +173,10 @@ const getUploadUrl = async (body) => {
   const command = new PutObjectCommand({
     Bucket: DOCS_BUCKET,
     Key: key,
-    ContentType: content_type || 'application/pdf'
+    ContentType: content_type || 'application/pdf',
+    ChecksumAlgorithm: undefined
   });
-  const url = await getSignedUrl(s3, command, { expiresIn: 300 });
+  const url = await getSignedUrl(s3, command, { expiresIn: 300, unhoistableHeaders: new Set(['x-amz-checksum-crc32', 'x-amz-sdk-checksum-algorithm']) });
   const db = await getDb();
   try {
     const applicant = await db.query('SELECT id FROM applicants WHERE id_number_hash = $1', [hash]);
