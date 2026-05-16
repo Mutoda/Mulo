@@ -36,6 +36,122 @@ const getDb = async () => {
 
 const hashId = (id) => crypto.createHash('sha256').update(id).digest('hex');
 
+// ── Mock Bureau Layer ─────────────────────────────────────────────────────────
+// Deterministic mock data based on ID hash — consistent per applicant
+// Replace each function with real API call when credentials are available
+
+const mockLightstone = (idHash) => {
+  // Use hash bytes to seed realistic property data
+  const seed = parseInt(idHash.substring(0, 8), 16);
+  const propertyValues = [850000, 1200000, 1500000, 1850000, 2200000, 2800000, 3500000];
+  const suburbs = [
+    { name: 'Kempton Park Ext 2', city: 'Ekurhuleni', province: 'Gauteng' },
+    { name: 'Midrand', city: 'Johannesburg', province: 'Gauteng' },
+    { name: 'Centurion', city: 'Tshwane', province: 'Gauteng' },
+    { name: 'Bedfordview', city: 'Ekurhuleni', province: 'Gauteng' },
+    { name: 'Sandton', city: 'Johannesburg', province: 'Gauteng' },
+    { name: 'Fourways', city: 'Johannesburg', province: 'Gauteng' },
+    { name: 'Bellville', city: 'Cape Town', province: 'Western Cape' },
+  ];
+  const streets = ['Jacaranda', 'Protea', 'Acacia', 'Baobab', 'Tamboti', 'Marula', 'Kiepersol'];
+  const banks = ['Nedbank Home Loans', 'Standard Bank', 'Absa Home Loans', 'FNB Home Loans', 'SA Home Loans'];
+
+  const idx = seed % propertyValues.length;
+  const suburb = suburbs[seed % suburbs.length];
+  const street = streets[(seed >> 4) % streets.length];
+  const streetNo = 10 + (seed % 90);
+  const erf = 1000 + (seed % 8000);
+  const titleDeed = `T ${40000 + (seed % 20000)}/2${2015 + (seed % 9)}`;
+  const propertyValue = propertyValues[idx];
+  const bondLtv = 0.55 + (seed % 20) / 100; // 55-75% LTV
+  const bondBalance = Math.round(propertyValue * bondLtv / 1000) * 1000;
+  const bondHolder = banks[seed % banks.length];
+  const bondStart = `${2013 + (seed % 8)}-0${1 + (seed % 9)}-01`;
+
+  return {
+    address: `${streetNo} ${street} Avenue, ${suburb.name}, ${suburb.city}`,
+    suburb: suburb.name,
+    city: suburb.city,
+    province: suburb.province,
+    erf_number: `Erf ${erf}`,
+    title_deed: titleDeed,
+    market_value: propertyValue,
+    bond_balance: bondBalance,
+    bond_holder: bondHolder,
+    bond_start_date: bondStart,
+    bond_term_months: 240,
+    ltv: Math.round(bondBalance / propertyValue * 100) / 100
+  };
+};
+
+const mockTruID = (idHash) => {
+  const seed = parseInt(idHash.substring(8, 16), 16);
+  const incomes = [28000, 35000, 45000, 52000, 65000, 85000, 110000];
+  const employers = ['Sasol', 'Anglo American', 'Standard Bank', 'Shoprite Holdings', 'MTN Group', 'Vodacom', 'Discovery'];
+  const income = incomes[seed % incomes.length];
+  const employer = employers[seed % employers.length];
+  const expenseRatio = 0.30 + (seed % 15) / 100; // 30-45% of income
+  const expenses = Math.round(income * expenseRatio / 500) * 500;
+
+  return {
+    employer,
+    employment_type: 'permanent',
+    gross_monthly_income: income,
+    net_monthly_income: Math.round(income * 0.72),
+    monthly_expenses: expenses,
+    bank: ['Nedbank', 'FNB', 'Absa', 'Standard Bank', 'Capitec'][seed % 5],
+    account_verified: true,
+    statements_months: 3
+  };
+};
+
+const mockTransUnion = (idHash) => {
+  const seed = parseInt(idHash.substring(16, 24), 16);
+  const scores = [620, 650, 680, 710, 735, 755, 780];
+  const creditScore = scores[seed % scores.length];
+
+  const debtTypes = [
+    { type: 'personal', creditors: ['African Bank', 'Nedbank', 'Capitec', 'Standard Bank', 'Wesbank'] },
+    { type: 'credit_card', creditors: ['Capitec', 'FNB', 'Absa', 'Standard Bank', 'Nedbank'] },
+    { type: 'vehicle', creditors: ['Wesbank', 'MFC', 'Absa Vehicle Finance', 'Standard Bank Vehicle'] }
+  ];
+
+  const numDebts = 2 + (seed % 4); // 2-5 debts
+  const debts = [];
+  const balances = [25000, 45000, 68000, 95000, 125000, 180000, 245000];
+
+  for (let i = 0; i < numDebts; i++) {
+    const debtType = debtTypes[i % debtTypes.length];
+    const balance = balances[(seed + i) % balances.length];
+    const monthly = Math.round(balance * 0.025); // ~2.5% of balance
+    debts.push({
+      creditor: debtType.creditors[(seed + i) % debtType.creditors.length],
+      type: debtType.type,
+      balance,
+      monthly,
+      status: 'current'
+    });
+  }
+
+  return {
+    credit_score: creditScore,
+    debts,
+    judgements: 0,
+    missed_payments_6m: 0,
+    in_debt_review: false,
+    sequestrated: false
+  };
+};
+
+const getBureauData = (idNumber) => {
+  const hash = hashId(idNumber);
+  return {
+    lightstone: mockLightstone(hash),
+    truid: mockTruID(hash),
+    transunion: mockTransUnion(hash)
+  };
+};
+
 // ── SA ID Validation ──────────────────────────────────────────────────────────
 
 const validateSAID = (id) => {
@@ -147,19 +263,136 @@ const saveConsent = async (body) => {
   }
 };
 
+const PRIME_RATE = 11.75; // Current SA prime rate
+
+const calculateOffer = (propertyValue, bondBalance, grossIncome, monthlyExpenses, debts) => {
+  // Gate 2: Property & LTV
+  const equity = propertyValue - bondBalance;
+  const maxByEquity = Math.floor(equity * 0.75);
+
+  // Sort debts by priority: personal loans first, then credit cards, then vehicle
+  const priorityOrder = { personal: 1, personal_loan: 1, credit_card: 2, vehicle: 3, vehicle_finance: 3 };
+  const sortedDebts = [...debts].sort((a, b) => (priorityOrder[a.type] || 9) - (priorityOrder[b.type] || 9));
+
+  // Gate 3: Affordability — DTI cap 43%, minimum surplus R3,500
+  const maxDTI = grossIncome * 0.43;
+  const currentCommitments = debts.reduce((s, d) => s + (d.monthly || 0), 0);
+
+  // Greedily include debts up to equity cap
+  let totalDebt = 0;
+  const includedDebts = [];
+  const excludedDebts = [];
+  for (const debt of sortedDebts) {
+    if (totalDebt + debt.balance <= maxByEquity) {
+      totalDebt += debt.balance;
+      includedDebts.push({ ...debt, included: true });
+    } else {
+      excludedDebts.push({ ...debt, included: false });
+    }
+  }
+
+  if (totalDebt === 0) return { approved: false, reason: 'No debts qualify within your available equity' };
+
+  // Calculate repayment for the loan amount
+  const loanAmount = totalDebt;
+  const termMonths = 60;
+
+  // Try each rate band
+  const bands = [
+    { score: 82, pd: 0.032, rate: PRIME_RATE - 0.5, label: 'Prime - 0.5%', band: 'Excellent' },
+    { score: 70, pd: 0.075, rate: PRIME_RATE, label: 'Prime', band: 'Good' },
+    { score: 55, pd: 0.125, rate: PRIME_RATE + 0.5, label: 'Prime + 0.5%', band: 'Fair' }
+  ];
+
+  // Simple credit score estimation based on available data
+  const dtiRatio = currentCommitments / grossIncome;
+  let muloScore = 82;
+  if (dtiRatio > 0.35) muloScore = 70;
+  if (dtiRatio > 0.40) muloScore = 55;
+  if (dtiRatio > 0.43) return { approved: false, reason: 'DTI ratio exceeds 43% — affordability limit reached' };
+
+  const band = bands.find(b => muloScore >= b.score) || bands[bands.length - 1];
+  const monthlyRate = band.rate / 100 / 12;
+  const monthlyRepayment = Math.round(loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / (Math.pow(1 + monthlyRate, termMonths) - 1));
+
+  // Check surplus
+  const surplus = grossIncome - monthlyExpenses - monthlyRepayment;
+  if (surplus < 3500) return { approved: false, reason: `Monthly surplus of R${surplus.toLocaleString()} is below the minimum R3,500` };
+
+  const currentMonthlyDebt = debts.reduce((s, d) => s + (d.monthly || 0), 0);
+  const includedMonthlyDebt = includedDebts.reduce((s, d) => s + (d.monthly || 0), 0);
+  const monthlySaving = includedMonthlyDebt - monthlyRepayment;
+
+  return {
+    approved: true,
+    loan_amount: loanAmount,
+    interest_rate: band.rate,
+    rate_label: band.label,
+    term_months: termMonths,
+    monthly_repayment: monthlyRepayment,
+    monthly_saving: monthlySaving,
+    mulo_score: muloScore,
+    pd_score: band.pd,
+    risk_band: band.band,
+    surplus,
+    dti_percent: Math.round(dtiRatio * 100 * 10) / 10,
+    included_debts: includedDebts,
+    excluded_debts: excludedDebts
+  };
+};
+
 const getOffer = async (body) => {
-  return resp(200, {
-    applicant: 'Thabo Nkosi',
-    property: { address: '34 Jacaranda Avenue, Kempton Park Ext 2', value: 1850000, bond_balance: 1070000 },
-    offer: { loan_amount: 517500, interest_rate: 11.25, term_months: 60, monthly_repayment: 7543, monthly_saving: 5987, mulo_score: 82, pd_score: 3.2, rate_band: 'Prime - 0.5%' },
-    debts: [
-      { creditor: 'African Bank', type: 'personal', balance: 125000, monthly: 3200, priority: 1 },
-      { creditor: 'Nedbank', type: 'personal', balance: 68000, monthly: 1850, priority: 2 },
-      { creditor: 'Capitec', type: 'credit_card', balance: 48000, monthly: 1400, priority: 3 },
-      { creditor: 'FNB', type: 'credit_card', balance: 31500, monthly: 980, priority: 4 },
-      { creditor: 'Wesbank', type: 'vehicle', balance: 245000, monthly: 5100, priority: 5 }
-    ]
-  });
+  const { id_number, property_value, bond_balance, gross_income, monthly_expenses, debts } = body;
+
+  // Use real data if provided, otherwise use mock bureau data
+  let propValue = property_value;
+  let bondBal = bond_balance;
+  let grossInc = gross_income;
+  let monthlyExp = monthly_expenses;
+  let debtList = debts;
+
+  if (!propValue || !grossInc) {
+    if (!id_number) return resp(400, { error: 'id_number is required' });
+    const bureau = getBureauData(id_number);
+    propValue = propValue || bureau.lightstone.market_value;
+    bondBal = bondBal || bureau.lightstone.bond_balance;
+    grossInc = grossInc || bureau.truid.gross_monthly_income;
+    monthlyExp = monthlyExp || bureau.truid.monthly_expenses;
+    debtList = debtList || bureau.transunion.debts;
+  }
+
+  const result = calculateOffer(
+    Number(propValue),
+    Number(bondBal),
+    Number(grossInc),
+    Number(monthlyExp || 0),
+    debtList
+  );
+
+    if (!result.approved) {
+      return resp(200, { approved: false, reason: result.reason });
+    }
+
+    // Save application to DB if id_number provided
+    if (id_number) {
+      const db = await getDb();
+      try {
+        const hash = hashId(id_number);
+        const applicant = await db.query('SELECT id FROM applicants WHERE id_number_hash = $1', [hash]);
+        if (applicant.rows.length > 0) {
+          await db.query(
+            `INSERT INTO applications (applicant_id, status, mulo_score, pd_score, loan_amount, interest_rate, term_months, monthly_repayment, monthly_saving)
+             VALUES ($1, 'offered', $2, $3, $4, $5, 60, $6, $7)
+             ON CONFLICT DO NOTHING`,
+            [applicant.rows[0].id, result.mulo_score, result.pd_score, result.loan_amount, result.interest_rate / 100, result.monthly_repayment, result.monthly_saving]
+          );
+        }
+      } finally {
+        await db.end();
+      }
+    }
+
+    return resp(200, { approved: true, offer: result, debts: result.included_debts, excluded: result.excluded_debts });
 };
 
 const getUploadUrl = async (body) => {
@@ -210,6 +443,11 @@ exports.handler = async (event) => {
     if (path.endsWith('/consent') && method === 'POST') return await saveConsent(body);
     if (path.endsWith('/offer') && method === 'POST') return await getOffer(body);
     if (path.endsWith('/upload-url') && method === 'POST') return await getUploadUrl(body);
+    if (path.endsWith('/bureau') && method === 'POST') {
+      const { id_number } = body;
+      if (!id_number) return resp(400, { error: 'id_number is required' });
+      return resp(200, getBureauData(id_number));
+    }
     return resp(404, { error: `Route not found: ${method} ${path}` });
   } catch (err) {
     console.error('Handler error:', err);
