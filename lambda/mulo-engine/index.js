@@ -429,7 +429,8 @@ exports.handler = async (event) => {
   if (event.requestContext?.http?.method === 'OPTIONS' || event.httpMethod === 'OPTIONS') {
     return resp(200, {});
   }
-  const path = event.rawPath || event.path || '/';
+  const rawPath = event.rawPath || event.path || '/';
+  const path = rawPath.replace(/^\/prod/, '') || '/';
   const method = event.requestContext?.http?.method || event.httpMethod || 'POST';
   let body = {};
   try { body = event.body ? (typeof event.body === 'string' ? JSON.parse(event.body) : event.body) : {}; } catch(e) {}
@@ -447,6 +448,39 @@ exports.handler = async (event) => {
       const { id_number } = body;
       if (!id_number) return resp(400, { error: 'id_number is required' });
       return resp(200, getBureauData(id_number));
+    }
+    if ((path.endsWith('/admin/applications') || path.includes('/admin/applications')) && method === 'GET') {
+      const db = await getDb();
+      try {
+        const result = await db.query(`
+          SELECT 
+            a.id,
+            a.id_number_hash,
+            a.dha_verified,
+            a.date_of_birth,
+            a.cellphone,
+            a.created_at,
+            ap.status,
+            ap.mulo_score,
+            ap.loan_amount,
+            ap.interest_rate,
+            ap.monthly_repayment,
+            ap.monthly_saving,
+            ap.created_at as applied_at,
+            COUNT(DISTINCT d.id) as doc_count,
+            COUNT(DISTINCT c.id) as consent_count
+          FROM applicants a
+          LEFT JOIN applications ap ON ap.applicant_id = a.id
+          LEFT JOIN documents d ON d.applicant_id = a.id
+          LEFT JOIN consents c ON c.applicant_id = a.id
+          GROUP BY a.id, ap.id
+          ORDER BY a.created_at DESC
+          LIMIT 50
+        `);
+        return resp(200, { applicants: result.rows, total: result.rowCount });
+      } finally {
+        await db.end();
+      }
     }
     return resp(404, { error: `Route not found: ${method} ${path}` });
   } catch (err) {
