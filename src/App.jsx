@@ -37,7 +37,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8;min-height:100vh}
 /* ── SHELL ── */
 .shell{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:32px 16px}
 .phone{width:390px;height:min(780px,92vh);min-height:600px;background:#F7F9FC;border-radius:44px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.08);position:relative;display:flex;flex-direction:column}
-.phone-notch{width:126px;height:34px;background:#0A1628;border-radius:0 0 20px 20px;margin:0 auto;flex-shrink:0}
+.phone-notch{display:none}
 
 /* ── SCREENS ── */
 .screen{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
