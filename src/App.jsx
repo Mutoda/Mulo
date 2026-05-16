@@ -2963,7 +2963,7 @@ export default function App() {
       <style>{CSS}</style>
       <div className="shell">
         <div className="phone">
-          <div className="phone-notch"/>
+          
           <Screen go={setScreen} />
         </div>
       </div>
