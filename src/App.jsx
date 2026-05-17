@@ -36,7 +36,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8;min-height:100vh}
 
 /* ── SHELL ── */
 .shell{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:32px 16px}
-.phone{width:390px;height:min(780px,92vh);min-height:600px;background:#F7F9FC;border-radius:0;overflow:hidden;box-shadow:none;position:relative;display:flex;flex-direction:column}
+.phone{width:390px;height:min(780px,92vh);min-height:600px;background:#F7F9FC;border-radius:0;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25);position:relative;display:flex;flex-direction:column}
 .phone-notch{display:none}
 
 /* ── SCREENS ── */
@@ -543,7 +543,7 @@ function Landing({ go }) {
             <div className="mulo-logo">Mu<span>ḽ</span>o</div>
             <div style={{display:"flex",alignItems:"center",gap:16}}>
               <div style={{fontSize:13,color:"rgba(255,255,255,0.7)",cursor:"pointer",fontWeight:500}} onClick={() => setFaqOpen(true)}>FAQ</div>
-              <div className="login-link" onClick={() => go("dashboard")}>Sign in →</div>
+              <div className="login-link" onClick={() => go("login")}>Sign in →</div>
             </div>
           </div>
           <div className="hero-eyebrow">🇿🇦 South Africa's #1 Refinance Platform</div>
@@ -2944,6 +2944,69 @@ function Disbursement({ go }) {
 /* ─────────────────────────────────────────────
    SCREEN 8 — DASHBOARD
 ───────────────────────────────────────────── */
+function Login({ go }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phase, setPhase] = useState("idle");
+  const [showPass, setShowPass] = useState(false);
+
+  const handleSignIn = () => {
+    if (!email || !password) return;
+    setPhase("checking");
+    setTimeout(() => {
+      if (password.length >= 6) {
+        const parts = email.split("@")[0].split(".");
+        window._muloFirstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : "User";
+        window._muloLastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : "";
+        go("dashboard");
+      } else {
+        setPhase("error");
+      }
+    }, 1200);
+  };
+
+  return (
+    <div className="screen fade-in" style={{background:"#fff"}}>
+      <div className="screen-header" style={{background:"#fff",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
+        <div className="back-btn" onClick={() => go("landing")}>←</div>
+        <div className="screen-header-text">
+          <div className="screen-header-title">Sign in</div>
+          <div className="screen-header-sub">Welcome back to Muḽo</div>
+        </div>
+      </div>
+      <div className="screen-scroll">
+        <div className="form-pad" style={{paddingTop:32}}>
+          <div style={{textAlign:"center",marginBottom:32}}>
+            <div style={{fontFamily:"'Sora',sans-serif",fontSize:28,fontWeight:800,color:"#0A1628",letterSpacing:-1}}>Mu<span style={{color:"#00B8A9"}}>ḽ</span>o</div>
+            <div style={{fontSize:13,color:"#8FA3BE",marginTop:6}}>Sign in to your account</div>
+          </div>
+          <div className="input-group">
+            <label className="input-label">Email address</label>
+            <input className="input-field" type="email" placeholder="you@example.com" value={email} onChange={e => { setEmail(e.target.value); setPhase("idle"); }} autoCapitalize="none" />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Password</label>
+            <div style={{position:"relative"}}>
+              <input className={"input-field" + (phase==="error" ? " error" : "")} type={showPass ? "text" : "password"} placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setPhase("idle"); }} />
+              <div onClick={() => setShowPass(s=>!s)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:12,color:"#8FA3BE",cursor:"pointer"}}>{showPass ? "Hide" : "Show"}</div>
+            </div>
+            {phase==="error" && <div className="input-hint err">✕ Incorrect password. Please try again.</div>}
+          </div>
+          <div style={{textAlign:"right",marginTop:-8,marginBottom:20}}>
+            <span style={{fontSize:12,color:"#00B8A9",cursor:"pointer"}}>Forgot password?</span>
+          </div>
+          <button className="btn btn-primary" onClick={handleSignIn} disabled={!email || !password || phase==="checking"} style={{opacity:!email||!password?0.4:1}}>
+            {phase==="checking" ? "Signing in…" : "Sign in →"}
+          </button>
+          <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"#8FA3BE"}}>
+            Don't have an account? <span style={{color:"#00B8A9",cursor:"pointer"}} onClick={() => go("id-verify")}>Apply now →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ go }) {
   const [tab, setTab] = useState("home");
 
@@ -2962,7 +3025,9 @@ function Dashboard({ go }) {
             <div className="dash-greeting">Good morning 👋</div>
             <div className="dash-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</div>
           </div>
-          <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif"}}>TN</div>
+          <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif",cursor:"pointer"}} onClick={() => setTab("profile")}>
+            {((window._muloFirstName||'T')[0]+(window._muloLastName||'N')[0]).toUpperCase()}
+          </div>
         </div>
         <div className="status-card">
           <div className="status-top">
@@ -3042,7 +3107,10 @@ function Dashboard({ go }) {
       </div>
       <div className="mini-nav">
         {[["🏠","Home"],["💸","Tranches"],["💬","Support"],["👤","Profile"]].map(([icon,label],i) => (
-          <div key={label} className={`nav-tab ${i===0?"active":""}`} onClick={() => i===1 ? go("disbursement") : null}>
+          <div key={label} className={`nav-tab ${tab===["home","tranches","support","profile"][i]?"active":""}`} onClick={() => {
+            if(i===1) go("disbursement");
+            else setTab(["home","tranches","support","profile"][i]);
+          }}>
             <div className="nav-tab-icon">{icon}</div>
             <div className="nav-tab-label">{label}</div>
           </div>
@@ -3055,7 +3123,7 @@ function Dashboard({ go }) {
 /* ─────────────────────────────────────────────
    ROOT
 ───────────────────────────────────────────── */
-const SCREENS = { landing:Landing, "id-verify":IdVerify, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
+const SCREENS = { landing:Landing, login:Login, "id-verify":IdVerify, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
