@@ -80,6 +80,7 @@ const mockLightstone = (idHash) => {
     bond_holder: bondHolder,
     bond_start_date: bondStart,
     bond_term_months: 240,
+    bond_rate_margin: [-0.5, 0, 0.5, 1.0][seed % 4],
     ltv: Math.round(bondBalance / propertyValue * 100) / 100
   };
 };
@@ -265,10 +266,23 @@ const saveConsent = async (body) => {
 
 const PRIME_RATE = 11.75; // Current SA prime rate
 
-const calculateOffer = (propertyValue, bondBalance, grossIncome, monthlyExpenses, debts) => {
+const calculateOffer = (propertyValue, bondBalance, grossIncome, monthlyExpenses, debts, bondStartDate, bondRateMargin) => {
   // Gate 2: Property & LTV
   const equity = propertyValue - bondBalance;
   const maxByEquity = Math.floor(equity * 0.75);
+
+  // Calculate remaining bond term (assume 20yr/240 month original term)
+  const bondStart = bondStartDate ? new Date(bondStartDate) : new Date('2016-01-01');
+  const monthsElapsed = Math.floor((Date.now() - bondStart.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+  const remainingMonths = Math.max(0, 240 - monthsElapsed);
+
+  if (remainingMonths < 60) {
+    return { approved: false, reason: 'Your home loan has less than 5 years remaining. A further advance is not available at this stage.' };
+  }
+
+  const margin = bondRateMargin !== undefined ? bondRateMargin : 0;
+  const bondRate = PRIME_RATE + margin;
+  const rateLabel = margin === -0.5 ? 'Prime - 0.5%' : margin === 0 ? 'Prime' : margin === 0.5 ? 'Prime + 0.5%' : 'Prime + 1%';
 
   // Sort debts by priority: personal loans first, then credit cards, then vehicle
   const priorityOrder = { personal: 1, personal_loan: 1, credit_card: 2, vehicle: 3, vehicle_finance: 3 };
@@ -295,24 +309,15 @@ const calculateOffer = (propertyValue, bondBalance, grossIncome, monthlyExpenses
 
   // Calculate repayment for the loan amount
   const loanAmount = totalDebt;
-  const termMonths = 60;
+  const termMonths = remainingMonths;
 
-  // Try each rate band
-  const bands = [
-    { score: 82, pd: 0.032, rate: PRIME_RATE - 0.5, label: 'Prime - 0.5%', band: 'Excellent' },
-    { score: 70, pd: 0.075, rate: PRIME_RATE, label: 'Prime', band: 'Good' },
-    { score: 55, pd: 0.125, rate: PRIME_RATE + 0.5, label: 'Prime + 0.5%', band: 'Fair' }
-  ];
-
-  // Simple credit score estimation based on available data
   const dtiRatio = currentCommitments / grossIncome;
   let muloScore = 82;
   if (dtiRatio > 0.35) muloScore = 70;
   if (dtiRatio > 0.40) muloScore = 55;
   if (dtiRatio > 0.43) return { approved: false, reason: 'DTI ratio exceeds 43% — affordability limit reached' };
 
-  const band = bands.find(b => muloScore >= b.score) || bands[bands.length - 1];
-  const monthlyRate = band.rate / 100 / 12;
+  const monthlyRate = bondRate / 100 / 12;
   const monthlyRepayment = Math.round(loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / (Math.pow(1 + monthlyRate, termMonths) - 1));
 
   // Check surplus
@@ -326,14 +331,15 @@ const calculateOffer = (propertyValue, bondBalance, grossIncome, monthlyExpenses
   return {
     approved: true,
     loan_amount: loanAmount,
-    interest_rate: band.rate,
-    rate_label: band.label,
+    interest_rate: bondRate,
+    rate_label: rateLabel,
     term_months: termMonths,
+    remaining_months: remainingMonths,
     monthly_repayment: monthlyRepayment,
     monthly_saving: monthlySaving,
     mulo_score: muloScore,
-    pd_score: band.pd,
-    risk_band: band.band,
+    pd_score: muloScore >= 75 ? 0.032 : muloScore >= 60 ? 0.075 : 0.125,
+    risk_band: muloScore >= 75 ? 'Excellent' : muloScore >= 60 ? 'Good' : 'Fair',
     surplus,
     dti_percent: Math.round(dtiRatio * 100 * 10) / 10,
     included_debts: includedDebts,
@@ -345,6 +351,7 @@ const getOffer = async (body) => {
   const { id_number, property_value, bond_balance, gross_income, monthly_expenses, debts } = body;
 
   // Use real data if provided, otherwise use mock bureau data
+  let bureau = null;
   let propValue = property_value;
   let bondBal = bond_balance;
   let grossInc = gross_income;
@@ -361,12 +368,16 @@ const getOffer = async (body) => {
     debtList = debtList || bureau.transunion.debts;
   }
 
+  const bondStartDate = body.bond_start_date || bureau?.lightstone?.bond_start_date;
+  const bondRateMargin = body.bond_rate_margin !== undefined ? body.bond_rate_margin : bureau?.lightstone?.bond_rate_margin;
   const result = calculateOffer(
     Number(propValue),
     Number(bondBal),
     Number(grossInc),
     Number(monthlyExp || 0),
-    debtList
+    debtList,
+    bondStartDate,
+    bondRateMargin
   );
 
     if (!result.approved) {

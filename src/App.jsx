@@ -1727,6 +1727,7 @@ function Offer({ go }) {
   const muloScore = engineResult?.offer?.mulo_score || 82;
   const rateAnnual = engineResult?.offer?.rate_annual || 11.25;
   const rateLabel = engineResult?.offer?.rate_label || 'Prime − 0.5%';
+  const termMonths = engineResult?.offer?.term_months || 60;
   const monthlySaving = engineResult?.offer?.monthly_saving || 5987;
   const pdScore = engineResult?.gates?.gate4?.scores?.pd_score || 3.2;
   const HOME_VALUE      = 1_850_000;
@@ -1900,7 +1901,7 @@ if (loading) return (
 
           <div className="offer-amount-label">APPROVED EQUITY LOAN</div>
           <div className="offer-amount"><span>R</span> {LOAN_AMOUNT.toLocaleString("en-ZA")}</div>
-          <div className="offer-rate-line">Prime – 0.5% · 11.25% p.a. · 60 months</div>
+          <div className="offer-rate-line">{rateLabel || "Prime"} · {rateAnnual}% p.a. · {termMonths} months</div>
 
           <div className="offer-pills">
             <div className="offer-pill highlight">
@@ -2267,7 +2268,7 @@ function LoanSign({ go }) {
               <div className="esign-highlight">
                 <strong>Key terms at a glance</strong>
                 {[
-                  ["Loan amount","R 517,500"],["Interest rate","11.25% p.a. fixed"],["Term","60 months"],
+                  ["Loan amount",`R ${(loanAmount||517500).toLocaleString("en-ZA")}`],["Interest rate",`${rateAnnual||11.25}% p.a.`],["Term",`${termMonths||60} months`],
                   ["Monthly instalment","R 7,543"],["Total repayable","R 452,580"],["Initiation fee","R 1,207.50"],
                   ["Monthly service fee","R 69.00"],["First payment due","11 May 2026"],
                 ].map(([l,v]) => (
