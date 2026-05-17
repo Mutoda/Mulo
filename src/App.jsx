@@ -1728,6 +1728,12 @@ function Offer({ go }) {
   const rateAnnual = engineResult?.offer?.rate_annual || 11.25;
   const rateLabel = engineResult?.offer?.rate_label || 'Prime − 0.5%';
   const termMonths = engineResult?.offer?.term_months || 60;
+  if (engineResult) {
+    window._muloLoanAmount = engineResult?.offer?.loan_amount || 517500;
+    window._muloRateAnnual = engineResult?.offer?.interest_rate || 11.25;
+    window._muloRateLabel = engineResult?.offer?.rate_label || 'Prime';
+    window._muloTermMonths = engineResult?.offer?.term_months || 60;
+  }
   const monthlySaving = engineResult?.offer?.monthly_saving || 5987;
   const pdScore = engineResult?.gates?.gate4?.scores?.pd_score || 3.2;
   const HOME_VALUE      = 1_850_000;
@@ -2221,6 +2227,10 @@ const uploadFile = async (file, docType, setter) => {
    SCREEN 8 — LOAN AGREEMENT E-SIGN
 ───────────────────────────────────────────── */
 function LoanSign({ go }) {
+  const loanAmount = window._muloLoanAmount || 517500;
+  const rateAnnual = window._muloRateAnnual || 11.25;
+  const rateLabel = window._muloRateLabel || 'Prime';
+  const termMonths = window._muloTermMonths || 60;
   const [signed, setSigned] = useState(false);
   const [initialled, setInitialled] = useState(false);
   const [scrolled, setScrolled] = useState(false);
