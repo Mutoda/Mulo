@@ -883,7 +883,7 @@ setPhase("checking");
               {phase === "checking" ? "Verifying…" : "Verify my ID →"}
             </button>
           : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; window._muloFirstName = firstName; window._muloLastName = lastName; go("otp"); }} disabled={!firstName.trim() || !lastName.trim()} style={{opacity: !firstName.trim() || !lastName.trim() ? 0.4 : 1}}>
-              Send WhatsApp OTP →
+              Continue to authentication →
             </button>
         }
       </div>
