@@ -1472,7 +1472,7 @@ function BondConfirm({ go }) {
     property:    "34 Jacaranda Avenue, Kempton Park Ext 2, Gauteng",
     erf:         "Erf 4821",
     titleDeed:   "T 48291/2019",
-    bondholder:  "Nedbank Home Loans",
+    bondholder:  "Absa Home Loans",
     accountNo:   "••• ••• 2847",
     originalAmt: 1_400_000,
     outstanding: 1_070_000,
@@ -1811,7 +1811,7 @@ function Offer({ go }) {
   // (store credit / other excluded per product rules)
   const ALL_DEBTS = [
     { name:"African Bank Personal Loan", type:"Personal loan",    cat:"personal", icon:"🏦", bg:"#EBF0FF", monthly:3_800, balance:125_000 },
-    { name:"Nedbank Personal Loan",      type:"Personal loan",    cat:"personal", icon:"🏦", bg:"#EBF0FF", monthly:2_100, balance:68_000  },
+    { name:"Absa Personal Loan",      type:"Personal loan",    cat:"personal", icon:"🏦", bg:"#EBF0FF", monthly:2_100, balance:68_000  },
     { name:"Capitec Credit Card",        type:"Credit card",      cat:"credit",   icon:"💳", bg:"#FFF0EB", monthly:1_450, balance:48_000  },
     { name:"FNB Credit Card",            type:"Credit card",      cat:"credit",   icon:"💳", bg:"#FFF0EB", monthly:980,   balance:31_500  },
     { name:"Wesbank Vehicle Finance",    type:"Vehicle finance",  cat:"vehicle",  icon:"🚗", bg:"#EBFFF5", monthly:5_200, balance:245_000 },
@@ -2221,14 +2221,14 @@ const uploadFile = async (file, docType, setter) => {
               {[
                 "Must be your most recent payslip",
                 "Must show your full name, employer name and net pay",
-                "PDF, JPG or PNG · Max 10MB",
+                "PDF only · Max 10MB",
               ].map(r => <div className="doc-rule-item" key={r}><span style={{color:"#F4B942",flexShrink:0}}>•</span>{r}</div>)}
             </div>
             {!payslip ? (
-              <div className="doc-upload-zone" onClick={() => { const i = document.createElement('input'); i.type='file'; i.accept='.pdf,.jpg,.jpeg,.png'; i.onchange=e=>uploadFile(e.target.files[0],'payslip',setPayslip); i.click(); }}>
+              <div className="doc-upload-zone" onClick={() => { const i = document.createElement('input'); i.type='file'; i.accept='.pdf'; i.onchange=e=>uploadFile(e.target.files[0],'payslip',setPayslip); i.click(); }}>
                 <div className="doc-upload-icon">📄</div>
                 <div className="doc-upload-label">Tap to upload payslip</div>
-                <div className="doc-upload-hint">or drag & drop · PDF, JPG, PNG</div>
+                <div className="doc-upload-hint">or drag & drop · PDF only</div>
               </div>
             ) : (
               <div className="doc-uploaded-pill fade-up">
@@ -2250,11 +2250,11 @@ const uploadFile = async (file, docType, setter) => {
                 "Not older than 3 months",
                 "Accepted: utility bill, bank statement, or lease agreement",
                 "Must show your full name and physical address",
-                "PDF, JPG or PNG · Max 10MB",
+                "PDF only · Max 10MB",
               ].map(r => <div className="doc-rule-item" key={r}><span style={{color:"#F4B942",flexShrink:0}}>•</span>{r}</div>)}
             </div>
             {!address ? (
-              <div className="doc-upload-zone" onClick={() => { const i = document.createElement('input'); i.type='file'; i.accept='.pdf,.jpg,.jpeg,.png'; i.onchange=e=>uploadFile(e.target.files[0],'proof_of_address',setAddress); i.click(); }}>
+              <div className="doc-upload-zone" onClick={() => { const i = document.createElement('input'); i.type='file'; i.accept='.pdf'; i.onchange=e=>uploadFile(e.target.files[0],'proof_of_address',setAddress); i.click(); }}>
                 <div className="doc-upload-icon">🏠</div>
                 <div className="doc-upload-label">Tap to upload proof of address</div>
                 <div className="doc-upload-hint">Utility bill · Bank statement · Lease</div>
@@ -2567,7 +2567,7 @@ function Settlement({ go }) {
 
   const creditors = [
     { name:"African Bank Personal Loan", type:"Personal loan",   icon:"🏦", bg:"#EBF0FF", amt:"R125,000" },
-    { name:"Nedbank Personal Loan",      type:"Personal loan",   icon:"🏦", bg:"#EBF0FF", amt:"R68,000"  },
+    { name:"Absa Personal Loan",      type:"Personal loan",   icon:"🏦", bg:"#EBF0FF", amt:"R68,000"  },
     { name:"Capitec Credit Card",        type:"Credit card",     icon:"💳", bg:"#FFF0EB", amt:"R48,000"  },
     { name:"FNB Credit Card",            type:"Credit card",     icon:"💳", bg:"#FFF0EB", amt:"R31,500"  },
     { name:"Wesbank Vehicle Finance",    type:"Vehicle finance",  icon:"🚗", bg:"#EBFFF5", amt:"R245,000" },
