@@ -541,7 +541,10 @@ function Landing({ go }) {
         <div className="landing-hero">
           <div className="logo-row">
             <div className="mulo-logo">Mu<span>ḽ</span>o</div>
-            <div className="login-link" onClick={() => go("dashboard")}>Sign in →</div>
+            <div style={{display:"flex",alignItems:"center",gap:16}}>
+              <div style={{fontSize:13,color:"rgba(255,255,255,0.7)",cursor:"pointer",fontWeight:500}} onClick={() => setFaqOpen(true)}>FAQ</div>
+              <div className="login-link" onClick={() => go("dashboard")}>Sign in →</div>
+            </div>
           </div>
           <div className="hero-eyebrow">🇿🇦 South Africa's #1 Refinance Platform</div>
           <h1 className="hero-title">
