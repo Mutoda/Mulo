@@ -619,6 +619,8 @@ function validateSAID(id) {
 ───────────────────────────────────────────── */
 function IdVerify({ go }) {
   const [idNum, setIdNum]   = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName]   = useState("");
   const [phase, setPhase]   = useState("idle"); // idle | validating | invalid | checking | done
   const [validation, setValidation] = useState(null);
   const [checks, setChecks] = useState([
@@ -739,6 +741,30 @@ setPhase("checking");
             />
             {renderHint()}
           </div>
+          {idNum.length === 13 && validation?.valid && (
+            <div className="fade-up" style={{display:"flex",gap:10,marginBottom:4}}>
+              <div className="input-group" style={{flex:1,marginBottom:0}}>
+                <label className="input-label">First name <span style={{color:"#8FA3BE",fontWeight:400}}>(as per ID)</span></label>
+                <input
+                  className="input-field"
+                  placeholder="e.g. Thabo"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  autoCapitalize="words"
+                />
+              </div>
+              <div className="input-group" style={{flex:1,marginBottom:0}}>
+                <label className="input-label">Last name <span style={{color:"#8FA3BE",fontWeight:400}}>(as per ID)</span></label>
+                <input
+                  className="input-field"
+                  placeholder="e.g. Nkosi"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  autoCapitalize="words"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Validation breakdown — shown as soon as 13 digits entered */}
           {idNum.length === 13 && (
@@ -806,7 +832,7 @@ setPhase("checking");
             <div className="pre-qual-banner fade-up">
               <div className="pre-qual-icon">🏡</div>
               <div className="pre-qual-title">Homeowner confirmed</div>
-              <div className="pre-qual-sub">Thabo Nkosi · Kempton Park, Gauteng<br/>Next: verify it's really you</div>
+              <div className="pre-qual-sub">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')} · Kempton Park, Gauteng<br/>Next: verify it's really you</div>
             </div>
           )}
 
@@ -830,7 +856,7 @@ setPhase("checking");
               onClick={handleCheck}>
               {phase === "checking" ? "Verifying…" : "Verify my ID →"}
             </button>
-          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; go("otp"); }}>
+          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; window._muloFirstName = firstName; window._muloLastName = lastName; go("otp"); }} disabled={!firstName.trim() || !lastName.trim()} style={{opacity: !firstName.trim() || !lastName.trim() ? 0.4 : 1}}>
               Send WhatsApp OTP →
             </button>
         }
@@ -941,7 +967,7 @@ const verify = async () => {
           </div>
           <div className="wa-preview-body">
             <div className="wa-bubble">
-              <div className="wa-bubble-greeting">Hi Thabo 👋 Your Muḽo verification code is:</div>
+              <div className="wa-bubble-greeting">Hi {window._muloFirstName || 'Thabo'} 👋 Your Muḽo verification code is:</div>
               <div className="wa-bubble-otp">123456</div>
               <div className="wa-bubble-footer">Valid for <strong>10 minutes</strong>. Never share this code with anyone — Muḽo will never ask for it.<br/>🔒 DHA-linked number verified.</div>
               <div className="wa-bubble-meta">
@@ -1079,7 +1105,7 @@ function LivenessCheck({ go }) {
             <div className="camera-instruction">
               {phase==="idle"&&"Position face in oval"}
               {phase==="scanning"&&(steps[livenessStep]?.label||"Hold still…")}
-              {phase==="verified"&&"✓ Match confirmed — Thabo Nkosi"}
+              {phase==="verified"&&`✓ Match confirmed — ${(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}`}
             </div>
             <div className="camera-sub-instruction">
               {phase==="idle"&&"Tap 'Start verification' below"}
@@ -1139,7 +1165,7 @@ function Signup({ go }) {
       <div className="screen-scroll">
         <div className="form-pad" style={{paddingTop:8}}>
           <div style={{background:"rgba(18,194,107,0.06)",border:"1px solid rgba(18,194,107,0.2)",borderRadius:14,padding:"12px 14px",marginBottom:20,fontSize:12,color:"#12C26B",display:"flex",gap:8,alignItems:"center"}}>
-            ✓ &nbsp;ID · OTP · Face verified — Thabo Nkosi · Homeowner
+            ✓  ID · OTP · Face verified — {(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')} · Homeowner
           </div>
 
           {/* Name locked from DHA */}
@@ -1150,11 +1176,11 @@ function Signup({ go }) {
             <div className="name-row">
               <div>
                 <div style={{fontSize:10,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:5}}>First name</div>
-                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>Thabo</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>{window._muloFirstName || 'Thabo'}</div>
               </div>
               <div>
                 <div style={{fontSize:10,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:5}}>Last name</div>
-                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>Nkosi</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#0A1628"}}>{window._muloLastName || 'Nkosi'}</div>
               </div>
             </div>
             <div style={{fontSize:11,color:"#8FA3BE",marginTop:10,display:"flex",alignItems:"center",gap:5}}>
@@ -1560,7 +1586,7 @@ function BankAccountConfirm({ go }) {
     bank:        "Nedbank",
     logo:        "🏦",
     type:        "Cheque Account",
-    holder:      "Thabo Nkosi",
+    holder: (window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi'),
     number:      "••• ••• 2847",
     branch:      "198765",
     source:      "TruID — verified 11 Apr 2026",
@@ -1765,7 +1791,7 @@ if (loading) return (
             <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Offer valid 48 hrs</div>
           </div>
           <div className="offer-eyebrow">PERSONALISED EQUITY OFFER</div>
-          <div className="offer-name">Thabo Nkosi · 34 Jacaranda Ave, Kempton Park</div>
+          <div className="offer-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')} · 34 Jacaranda Ave, Kempton Park</div>
 
           {/* ── ML ENGINE SCORES ── */}
           {(() => {
@@ -2232,7 +2258,7 @@ function LoanSign({ go }) {
             <div className="esign-doc-body">
               <div className="esign-clause">
                 <strong>1. Parties</strong><br/>
-                This agreement is entered into between <strong>Muḽo (Pty) Ltd</strong> ("the Lender") and <strong>Thabo Nkosi</strong>, ID 800101 5009 087 ("the Borrower") on 11 April 2026.
+                This agreement is entered into between <strong>Muḽo (Pty) Ltd</strong> ("the Lender") and <strong>{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</strong>, ID 800101 5009 087 ("the Borrower") on 11 April 2026.
               </div>
               <div className="esign-clause">
                 <strong>2. Loan amount &amp; purpose</strong><br/>
@@ -2288,7 +2314,7 @@ function LoanSign({ go }) {
               </div>
               <div className={`signature-pad ${signed?"signed":""}`} onClick={() => signed ? null : setScrolled(true) && setSigned(true) || setSigned(true)}>
                 {signed
-                  ? <><span className="sig-rendered">Thabo Nkosi</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:45 · IP 41.13.xxx.xxx</span></>
+                  ? <><span className="sig-rendered">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:45 · IP 41.13.xxx.xxx</span></>
                   : <div className="sig-placeholder"><span style={{fontSize:20}}>✍️</span><span>Tap to sign</span>{!scrolled&&<span style={{fontSize:10,color:"#FF7043"}}>Scroll to read full agreement first</span>}</div>
                 }
               </div>
@@ -2386,10 +2412,10 @@ function Conveyancing({ go }) {
               <div className="esign-doc-body">
                 <div className="esign-clause">
                   <strong>Property:</strong> Erf 4821, 34 Jacaranda Avenue, Kempton Park Ext 2, Gauteng<br/>
-                  <strong>Title Deed:</strong> T 48291/2019 · Registered owner: Thabo Nkosi
+                  <strong>Title Deed:</strong> T 48291/2019 · Registered owner: {(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}
                 </div>
                 <div className="esign-clause">
-                  <strong>Consent:</strong> I, <strong>Thabo Nkosi</strong>, hereby consent to the registration of a second mortgage bond over the above property in favour of <strong>Muḽo (Pty) Ltd</strong> for the sum of <strong>R517,500</strong>, as security for the equity loan advanced under agreement REF-2026-48291.
+                  <strong>Consent:</strong> I, <strong>{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</strong>, hereby consent to the registration of a second mortgage bond over the above property in favour of <strong>Muḽo (Pty) Ltd</strong> for the sum of <strong>R517,500</strong>, as security for the equity loan advanced under agreement REF-2026-48291.
                 </div>
                 <div className="esign-highlight">
                   ⚖️ <strong>Your rights:</strong> You have 5 business days to cancel this consent without penalty. The bond will be registered at the Deeds Office and reflected on your title deed. You retain full ownership of the property.
@@ -2408,7 +2434,7 @@ function Conveyancing({ go }) {
                 </div>
                 <div className={`signature-pad ${signed?"signed":""}`} onClick={() => setSigned(true)}>
                   {signed
-                    ? <><span className="sig-rendered">Thabo Nkosi</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:52</span></>
+                    ? <><span className="sig-rendered">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</span><span className="sig-verified-badge">✓ Signed</span><span className="sig-date-stamp">11 Apr 2026 · 11:52</span></>
                     : <div className="sig-placeholder"><span style={{fontSize:20}}>✍️</span><span>Tap to sign conveyancing consent</span></div>
                   }
                 </div>
@@ -2857,7 +2883,7 @@ function Dashboard({ go }) {
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
             <div className="dash-greeting">Good morning 👋</div>
-            <div className="dash-name">Thabo Nkosi</div>
+            <div className="dash-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</div>
           </div>
           <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif"}}>TN</div>
         </div>
