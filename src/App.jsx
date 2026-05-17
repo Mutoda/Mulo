@@ -832,47 +832,7 @@ setPhase("checking");
             </div>
           )}
 
-          {/* Validation breakdown — shown as soon as 13 digits entered */}
-          {idNum.length === 13 && (
-            <div style={{marginBottom:16}} className="fade-up">
-              <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Format validation</div>
-              {[
-                {
-                  label:"13 digits",
-                  ok: idNum.length === 13,
-                  detail:"Correct length"
-                },
-                {
-                  label:"Valid date of birth",
-                  ok: validation?.valid || (validation?.error !== "Invalid date of birth in ID number" && validation?.error !== "Applicant must be 18 or older" && validation?.error !== "Date of birth appears invalid"),
-                  detail: validation?.valid ? `${validation.dob} · Age ${validation.age}` : (["Invalid date of birth in ID number","Applicant must be 18 or older","Date of birth appears invalid"].includes(validation?.error) ? validation.error : "Checking...")
-                },
-                {
-                  label:"Citizenship digit",
-                  ok: validation?.valid || validation?.error !== "Invalid citizenship digit — must be 0 or 1",
-                  detail: validation?.valid ? validation.citizen : validation?.error === "Invalid citizenship digit — must be 0 or 1" ? "Invalid — must be 0 or 1" : "SA Citizen or Permanent Resident"
-                },
-                {
-                  label:"Luhn checksum",
-                  ok: validation?.valid,
-                  detail: validation?.valid ? "Mathematically valid" : validation?.error === "Checksum failed — please check your ID number" ? "Checksum failed — typo?" : "Verifying..."
-                },
-              ].map((row, i) => (
-                <div key={i} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"9px 0",borderBottom:"1px solid #F7F9FC"}}>
-                  <div style={{
-                    width:24,height:24,borderRadius:8,flexShrink:0,
-                    background: row.ok ? "rgba(18,194,107,0.1)" : "rgba(255,112,67,0.1)",
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:12,color: row.ok ? "#12C26B" : "#FF7043"
-                  }}>{row.ok ? "✓" : "✕"}</div>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:"#0A1628"}}>{row.label}</div>
-                    <div style={{fontSize:11,color: row.ok ? "#8FA3BE" : "#FF7043",marginTop:1}}>{row.detail}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+
 
           {/* Bureau checks — shown after clicking Verify */}
           {(phase === "checking" || phase === "done") && (
