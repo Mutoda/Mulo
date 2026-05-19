@@ -990,7 +990,7 @@ const verify = async () => {
           <div className="wa-preview-body">
             <div className="wa-bubble">
               <div className="wa-bubble-greeting">Hi {window._muloFirstName || 'Thabo'} 👋 Your Muḽo verification code is:</div>
-              <div className="wa-bubble-otp">123456</div>
+              <div className="wa-bubble-otp">••••••</div>
               <div className="wa-bubble-footer">Valid for <strong>10 minutes</strong>. Never share this code with anyone — Muḽo will never ask for it.<br/>🔒 DHA-linked number verified.</div>
               <div className="wa-bubble-meta">
                 <span>11:42 AM</span>
@@ -1043,7 +1043,7 @@ const verify = async () => {
           </div>
           <div style={{background:"#F7F9FC",border:"1px solid #E8EDF4",borderRadius:14,padding:14,fontSize:12,color:"#8FA3BE",lineHeight:1.6,marginBottom:16}}>
             <strong style={{color:"#0A1628",display:"block",marginBottom:3}}>💡 Demo hint</strong>
-            Enter <strong style={{color:"#25D366",fontFamily:"'Sora',sans-serif"}}>123456</strong> to proceed.
+            Enter the 6-digit code sent to your WhatsApp.
           </div>
         </div>
       </div>

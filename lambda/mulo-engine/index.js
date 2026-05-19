@@ -209,6 +209,33 @@ const verifyId = async (body) => {
   }
 };
 
+const sendWhatsAppOtp = async (cellphone, otp) => {
+  const token = process.env.WA_TOKEN;
+  const phoneNumberId = process.env.WA_PHONE_NUMBER_ID;
+  if (!token || !phoneNumberId) { console.log('WhatsApp not configured'); return; }
+
+  // Format SA number to international format
+  let to = cellphone.replace(/D/g, '');
+  if (to.startsWith('0')) to = '27' + to.slice(1);
+
+  const res = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'template',
+      template: {
+        name: 'hello_world',
+        language: { code: 'en_US' }
+      }
+    })
+  });
+  const data = await res.json();
+  console.log('WhatsApp send result:', JSON.stringify(data));
+  return data;
+};
+
 const sendOtp = async (body) => {
   const { id_number, cellphone } = body;
   if (!id_number || !cellphone) return resp(400, { error: 'id_number and cellphone are required' });
@@ -222,6 +249,7 @@ const sendOtp = async (body) => {
       [hash, JSON.stringify({ otp_hash: hashId(otp), expires_at: new Date(Date.now() + 10 * 60 * 1000), cellphone })]
     );
     console.log(`OTP for demo: ${otp}`);
+    await sendWhatsAppOtp(cellphone, otp);
     return resp(200, { sent: true, message: `OTP sent to ${cellphone}` });
   } finally {
     await db.end();
