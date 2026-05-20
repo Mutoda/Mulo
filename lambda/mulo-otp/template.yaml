@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Mulo OTP Lambdas — sendWhatsAppOTP + verifyWhatsAppOTP
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Architectures: [arm64]
+    Timeout: 15
+    MemorySize: 256
+    Environment:
+      Variables:
+        REDIS_URL: !Sub "redis://mulo-redis.rlcwux.0001.afs1.cache.amazonaws.com:6379"
+        WHATSAPP_SECRET: mulo/whatsapp
+        JWT_SECRET: mulo/jwt
+        MAX_OTP_ATTEMPTS: "3"
+        MAX_VERIFY_ATTEMPTS: "5"
+
+Resources:
+  SendWhatsAppOTPFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: mulo-send-whatsapp-otp
+      Handler: src/sendWhatsAppOTP.handler
+      CodeUri: .
+      Description: Generate OTP, store in Redis, send via WhatsApp Cloud API
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub "arn:aws:secretsmanager:af-south-1:${AWS::AccountId}:secret:mulo/whatsapp-*"
+      Events:
+        ApiPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MuloOtpApi
+            Path: /otp/send
+            Method: POST
+
+  VerifyWhatsAppOTPFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: mulo-verify-whatsapp-otp
+      Handler: src/verifyWhatsAppOTP.handler
+      CodeUri: .
+      Description: Validate OTP, issue phone-verified JWT
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Sub "arn:aws:secretsmanager:af-south-1:${AWS::AccountId}:secret:mulo/jwt-*"
+      Events:
+        ApiPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MuloOtpApi
+            Path: /otp/verify
+            Method: POST
+
+  MuloOtpApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: mulo-otp-api
+      StageName: prod
+
+Outputs:
+  OtpApiEndpoint:
+    Description: Base URL for OTP API
+    Value: !Sub "https://${MuloOtpApi}.execute-api.af-south-1.amazonaws.com/prod"
+  SendOTPFunctionArn:
+    Value: !GetAtt SendWhatsAppOTPFunction.Arn
+  VerifyOTPFunctionArn:
+    Value: !GetAtt VerifyWhatsAppOTPFunction.Arn
