@@ -20,7 +20,7 @@ async function getJwtSecret() {
 
 async function getRedis() {
   if (redisClient?.isReady) return redisClient;
-  redisClient = createClient({ url: process.env.REDIS_URL, socket: { tls: true, rejectUnauthorized: true } });
+  redisClient = createClient({ url: process.env.REDIS_URL, socket: { tls: false } });
   redisClient.on("error", (err) => console.error("Redis error:", err));
   await redisClient.connect();
   return redisClient;

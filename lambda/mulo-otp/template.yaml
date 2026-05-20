@@ -8,9 +8,16 @@ Globals:
     Architectures: [arm64]
     Timeout: 15
     MemorySize: 256
+    VpcConfig:
+      SecurityGroupIds:
+        - sg-05409eb1ca29131af
+      SubnetIds:
+        - subnet-00a450bb8f26278cf
+        - subnet-02398c838bfa77338
+        - subnet-09d388e8d0f6446b7
     Environment:
       Variables:
-        REDIS_URL: !Sub "redis://mulo-redis.rlcwux.0001.afs1.cache.amazonaws.com:6379"
+        REDIS_URL: "redis://mulo-redis.rlcwux.0001.afs1.cache.amazonaws.com:6379"
         WHATSAPP_SECRET: mulo/whatsapp
         JWT_SECRET: mulo/jwt
         MAX_OTP_ATTEMPTS: "3"
@@ -27,6 +34,7 @@ Resources:
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Sub "arn:aws:secretsmanager:af-south-1:${AWS::AccountId}:secret:mulo/whatsapp-*"
+        - VPCAccessPolicy: {}
       Events:
         ApiPost:
           Type: Api
@@ -45,6 +53,7 @@ Resources:
       Policies:
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Sub "arn:aws:secretsmanager:af-south-1:${AWS::AccountId}:secret:mulo/jwt-*"
+        - VPCAccessPolicy: {}
       Events:
         ApiPost:
           Type: Api
