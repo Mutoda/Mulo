@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 const API = "https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod";
+const OTP_API = "https://zcdikmofo9.execute-api.af-south-1.amazonaws.com/prod";
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS
@@ -895,8 +896,24 @@ function OtpVerify({ go }) {
   const [phase, setPhase] = useState("idle");
   const [timer, setTimer] = useState(59);
   const [attempts, setAttempts] = useState(0);
+  const [sendError, setSendError] = useState(null);
   const inputRefs = useRef([]);
 
+  // Send OTP when screen loads
+  useEffect(() => {
+    const phone = window._muloCellphone;
+    if (!phone) return;
+    fetch(`${OTP_API}/otp/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phoneNumber: phone }),
+    })
+      .then(r => r.json())
+      .then(d => { if (!d.success) setSendError("Could not send OTP. Please go back and try again."); })
+      .catch(() => setSendError("Could not send OTP. Please check your connection."));
+  }, []);
+
+  // Countdown timer
   useEffect(() => {
     if(timer <= 0) return;
     const t = setTimeout(() => setTimer(s => s-1), 1000);
@@ -921,18 +938,19 @@ function OtpVerify({ go }) {
     if(pasted.length === 6) { setDigits(pasted.split("")); inputRefs.current[5]?.focus(); }
   };
 
-const verify = async () => {
+  const verify = async () => {
     const code = digits.join("");
     if(code.length < 6) return;
     setPhase("checking");
     try {
-      const res = await fetch(`${API}/otp/verify`, {
+      const res = await fetch(`${OTP_API}/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_number: window._muloIdNumber || "demo", otp: code })
+        body: JSON.stringify({ phoneNumber: window._muloCellphone, otp: code })
       });
       const data = await res.json();
       if(data.verified) {
+        window._muloVerifiedToken = data.verifiedToken;
         setPhase("done");
         setTimeout(() => go("liveness"), 900);
       } else {
@@ -949,7 +967,22 @@ const verify = async () => {
     }
   };
 
-  const resend = () => { setTimer(59); setDigits(["","","","","",""]); setPhase("idle"); };
+  const resend = () => {
+    const phone = window._muloCellphone;
+    if (!phone) return;
+    setTimer(59);
+    setDigits(["","","","","",""]);
+    setPhase("idle");
+    setSendError(null);
+    fetch(`${OTP_API}/otp/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phoneNumber: phone }),
+    })
+      .then(r => r.json())
+      .then(d => { if (!d.success) setSendError("Could not resend OTP. Please try again."); })
+      .catch(() => setSendError("Could not resend OTP. Please check your connection."));
+  };
   const allFilled = digits.every(Boolean);
 
   return (
@@ -1022,6 +1055,7 @@ const verify = async () => {
             ))}
           </div>
 
+          {sendError && <div style={{textAlign:"center",fontSize:13,color:"#FF7043",fontWeight:600,marginBottom:10}} className="fade-up">⚠️ {sendError}</div>}
           {phase==="error" && <div style={{textAlign:"center",fontSize:13,color:"#FF7043",fontWeight:600,marginBottom:10}} className="fade-up">✕ Incorrect code — try again</div>}
           {phase==="done"  && <div style={{textAlign:"center",fontSize:13,color:"#12C26B",fontWeight:600,marginBottom:10}} className="fade-up">✓ Verified — redirecting…</div>}
 
