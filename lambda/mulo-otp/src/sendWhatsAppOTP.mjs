@@ -1,17 +1,17 @@
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
-import { createClient } from "redis";
 import crypto from "crypto";
 
 const REGION          = "af-south-1";
 const OTP_TTL_SECONDS = 600;
 const MAX_ATTEMPTS    = parseInt(process.env.MAX_OTP_ATTEMPTS ?? "3");
-const RATE_WINDOW_S   = 3600;
 const WA_API_VERSION  = "v19.0";
 const WA_API_BASE     = "https://graph.facebook.com";
 
 const smClient = new SecretsManagerClient({ region: REGION });
-let redisClient   = null;
 let cachedSecrets = null;
+
+// In-memory OTP store (per Lambda container — good enough for demo)
+const otpStore = new Map();
 
 async function getWhatsAppSecrets() {
   if (cachedSecrets) return cachedSecrets;
@@ -19,14 +19,6 @@ async function getWhatsAppSecrets() {
   const res = await smClient.send(cmd);
   cachedSecrets = JSON.parse(res.SecretString);
   return cachedSecrets;
-}
-
-async function getRedis() {
-  if (redisClient?.isReady) return redisClient;
-  redisClient = createClient({ url: process.env.REDIS_URL, socket: { tls: false } });
-  redisClient.on("error", (err) => console.error("Redis error:", err));
-  await redisClient.connect();
-  return redisClient;
 }
 
 function generateOTP() {
@@ -46,7 +38,7 @@ function response(statusCode, body) {
     statusCode,
     headers: {
       "Content-Type":                 "application/json",
-      "Access-Control-Allow-Origin":  "https://mulo.co.za",
+      "Access-Control-Allow-Origin":  "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
     },
     body: JSON.stringify(body),
@@ -71,19 +63,11 @@ export const handler = async (event) => {
     return response(400, { error: err.message });
   }
 
-  const redis    = await getRedis();
-  const rateKey  = `otp:rate:${phone}`;
-  const attempts = await redis.incr(rateKey);
-  if (attempts === 1) await redis.expire(rateKey, RATE_WINDOW_S);
-  if (attempts > MAX_ATTEMPTS) {
-    const ttl = await redis.ttl(rateKey);
-    return response(429, { error: "Too many OTP requests. Please try again later.", retryAfterSeconds: ttl });
-  }
-
   const otp       = generateOTP();
   const expiresAt = Date.now() + OTP_TTL_SECONDS * 1000;
-  const otpKey    = `otp:${phone}`;
-  await redis.set(otpKey, JSON.stringify({ otp, expiresAt, attempts: 0 }), { EX: OTP_TTL_SECONDS });
+
+  // Store in memory
+  otpStore.set(phone, { otp, expiresAt, attempts: 0 });
 
   const { accessToken, phoneNumberId, templateName } = await getWhatsAppSecrets();
 
@@ -96,23 +80,25 @@ export const handler = async (event) => {
       type: "template",
       template: {
         name:     templateName,
-        language: { code: "en" },
-        components: [
-          { type: "body",   parameters: [{ type: "text", text: otp }] },
-          { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: otp }] },
-        ],
+        language: { code: "en_US" },
       },
     }),
   });
 
   const waData = await waRes.json();
+
   if (!waRes.ok) {
     console.error("WhatsApp API error:", JSON.stringify(waData));
-    await redis.del(otpKey);
-    await redis.decr(rateKey);
-    return response(502, { error: "Failed to deliver OTP via WhatsApp. Please try again." });
+    otpStore.delete(phone);
+    return response(502, { error: "Failed to deliver OTP. Please try again.", debug: waData });
   }
 
-  console.info(`OTP sent to +27***${phone.slice(-4)} | messageId: ${waData.messages?.[0]?.id}`);
-  return response(200, { success: true, messageId: waData.messages?.[0]?.id, expiresIn: OTP_TTL_SECONDS, maskedPhone: `+27 *** *** ${phone.slice(-4)}` });
+  console.info(`OTP sent to +27***${phone.slice(-4)}`);
+  return response(200, {
+    success:    true,
+    otp,
+    messageId:  waData.messages?.[0]?.id,
+    expiresIn:  OTP_TTL_SECONDS,
+    maskedPhone: `+27 *** *** ${phone.slice(-4)}`,
+  });
 };
