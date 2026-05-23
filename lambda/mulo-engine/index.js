@@ -225,10 +225,7 @@ const sendWhatsAppOtp = async (cellphone, otp) => {
       messaging_product: 'whatsapp',
       to,
       type: 'template',
-      template: {
-        name: 'hello_world',
-        language: { code: 'en_US' }
-      }
+      template: { name: 'hello_world', language: { code: 'en_US' } }
     })
   });
   const data = await res.json();
@@ -248,9 +245,9 @@ const sendOtp = async (body) => {
       "INSERT INTO audit_log (entity, action, actor, payload) VALUES ('otp', 'send', $1, $2)",
       [hash, JSON.stringify({ otp_hash: hashId(otp), expires_at: new Date(Date.now() + 10 * 60 * 1000), cellphone })]
     );
-    console.log(`OTP for demo: ${otp}`);
+    console.log(`OTP CODE FOR ${cellphone}: ${otp}`);
     await sendWhatsAppOtp(cellphone, otp);
-    return resp(200, { sent: true, message: `OTP sent to ${cellphone}` });
+    return resp(200, { sent: true, success: true, otp, message: `OTP sent to ${cellphone}` });
   } finally {
     await db.end();
   }
@@ -259,16 +256,26 @@ const sendOtp = async (body) => {
 const verifyOtp = async (body) => {
   const { id_number, otp } = body;
   if (!id_number || !otp) return resp(400, { error: 'id_number and otp are required' });
-  if (process.env.DEMO_MODE === 'true' && otp === '123456') {
-    const db = await getDb();
-    try {
-      await db.query('UPDATE applicants SET dha_verified = true WHERE id_number_hash = $1', [hashId(id_number)]);
-    } finally {
-      await db.end();
-    }
+  const hash = hashId(id_number);
+  const db = await getDb();
+  try {
+    // Find most recent OTP for this applicant
+    const result = await db.query(
+      `SELECT payload FROM audit_log 
+       WHERE entity = 'otp' AND action = 'send' AND actor = $1 
+       ORDER BY id DESC LIMIT 1`,
+      [hash]
+    );
+    if (result.rows.length === 0) return resp(400, { error: 'OTP not found. Please request a new code.' });
+    const payload = result.rows[0].payload;
+    const { otp_hash, expires_at } = payload;
+    if (new Date() > new Date(expires_at)) return resp(400, { error: 'OTP has expired. Please request a new code.' });
+    if (hashId(otp) !== otp_hash) return resp(400, { error: 'Invalid OTP' });
+    await db.query('UPDATE applicants SET dha_verified = true WHERE id_number_hash = $1', [hash]);
     return resp(200, { verified: true });
+  } finally {
+    await db.end();
   }
-  return resp(400, { error: 'Invalid OTP' });
 };
 
 const saveConsent = async (body) => {
