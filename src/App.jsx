@@ -1077,7 +1077,7 @@ function OtpVerify({ go }) {
           </div>
           <div style={{background:"#F7F9FC",border:"1px solid #E8EDF4",borderRadius:14,padding:14,fontSize:12,color:"#8FA3BE",lineHeight:1.6,marginBottom:16}}>
             <strong style={{color:"#0A1628",display:"block",marginBottom:3}}>💡 Demo hint</strong>
-            Enter the 6-digit code sent to your WhatsApp.
+            No SIM yet — use code: 123456
           </div>
         </div>
       </div>
