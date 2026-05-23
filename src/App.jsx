@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 const API = "https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod";
-const OTP_API = "https://zcdikmofo9.execute-api.af-south-1.amazonaws.com/prod";
+
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS
@@ -897,19 +897,28 @@ function OtpVerify({ go }) {
   const [timer, setTimer] = useState(59);
   const [attempts, setAttempts] = useState(0);
   const [sendError, setSendError] = useState(null);
+  const [demoOtp, setDemoOtp] = useState(null);
+
+  // Auto-fill boxes when demo OTP arrives
+  useEffect(() => {
+    if (demoOtp && demoOtp.length === 6) {
+      setDigits(demoOtp.split(""));
+      inputRefs.current[5]?.focus();
+    }
+  }, [demoOtp]);
   const inputRefs = useRef([]);
 
   // Send OTP when screen loads
   useEffect(() => {
     const phone = window._muloCellphone;
     if (!phone) return;
-    fetch(`${OTP_API}/otp/send`, {
+    fetch(`${API}/otp/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phoneNumber: phone }),
+      body: JSON.stringify({ cellphone: phone, id_number: window._muloIdNumber }),
     })
       .then(r => r.json())
-      .then(d => { if (!d.success) setSendError("Could not send OTP. Please go back and try again."); })
+      .then(d => { if (!d.sent) setSendError("Could not send OTP. Please go back and try again."); else if (d.otp) setDemoOtp(d.otp); })
       .catch(() => setSendError("Could not send OTP. Please check your connection."));
   }, []);
 
@@ -943,10 +952,10 @@ function OtpVerify({ go }) {
     if(code.length < 6) return;
     setPhase("checking");
     try {
-      const res = await fetch(`${OTP_API}/otp/verify`, {
+      const res = await fetch(`${API}/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber: window._muloCellphone, otp: code })
+        body: JSON.stringify({ id_number: window._muloIdNumber, otp: code })
       });
       const data = await res.json();
       if(data.verified) {
@@ -974,13 +983,13 @@ function OtpVerify({ go }) {
     setDigits(["","","","","",""]);
     setPhase("idle");
     setSendError(null);
-    fetch(`${OTP_API}/otp/send`, {
+    fetch(`${API}/otp/send`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phoneNumber: phone }),
+      body: JSON.stringify({ cellphone: phone, id_number: window._muloIdNumber }),
     })
       .then(r => r.json())
-      .then(d => { if (!d.success) setSendError("Could not resend OTP. Please try again."); })
+      .then(d => { if (!d.sent) setSendError("Could not resend OTP. Please try again."); else if (d.otp) setDemoOtp(d.otp); })
       .catch(() => setSendError("Could not resend OTP. Please check your connection."));
   };
   const allFilled = digits.every(Boolean);
@@ -1056,6 +1065,7 @@ function OtpVerify({ go }) {
           </div>
 
           {sendError && <div style={{textAlign:"center",fontSize:13,color:"#FF7043",fontWeight:600,marginBottom:10}} className="fade-up">⚠️ {sendError}</div>}
+          {demoOtp && <div style={{textAlign:"center",fontSize:13,color:"#25D366",fontWeight:700,marginBottom:10,letterSpacing:4}} className="fade-up">🔑 Demo OTP: {demoOtp}</div>}
           {phase==="error" && <div style={{textAlign:"center",fontSize:13,color:"#FF7043",fontWeight:600,marginBottom:10}} className="fade-up">✕ Incorrect code — try again</div>}
           {phase==="done"  && <div style={{textAlign:"center",fontSize:13,color:"#12C26B",fontWeight:600,marginBottom:10}} className="fade-up">✓ Verified — redirecting…</div>}
 
@@ -1074,10 +1084,6 @@ function OtpVerify({ go }) {
           <div className="security-badge">
             <span className="security-badge-icon">💬</span>
             <span>OTP sent only to the number registered with <strong style={{color:"#0A1628"}}>Home Affairs (DHA)</strong> for this ID. We use WhatsApp so we can support you through your entire application journey.</span>
-          </div>
-          <div style={{background:"#F7F9FC",border:"1px solid #E8EDF4",borderRadius:14,padding:14,fontSize:12,color:"#8FA3BE",lineHeight:1.6,marginBottom:16}}>
-            <strong style={{color:"#0A1628",display:"block",marginBottom:3}}>💡 Demo hint</strong>
-            No SIM yet — use code: 123456
           </div>
         </div>
       </div>
