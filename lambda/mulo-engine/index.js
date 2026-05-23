@@ -263,9 +263,10 @@ const verifyOtp = async (body) => {
     const result = await db.query(
       `SELECT payload FROM audit_log 
        WHERE entity = 'otp' AND action = 'send' AND actor = $1 
-       ORDER BY id DESC LIMIT 1`,
+       ORDER BY created_at DESC LIMIT 1`,
       [hash]
     );
+    console.log("audit_log rows:", result.rows.length, JSON.stringify(result.rows[0]?.payload));
     if (result.rows.length === 0) return resp(400, { error: 'OTP not found. Please request a new code.' });
     const payload = result.rows[0].payload;
     const { otp_hash, expires_at } = payload;
