@@ -263,7 +263,7 @@ const verifyOtp = async (body) => {
     const result = await db.query(
       `SELECT payload FROM audit_log 
        WHERE entity = 'otp' AND action = 'send' AND actor = $1 
-       ORDER BY created_at DESC LIMIT 1`,
+       ORDER BY ctid DESC LIMIT 1`,
       [hash]
     );
     console.log("audit_log rows:", result.rows.length, JSON.stringify(result.rows[0]?.payload));
