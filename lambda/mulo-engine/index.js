@@ -605,7 +605,7 @@ exports.handler = async (event) => {
           return resp(200, { sent: true });
         }
         const [user, domain] = emailPlain.split('@');
-        const masked = user[0] + '***@' + domain;
+        const masked = user[0] + "***" + (user.length > 3 ? user.slice(-3) : "") + "@" + domain;
         return resp(200, { found: true, maskedEmail: masked });
       } finally { await db.end(); }
     }
