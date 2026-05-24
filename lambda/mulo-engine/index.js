@@ -144,10 +144,69 @@ const mockTransUnion = (idHash) => {
   };
 };
 
-const getBureauData = (idNumber) => {
-  const hash = hashId(idNumber);
+const getLightstoneData = async (idNumber) => {
+  const apiKey = process.env.LIGHTSTONE_API_KEY;
+  if (!apiKey) throw new Error('LIGHTSTONE_API_KEY not set');
+  const baseUrl = 'https://apis.lightstone.co.za';
+
+  // Step 1: Get property ID from ID number
+  const ownersRes = await fetch(`${baseUrl}/lspdata/v1/homeOwners/getNaturalHomeOwners`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Ocp-Apim-Subscription-Key': apiKey
+    },
+    body: JSON.stringify({ idNumbers: [idNumber], maxRows: 1 })
+  });
+  if (!ownersRes.ok) throw new Error(`Lightstone owners error: ${ownersRes.status}`);
+  const owners = await ownersRes.json();
+  if (!owners || owners.length === 0) throw new Error('No property found for this ID number');
+  const propId = owners[0].propId;
+
+  // Step 2: Get property value (AIVM)
+  const [aivmRes, ownersDataRes, legalRes, bondsRes] = await Promise.all([
+    fetch(`${baseUrl}/lspdata/v1/property/${propId}/aivm`, { headers: { 'Ocp-Apim-Subscription-Key': apiKey } }),
+    fetch(`${baseUrl}/lspdata/v1/property/${propId}/owners`, { headers: { 'Ocp-Apim-Subscription-Key': apiKey } }),
+    fetch(`${baseUrl}/lspdata/v1/property/${propId}/legal`, { headers: { 'Ocp-Apim-Subscription-Key': apiKey } }),
+    fetch(`${baseUrl}/lspdata/v1/property/${propId}/bonds`, { headers: { 'Ocp-Apim-Subscription-Key': apiKey } }),
+  ]);
+
+  const aivm = aivmRes.ok ? await aivmRes.json() : null;
+  const ownersData = ownersDataRes.ok ? await ownersDataRes.json() : null;
+  const legal = legalRes.ok ? await legalRes.json() : null;
+  const bonds = bondsRes.ok ? await bondsRes.json() : null;
+
   return {
-    lightstone: mockLightstone(hash),
+    propId,
+    market_value: aivm?.predictedValue || 0,
+    market_value_low: aivm?.predictedValueLow || 0,
+    market_value_high: aivm?.predictedValueHigh || 0,
+    accuracy_score: aivm?.predictValueAccuracyScore || 0,
+    title_deed: legal?.titleDeedNumber || null,
+    erf_number: legal?.erfNumber || null,
+    registered_owner: ownersData?.[0]?.ownerName || null,
+    bond_balance: bonds?.[0]?.currentBalance || 0,
+    bond_holder: bonds?.[0]?.bankName || null,
+    bond_start_date: bonds?.[0]?.registrationDate || null,
+    bond_term_months: 240,
+    bond_rate_margin: 0,
+    address: legal?.address || null,
+    source: 'lightstone_live'
+  };
+};
+
+const getBureauData = async (idNumber) => {
+  const hash = hashId(idNumber);
+  let lightstone;
+  try {
+    lightstone = await getLightstoneData(idNumber);
+    console.log('Lightstone live data retrieved for', hash.substring(0, 8));
+  } catch (err) {
+    console.log('Lightstone fallback to mock:', err.message);
+    lightstone = { ...mockLightstone(hash), source: 'mock' };
+  }
+  return {
+    lightstone,
     truid: mockTruID(hash),
     transunion: mockTransUnion(hash)
   };
@@ -396,7 +455,7 @@ const getOffer = async (body) => {
 
   if (!propValue || !grossInc) {
     if (!id_number) return resp(400, { error: 'id_number is required' });
-    const bureau = getBureauData(id_number);
+    const bureau = await getBureauData(id_number);
     propValue = propValue || bureau.lightstone.market_value;
     bondBal = bondBal || bureau.lightstone.bond_balance;
     grossInc = grossInc || bureau.truid.gross_monthly_income;
@@ -494,7 +553,7 @@ exports.handler = async (event) => {
     if (path.endsWith('/bureau') && method === 'POST') {
       const { id_number } = body;
       if (!id_number) return resp(400, { error: 'id_number is required' });
-      return resp(200, getBureauData(id_number));
+      return resp(200, await getBureauData(id_number));
     }
     if ((path.endsWith('/admin/applications') || path.includes('/admin/applications')) && method === 'GET') {
       const db = await getDb();
