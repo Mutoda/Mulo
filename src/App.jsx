@@ -2779,7 +2779,7 @@ function Disbursement({ go }) {
         <div className="disb-hero">
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,position:"relative",zIndex:1}}>
             <div className="mulo-logo" style={{color:"#fff"}}>Mu<span style={{color:"#00B8A9"}}>ḽ</span>o</div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Tranche Disbursement</div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{cursor:"pointer",color:"rgba(255,255,255,0.6)",fontSize:20}} onClick={() => go("dashboard")}>←</span><span style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Tranche Disbursement</span></div>
           </div>
 
           <div style={{display:"flex",alignItems:"center",gap:16,position:"relative",zIndex:1}}>
