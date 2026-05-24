@@ -821,11 +821,6 @@ setPhase("checking");
                   <input className="input-field" placeholder="e.g. Nkosi" value={lastName} onChange={e => setLastName(e.target.value)} autoCapitalize="words" />
                 </div>
               </div>
-              <div className="input-group" style={{marginBottom:0}}>
-                <label className="input-label">WhatsApp number</label>
-                <input className="input-field" type="tel" placeholder="e.g. 0821234567" value={cellphone} onChange={e => setCellphone(e.target.value.replace(/D/g,'').slice(0,10))} inputMode="numeric" />
-                <div style={{fontSize:11,color:"#8FA3BE",marginTop:4}}>We will send your OTP to this number via WhatsApp</div>
-              </div>
             </div>
           )}
 
@@ -879,7 +874,7 @@ setPhase("checking");
               onClick={handleCheck}>
               {phase === "checking" ? "Verifying…" : "Verify my ID →"}
             </button>
-          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; window._muloFirstName = firstName; window._muloLastName = lastName; window._muloCellphone = cellphone; go("phone-select"); }} disabled={!firstName.trim() || !lastName.trim() || cellphone.length < 10} style={{opacity: !firstName.trim() || !lastName.trim() || cellphone.length < 10 ? 0.4 : 1}}>
+          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; window._muloFirstName = firstName; window._muloLastName = lastName; go("phone-select"); }} disabled={!firstName.trim() || !lastName.trim()} style={{opacity: !firstName.trim() || !lastName.trim() ? 0.4 : 1}}>
               Continue to authentication →
             </button>
         }
