@@ -3099,7 +3099,7 @@ function Dashboard({ go }) {
             <div className="dash-greeting">Good morning 👋</div>
             <div className="dash-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</div>
           </div>
-          <div style={{width:40,height:40,borderRadius:14,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif",cursor:"pointer"}} onClick={() => setTab("profile")}>
+          <div style={{cursor:"pointer",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:20,color:"#fff",letterSpacing:-0.5}} onClick={() => setTab("home")}>Mu<span style={{color:"#00B8A9"}}>ḽ</span>o</div><div style={{display:"none"}}>
             {((window._muloFirstName||'T')[0]+(window._muloLastName||'N')[0]).toUpperCase()}
           </div>
         </div>
