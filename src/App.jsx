@@ -2710,7 +2710,7 @@ function Settlement({ go }) {
       <div className="bottom-cta">
         {!confirmed
           ? <button className="btn btn-primary" onClick={() => setConfirmed(true)}>Confirm settlement plan →</button>
-          : <button className="btn btn-primary" onClick={() => go("disbursement")}>Manage tranche disbursement →</button>
+          : <button className="btn btn-primary" onClick={() => go("dashboard")}>Go to my dashboard →</button>
         }
       </div>
     </div>
