@@ -1287,7 +1287,7 @@ function LivenessCheck({ go }) {
    SCREEN 3 — ACCOUNT CREATION
 ───────────────────────────────────────────── */
 function Signup({ go }) {
-  const [form, setForm] = useState({ email:"", phone:"", pass:"", confirm:"" });
+  const [form, setForm] = useState({ email:"", phone: window._muloCellphone || "", pass:"", confirm:"" });
   const s = (k,v) => setForm(f=>({...f,[k]:v}));
   const passwordsMatch = form.pass.length >= 8 && form.confirm === form.pass;
   const ready = form.email && form.phone && passwordsMatch;
