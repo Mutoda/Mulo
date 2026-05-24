@@ -3120,7 +3120,6 @@ function Dashboard({ go }) {
               <div className="repay-amount">R 6,940</div>
               <div className="repay-meta">Due 11 May 2026 · Month 1 of 60</div>
             </div>
-            <button className="btn btn-sm" style={{background:"rgba(255,255,255,0.12)",color:"#fff",border:"1px solid rgba(255,255,255,0.15)",fontFamily:"'IBM Plex Sans',sans-serif",padding:"9px 16px",borderRadius:12,fontSize:12,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>Set up debit</button>
           </div>
         </div>
       </div>
