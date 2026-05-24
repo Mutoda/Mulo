@@ -556,10 +556,59 @@ exports.handler = async (event) => {
       if (!id_number) return resp(400, { error: 'id_number is required' });
       return resp(200, await getBureauData(id_number));
     }
+    if (path.endsWith('/forgot-password') && method === 'POST') {
+      const { id_number, email_confirm } = body;
+      if (!id_number) return resp(400, { error: 'id_number is required' });
+      const db = await getDb();
+      try {
+        const result = await db.query(
+          'SELECT email_plain, password_hash FROM applicants WHERE id_number_hash = $1 AND password_hash IS NOT NULL',
+          [hashId(id_number)]
+        );
+        if (result.rows.length === 0) return resp(404, { error: 'No account found for this ID number' });
+        const emailPlain = result.rows[0].email_plain;
+        if (!emailPlain) return resp(404, { error: 'No email on file. Please contact support.' });
+        if (email_confirm) {
+          if (email_confirm.toLowerCase() !== emailPlain) return resp(400, { error: 'Email does not match our records' });
+          const crypto = require('crypto');
+          const resetCode = crypto.randomInt(100000, 999999).toString();
+          const resetHash = crypto.createHash('sha256').update(resetCode).digest('hex');
+          const expires = new Date(Date.now() + 15 * 60 * 1000);
+          await db.query('UPDATE applicants SET password_hash = $1 WHERE id_number_hash = $2',
+            [resetHash + ':reset:' + expires.toISOString(), hashId(id_number)]);
+          console.log('RESET CODE for', emailPlain, ':', resetCode);
+          return resp(200, { sent: true });
+        }
+        const [user, domain] = emailPlain.split('@');
+        const masked = user[0] + '***@' + domain;
+        return resp(200, { found: true, maskedEmail: masked });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/reset-password') && method === 'POST') {
+      const { id_number, reset_code, new_password } = body;
+      if (!id_number || !reset_code || !new_password) return resp(400, { error: 'Missing fields' });
+      const crypto = require('crypto');
+      const db = await getDb();
+      try {
+        const result = await db.query('SELECT password_hash FROM applicants WHERE id_number_hash = $1', [hashId(id_number)]);
+        if (!result.rows.length) return resp(404, { error: 'Account not found' });
+        const stored = result.rows[0].password_hash || '';
+        if (!stored.includes(':reset:')) return resp(400, { error: 'No reset in progress' });
+        const parts = stored.split(':reset:');
+        const storedHash = parts[0];
+        const expiresStr = parts[1];
+        if (new Date() > new Date(expiresStr)) return resp(400, { error: 'Reset code expired' });
+        if (crypto.createHash('sha256').update(reset_code).digest('hex') !== storedHash) return resp(400, { error: 'Invalid reset code' });
+        const newHash = crypto.createHash('sha256').update(new_password).digest('hex');
+        await db.query('UPDATE applicants SET password_hash = $1 WHERE id_number_hash = $2', [newHash, hashId(id_number)]);
+        return resp(200, { reset: true });
+      } finally { await db.end(); }
+    }
     if (path.endsWith('/admin/migrate') && method === 'POST') {
       const db = await getDb();
       try {
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS email TEXT');
+        await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS email_plain TEXT');
         await db.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS current_screen TEXT DEFAULT 'id-verify'");
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS password_hash TEXT');
         return resp(200, { migrated: true });
@@ -583,8 +632,8 @@ exports.handler = async (event) => {
       const db = await getDb();
       try {
         await db.query(
-          'UPDATE applicants SET email = $1, password_hash = $2 WHERE id_number_hash = $3',
-          [emailHash, passwordHash, hashId(id_number)]
+          'UPDATE applicants SET email = $1, password_hash = $2, email_plain = $3 WHERE id_number_hash = $4',
+          [emailHash, passwordHash, email.toLowerCase(), hashId(id_number)]
         );
         return resp(200, { saved: true });
       } finally { await db.end(); }

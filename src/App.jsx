@@ -3040,6 +3040,179 @@ function Disbursement({ go }) {
 /* ─────────────────────────────────────────────
    SCREEN 8 — DASHBOARD
 ───────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────
+   FORGOT PASSWORD SCREEN
+───────────────────────────────────────────── */
+function ForgotPassword({ go }) {
+  const [step, setStep] = useState("id"); // id | email | code | newpass | done
+  const [idNum, setIdNum] = useState("");
+  const [maskedEmail, setMaskedEmail] = useState("");
+  const [emailConfirm, setEmailConfirm] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [idNumber, setIdNumber] = useState("");
+
+  const handleIdSubmit = async () => {
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(API + '/forgot-password', {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ id_number: idNum })
+      });
+      const data = await res.json();
+      if (data.found) {
+        setMaskedEmail(data.maskedEmail);
+        setIdNumber(idNum);
+        setStep("email");
+      } else {
+        setError(data.error || "No account found for this ID number");
+      }
+    } catch(e) { setError("Connection error. Please try again."); }
+    setLoading(false);
+  };
+
+  const handleEmailConfirm = async () => {
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(API + '/forgot-password', {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ id_number: idNumber, email_confirm: emailConfirm })
+      });
+      const data = await res.json();
+      if (data.sent) {
+        setStep("code");
+      } else {
+        setError(data.error || "Email does not match our records");
+      }
+    } catch(e) { setError("Connection error. Please try again."); }
+    setLoading(false);
+  };
+
+  const handleResetPassword = async () => {
+    if (newPass !== confirmPass) { setError("Passwords do not match"); return; }
+    if (newPass.length < 8) { setError("Password must be at least 8 characters"); return; }
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(API + '/reset-password', {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ id_number: idNumber, reset_code: resetCode, new_password: newPass })
+      });
+      const data = await res.json();
+      if (data.reset) {
+        setStep("done");
+      } else {
+        setError(data.error || "Invalid reset code");
+      }
+    } catch(e) { setError("Connection error. Please try again."); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="screen fade-in" style={{background:"#fff"}}>
+      <div className="screen-header" style={{background:"#fff",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
+        <div className="back-btn" onClick={() => go("login")}>←</div>
+        <div className="screen-header-text">
+          <div className="screen-header-title">Reset password</div>
+          <div className="screen-header-sub">{step==="id"?"Step 1 of 3":step==="email"?"Step 2 of 3":step==="code"||step==="newpass"?"Step 3 of 3":"Complete"}</div>
+        </div>
+      </div>
+
+      <div className="screen-scroll">
+        <div className="form-pad" style={{paddingTop:32}}>
+          <div style={{textAlign:"center",marginBottom:28}}>
+            <div style={{fontSize:32,marginBottom:8}}>{step==="done"?"✅":"🔐"}</div>
+            <div style={{fontFamily:"'Sora',sans-serif",fontSize:18,fontWeight:700,color:"#0A1628",marginBottom:6}}>
+              {step==="id"?"Verify your identity":step==="email"?"Confirm your email":step==="code"?"Enter reset code":step==="newpass"?"Set new password":"Password reset!"}
+            </div>
+            <div style={{fontSize:13,color:"#8FA3BE",lineHeight:1.6}}>
+              {step==="id"?"Enter your SA ID number to find your account":
+               step==="email"?"We found your account. Confirm your email address:":
+               step==="code"?"Enter the 6-digit code sent to " + maskedEmail:
+               step==="newpass"?"Choose a new secure password":
+               "Your password has been reset successfully."}
+            </div>
+          </div>
+
+          {step==="id" && <>
+            <div className="input-group">
+              <label className="input-label">SA ID number</label>
+              <input className="input-field" type="tel" inputMode="numeric" maxLength={13}
+                placeholder="13-digit ID number" value={idNum}
+                onChange={e => { setIdNum(e.target.value.replace(/D/g,'')); setError(""); }} />
+            </div>
+          </>}
+
+          {step==="email" && <>
+            <div style={{background:"#F7F9FC",borderRadius:14,padding:14,marginBottom:20,textAlign:"center"}}>
+              <div style={{fontSize:12,color:"#8FA3BE",marginBottom:4}}>Email on file</div>
+              <div style={{fontSize:16,fontWeight:700,color:"#0A1628"}}>{maskedEmail}</div>
+            </div>
+            <div className="input-group">
+              <label className="input-label">Confirm your email address</label>
+              <input className="input-field" type="email" placeholder="Enter your full email"
+                value={emailConfirm} onChange={e => { setEmailConfirm(e.target.value); setError(""); }} />
+            </div>
+          </>}
+
+          {step==="code" && <>
+            <div className="input-group">
+              <label className="input-label">6-digit reset code</label>
+              <input className="input-field" type="tel" inputMode="numeric" maxLength={6}
+                placeholder="Enter code from email" value={resetCode}
+                onChange={e => { setResetCode(e.target.value.replace(/D/g,'')); setError(""); }} />
+            </div>
+            <button className="btn btn-outline" style={{width:"100%",marginTop:8,fontSize:13}}
+              onClick={() => setStep("newpass")} disabled={resetCode.length !== 6}>
+              Verify code →
+            </button>
+          </>}
+
+          {step==="newpass" && <>
+            <div className="input-group">
+              <label className="input-label">New password</label>
+              <input className="input-field" type="password" placeholder="Min. 8 characters"
+                value={newPass} onChange={e => { setNewPass(e.target.value); setError(""); }} />
+            </div>
+            <div className="input-group">
+              <label className="input-label">Confirm new password</label>
+              <input className="input-field" type="password" placeholder="Re-enter password"
+                value={confirmPass} onChange={e => { setConfirmPass(e.target.value); setError(""); }} />
+            </div>
+            {newPass && confirmPass && newPass===confirmPass && <div style={{fontSize:12,color:"#12C26B",marginBottom:8}}>✓ Passwords match</div>}
+          </>}
+
+          {step==="done" && <div style={{textAlign:"center",marginTop:16}}>
+            <button className="btn btn-primary" onClick={() => go("login")}>Sign in with new password →</button>
+          </div>}
+
+          {error && <div style={{fontSize:13,color:"#FF7043",fontWeight:600,marginTop:8,textAlign:"center"}}>⚠️ {error}</div>}
+        </div>
+      </div>
+
+      {step !== "done" && <div className="bottom-cta">
+        {step==="id" && <button className="btn btn-primary"
+          style={{opacity: idNum.length===13 ? 1 : 0.4}}
+          disabled={idNum.length !== 13 || loading}
+          onClick={handleIdSubmit}>{loading ? "Checking…" : "Find my account →"}</button>}
+        {step==="email" && <button className="btn btn-primary"
+          style={{opacity: emailConfirm ? 1 : 0.4}}
+          disabled={!emailConfirm || loading}
+          onClick={handleEmailConfirm}>{loading ? "Sending…" : "Send reset code →"}</button>}
+        {step==="newpass" && <button className="btn btn-primary"
+          style={{opacity: newPass.length>=8 && newPass===confirmPass ? 1 : 0.4}}
+          disabled={newPass.length<8 || newPass!==confirmPass || loading}
+          onClick={handleResetPassword}>{loading ? "Resetting…" : "Reset password →"}</button>}
+      </div>}
+    </div>
+  );
+}
 function Login({ go }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -3103,7 +3276,7 @@ function Login({ go }) {
             {phase==="error" && <div className="input-hint err">✕ Incorrect password. Please try again.</div>}
           </div>
           <div style={{textAlign:"right",marginTop:-8,marginBottom:20}}>
-            <span style={{fontSize:12,color:"#00B8A9",cursor:"pointer"}}>Forgot password?</span>
+            <span style={{fontSize:12,color:"#00B8A9",cursor:"pointer"}} onClick={() => go("forgot-password")}>Forgot password?</span>
           </div>
           <button className="btn btn-primary" onClick={handleSignIn} disabled={!email || !password || phase==="checking"} style={{opacity:!email||!password?0.4:1}}>
             {phase==="checking" ? "Signing in…" : "Sign in →"}
@@ -3300,7 +3473,7 @@ function Dashboard({ go }) {
 /* ─────────────────────────────────────────────
    ROOT
 ───────────────────────────────────────────── */
-const SCREENS = { landing:Landing, login:Login, "id-verify":IdVerify, "phone-select":PhoneSelect, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
+const SCREENS = { landing:Landing, login:Login, "id-verify":IdVerify, "forgot-password":ForgotPassword, "phone-select":PhoneSelect, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
 
 export default function App() {
   const [screen, setScreen] = useState("landing");
