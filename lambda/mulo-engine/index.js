@@ -592,16 +592,65 @@ exports.handler = async (event) => {
           await db.query('UPDATE applicants SET password_hash = $1 WHERE id_number_hash = $2',
             [resetHash + ':reset:' + expires.toISOString(), hashId(id_number)]);
           await sendEmail(emailPlain, 'Your Muḽo password reset code', `
-    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
-      <h2 style="color:#0A1628">Reset your Muḽo password</h2>
-      <p style="color:#8FA3BE">Use the code below to reset your password. Valid for 15 minutes.</p>
-      <div style="background:#F7F9FC;border-radius:12px;padding:24px;text-align:center;margin:24px 0">
-        <div style="font-size:36px;font-weight:800;letter-spacing:8px;color:#00B8A9">${resetCode}</div>
-      </div>
-      <p style="color:#8FA3BE;font-size:12px">Never share this code. Muḽo will never ask for it.</p>
-      <p style="color:#8FA3BE;font-size:12px">If you didn't request this, please ignore this email.</p>
-    </div>
-  `);
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F0F4F8;font-family:'Segoe UI',Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F0F4F8;padding:40px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="max-width:480px;width:100%">
+        
+        <!-- Header -->
+        <tr><td style="background:linear-gradient(135deg,#0A1628,#1B3A5E);border-radius:18px 18px 0 0;padding:32px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px">Mu<span style="color:#00B8A9">ḽ</span>o</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;text-transform:uppercase;letter-spacing:2px">Financial Technologies</div>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="background:#fff;padding:40px 32px">
+          <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0A1628">Reset your password</h1>
+          <p style="margin:0 0 24px;font-size:14px;color:#8FA3BE;line-height:1.6">
+            We received a request to reset your Muḽo account password. Use the code below — it expires in <strong style="color:#0A1628">15 minutes</strong>.
+          </p>
+
+          <!-- Code box -->
+          <div style="background:#F7F9FC;border:1px solid #E2E9F0;border-radius:16px;padding:28px;text-align:center;margin:0 0 24px">
+            <div style="font-size:11px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Your reset code</div>
+            <div style="font-size:40px;font-weight:800;letter-spacing:10px;color:#00B8A9;font-family:monospace">${resetCode}</div>
+          </div>
+
+          <!-- Security notice -->
+          <div style="background:#FFF8F0;border:1px solid #FFE0B2;border-radius:12px;padding:16px;margin-bottom:24px">
+            <div style="font-size:12px;color:#E65100;line-height:1.6">
+              🔒 <strong>Security reminder:</strong> Muḽo will never call or message you asking for this code. Never share it with anyone.
+            </div>
+          </div>
+
+          <p style="font-size:12px;color:#C5D0DC;line-height:1.6;margin:0">
+            If you didn't request a password reset, you can safely ignore this email. Your account remains secure.
+          </p>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="background:#F7F9FC;border-radius:0 0 18px 18px;padding:24px 32px;border-top:1px solid #E2E9F0">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:11px;color:#C5D0DC;line-height:1.8">
+                <a href="https://mulo.co.za" style="color:#00B8A9;text-decoration:none">mulo.co.za</a> · <a href="mailto:support@mulo.co.za" style="color:#00B8A9;text-decoration:none">support@mulo.co.za</a>
+              </td>
+              <td align="right" style="font-size:10px;color:#E2E9F0">
+                NCR Registered<br>POPIA Compliant
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+`);
           return resp(200, { sent: true });
         }
         const [user, domain] = emailPlain.split('@');
