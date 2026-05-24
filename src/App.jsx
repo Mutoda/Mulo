@@ -3231,23 +3231,6 @@ function Dashboard({ go }) {
             ))}
           </div>
 
-          {/* Quick actions */}
-          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:14}}>Quick actions</div>
-            {[
-              {icon:"📄", label:"View loan agreement", action:()=>go("loan-sign")},
-              {icon:"🏠", label:"View property details", action:()=>go("bond-confirm")},
-              {icon:"💸", label:"Manage tranches", action:()=>go("disbursement")},
-              {icon:"📞", label:"Contact Muḽo support", action:()=>{}},
-            ].map(({icon,label,action})=>(
-              <div key={label} onClick={action} style={{display:"flex",alignItems:"center",gap:12,paddingBottom:14,marginBottom:14,borderBottom:"1px solid #F0F4F8",cursor:"pointer"}}>
-                <span style={{fontSize:18}}>{icon}</span>
-                <span style={{fontSize:13,fontWeight:500,color:"#0A1628",flex:1}}>{label}</span>
-                <span style={{color:"#C5D0DC",fontSize:16}}>›</span>
-              </div>
-            ))}
-          </div>
-
           {/* Sign out */}
           <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
             <button className="btn btn-outline" style={{width:"100%",color:"#FF7043",borderColor:"#FF7043"}} onClick={() => { window._muloIdNumber=null; window._muloFirstName=null; window._muloLastName=null; window._muloCellphone=null; go("landing"); }}>
