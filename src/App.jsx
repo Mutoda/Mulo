@@ -1043,7 +1043,7 @@ function OtpVerify({ go }) {
       if(data.verified) {
         window._muloVerifiedToken = data.verifiedToken;
         setPhase("done");
-        setTimeout(() => go("liveness"), 900);
+        setTimeout(() => go("signup"), 900);
       } else {
         setAttempts(a => a+1);
         setPhase("error");
@@ -1281,7 +1281,7 @@ function LivenessCheck({ go }) {
       <div className="bottom-cta">
         {phase==="idle"&&<button className="btn btn-primary" onClick={startScan}>Start face verification →</button>}
         {phase==="scanning"&&<button className="btn btn-primary" style={{opacity:.5}} disabled><span style={{display:"inline-block",animation:"spin 1s linear infinite",marginRight:6}}>⟳</span>Scanning…</button>}
-        {phase==="verified"&&<button className="btn btn-primary" onClick={()=>go("signup")}>Continue to create account →</button>}
+        {phase==="verified"&&<button className="btn btn-primary" onClick={()=>go("loan-sign")}>Continue to sign agreement →</button>}
       </div>
     </div>
   );
@@ -1299,7 +1299,7 @@ function Signup({ go }) {
   return (
     <div className="screen fade-in">
       <div className="screen-header">
-        <div className="back-btn" onClick={() => go("liveness")}>←</div>
+        <div className="back-btn" onClick={() => go("otp")}>←</div>
         <div className="screen-header-text">
           <div className="screen-header-title">Create your account</div>
           <div className="screen-header-sub">Step 4 of 6</div>
@@ -2236,7 +2236,7 @@ if (loading) return (
         </div>
       </div>
       <div className="bottom-cta">
-        <button className="btn btn-primary" onClick={() => go("doc-upload")}>Accept offer & upload documents →</button>
+        <button className="btn btn-primary" onClick={() => go("doc-upload")}>Upload documents →</button>
         <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>No obligation · Rate locked for 48 hours</div>
       </div>
     </div>
@@ -2270,7 +2270,7 @@ const uploadFile = async (file, docType, setter) => {
 
   const submit = () => {
     setSubmitting(true);
-    setTimeout(() => go("loan-sign"), 1200);
+    setTimeout(() => go("liveness"), 1200);
   };
 
   return (
