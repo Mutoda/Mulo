@@ -255,14 +255,15 @@ const verifyId = async (body) => {
   const db = await getDb();
   try {
     const hash = hashId(id_number);
-    const existing = await db.query('SELECT id FROM applicants WHERE id_number_hash = $1', [hash]);
+    const existing = await db.query('SELECT id, email, password_hash, current_screen FROM applicants WHERE id_number_hash = $1', [hash]);
     if (existing.rows.length === 0) {
       await db.query(
         'INSERT INTO applicants (id_number_hash, dha_verified, date_of_birth) VALUES ($1, false, $2)',
         [hash, validation.dob_raw]
       );
     }
-    return resp(200, { valid: true, returning: existing.rows.length > 0, dob: validation.dob, age: validation.age, gender: validation.gender, citizen: validation.citizen });
+    const hasAccount = existing.rows.length > 0 && !!existing.rows[0].password_hash;
+    return resp(200, { valid: true, returning: existing.rows.length > 0, hasAccount, dob: validation.dob, age: validation.age, gender: validation.gender, citizen: validation.citizen });
   } finally {
     await db.end();
   }

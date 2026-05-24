@@ -710,6 +710,7 @@ function IdVerify({ go }) {
   const [lastName, setLastName]   = useState("");
   const [cellphone, setCellphone] = useState("");
   const [phase, setPhase]   = useState("idle"); // idle | validating | invalid | checking | done
+  const [hasAccount, setHasAccount] = useState(false);
   const [validation, setValidation] = useState(null);
   const [checks, setChecks] = useState([
     { label:"Valid SA ID format",    sub:"13 digits · Luhn checksum · Date of birth", status:"wait" },
@@ -749,6 +750,7 @@ setPhase("checking");
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Verification failed");
+      if (data.hasAccount) setHasAccount(true);
       setChecks(c => c.map((x,i) => i===0 ? {...x,status:"ok",sub:`DOB: ${result.dob} · ${result.gender} · ${result.citizen}`} : x));
       setTimeout(() => {
         setChecks(c => c.map((x,i) => i===1 ? {...x,status:"loading"} : x));
@@ -887,7 +889,15 @@ setPhase("checking");
       </div>
 
       <div className="bottom-cta">
-        {phase !== "done"
+        {phase === "done" && hasAccount
+          ? <div>
+              <div style={{background:"rgba(0,184,169,0.06)",border:"1px solid rgba(0,184,169,0.2)",borderRadius:14,padding:"14px 16px",marginBottom:12,textAlign:"center"}}>
+                <div style={{fontSize:13,fontWeight:600,color:"#0A1628",marginBottom:4}}>Welcome back, {firstName || "there"} 👋</div>
+                <div style={{fontSize:12,color:"#8FA3BE"}}>You have an existing Muḽo application.</div>
+              </div>
+              <button className="btn btn-primary" onClick={() => go("login")}>Sign in to continue →</button>
+            </div>
+          : phase !== "done"
           ? <button className="btn btn-primary"
               disabled={idNum.length < 13 || phase === "invalid" || phase === "checking"}
               style={{opacity: idNum.length < 13 || phase === "invalid" ? 0.4 : 1}}
