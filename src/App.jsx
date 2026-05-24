@@ -3095,13 +3095,14 @@ function Dashboard({ go }) {
     <div className="screen fade-in" style={{background:"#F0F4F8"}}>
       <div className="dash-header">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div className="dash-greeting">Good morning 👋</div>
-            <div className="dash-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</div>
-          </div>
-          <div style={{cursor:"pointer",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:20,color:"#fff",letterSpacing:-0.5}} onClick={() => setTab("home")}>Mu<span style={{color:"#00B8A9"}}>ḽ</span>o</div><div style={{display:"none"}}>
+          <div style={{cursor:"pointer",fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:22,color:"#fff",letterSpacing:-0.5}} onClick={() => setTab("home")}>Mu<span style={{color:"#00B8A9"}}>ḽ</span>o</div>
+          <div style={{width:40,height:40,borderRadius:14,background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:700,color:"#fff",fontFamily:"'Sora',sans-serif",cursor:"pointer"}} onClick={() => setTab("profile")}>
             {((window._muloFirstName||'T')[0]+(window._muloLastName||'N')[0]).toUpperCase()}
           </div>
+        </div>
+        <div style={{marginTop:12}}>
+          <div className="dash-greeting">Good morning 👋</div>
+          <div className="dash-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')}</div>
         </div>
         <div className="status-card">
           <div className="status-top">
