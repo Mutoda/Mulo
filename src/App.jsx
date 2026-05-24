@@ -3126,6 +3126,7 @@ function Dashboard({ go }) {
       </div>
 
       <div className="dash-body">
+        {tab==="home" && <div>
         <div style={{height:12}}/>
         <div className="insight-row">
           <div className="insight-card">
@@ -3178,6 +3179,7 @@ function Dashboard({ go }) {
           ))}
         </div>
         <div style={{height:8}}/>
+        </div>}
         {tab==="profile" && <div>
           {/* Profile header */}
           <div style={{background:"#fff",borderRadius:18,padding:20,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12,display:"flex",alignItems:"center",gap:14}}>
