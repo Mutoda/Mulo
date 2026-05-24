@@ -3168,7 +3168,7 @@ function ForgotPassword({ go }) {
                 placeholder="Enter code from email" value={resetCode}
                 onChange={e => { setResetCode(e.target.value.replace(/D/g,'')); setError(""); }} />
             </div>
-            <button className="btn btn-outline" style={{width:"100%",marginTop:8,fontSize:13}}
+            <button className="btn btn-primary" style={{width:"100%",opacity: resetCode.length===6 ? 1 : 0.4}}
               onClick={() => setStep("newpass")} disabled={resetCode.length !== 6}>
               Verify code →
             </button>

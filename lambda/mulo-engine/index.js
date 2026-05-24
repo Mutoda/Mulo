@@ -20,6 +20,21 @@ const resp = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
+
+const sendEmail = async (to, subject, html) => {
+  const { SESv2Client, SendEmailCommand } = await import('@aws-sdk/client-sesv2');
+  const ses = new SESv2Client({ region: 'af-south-1' });
+  await ses.send(new SendEmailCommand({
+    FromEmailAddress: 'noreply@mulo.co.za',
+    Destination: { ToAddresses: [to] },
+    Content: {
+      Simple: {
+        Subject: { Data: subject },
+        Body: { Html: { Data: html } }
+      }
+    }
+  }));
+};
 const getDb = async () => {
   const client = new Client({
     host: process.env.DB_HOST,
@@ -576,7 +591,17 @@ exports.handler = async (event) => {
           const expires = new Date(Date.now() + 15 * 60 * 1000);
           await db.query('UPDATE applicants SET password_hash = $1 WHERE id_number_hash = $2',
             [resetHash + ':reset:' + expires.toISOString(), hashId(id_number)]);
-          console.log('RESET CODE for', emailPlain, ':', resetCode);
+          await sendEmail(emailPlain, 'Your Muḽo password reset code', `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+      <h2 style="color:#0A1628">Reset your Muḽo password</h2>
+      <p style="color:#8FA3BE">Use the code below to reset your password. Valid for 15 minutes.</p>
+      <div style="background:#F7F9FC;border-radius:12px;padding:24px;text-align:center;margin:24px 0">
+        <div style="font-size:36px;font-weight:800;letter-spacing:8px;color:#00B8A9">${resetCode}</div>
+      </div>
+      <p style="color:#8FA3BE;font-size:12px">Never share this code. Muḽo will never ask for it.</p>
+      <p style="color:#8FA3BE;font-size:12px">If you didn't request this, please ignore this email.</p>
+    </div>
+  `);
           return resp(200, { sent: true });
         }
         const [user, domain] = emailPlain.split('@');
@@ -608,6 +633,7 @@ exports.handler = async (event) => {
       const db = await getDb();
       try {
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS email TEXT');
+        if (body.clear) { await db.query('UPDATE applicants SET email = NULL, email_plain = NULL, password_hash = NULL, current_screen = NULL WHERE id_number_hash = $1', [hashId('8301012322099')]); return resp(200, { cleared: true }); }
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS email_plain TEXT');
         await db.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS current_screen TEXT DEFAULT 'id-verify'");
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS password_hash TEXT');
