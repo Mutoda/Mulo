@@ -2,6 +2,26 @@ import React, { useState, useEffect, useRef } from "react";
 
 const API = "https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod";
 
+const BANK_LOGO = (bank, size=24) => {
+  const logos = {
+    "Absa":           "https://www.absa.co.za/favicon.ico",
+    "Absa Home Loans":"https://www.absa.co.za/favicon.ico",
+    "Nedbank":        "https://www.nedbank.co.za/favicon.ico",
+    "Nedbank Home Loans": "https://www.nedbank.co.za/favicon.ico",
+    "FNB":            "https://www.fnb.co.za/favicon.ico",
+    "FNB Home Loans": "https://www.fnb.co.za/favicon.ico",
+    "Standard Bank":  "https://www.standardbank.co.za/favicon.ico",
+    "Capitec":        "https://www.capitecbank.co.za/favicon.ico",
+    "African Bank":   "https://www.africanbank.co.za/favicon.ico",
+    "Wesbank":        "https://www.wesbank.co.za/favicon.ico",
+    "SA Home Loans":  "https://www.sahomeloans.com/favicon.ico",
+  };
+  const url = Object.entries(logos).find(([k]) => bank?.includes(k))?.[1];
+  if (!url) return <span style={{fontSize:size*0.75}}>🏦</span>;
+  return <img src={url} width={size} height={size} style={{borderRadius:4,objectFit:"contain"}} onError={e=>e.target.style.display='none'} />;
+};
+
+
 
 /* ─────────────────────────────────────────────
    DESIGN TOKENS
@@ -1593,7 +1613,7 @@ function BondConfirm({ go }) {
           {/* Bond details card */}
           <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 14px rgba(0,0,0,0.06)",marginBottom:12}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-              <div style={{width:36,height:36,borderRadius:12,background:"#EBF0FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>🏦</div>
+              <div style={{width:36,height:36,borderRadius:12,background:"#EBF0FF",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{BANK_LOGO(BOND.bondholder, 28)}</div>
               <div>
                 <div style={{fontSize:14,fontWeight:700,color:"#0A1628"}}>{BOND.bondholder}</div>
                 <div style={{fontSize:11,color:"#8FA3BE"}}>Account {BOND.accountNo}</div>
@@ -1703,12 +1723,12 @@ function BankAccountConfirm({ go }) {
   const [confirmed, setConfirmed] = useState(false);
 
   const ACCOUNT = {
-    bank:        "Nedbank",
-    logo:        "🏦",
+    bank:        "Absa",
+    logo:        BANK.bank,
     type:        "Cheque Account",
     holder: (window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi'),
     number:      "••• ••• 2847",
-    branch:      "198765",
+    branch:      "632005",
     source:      "TruID — verified 11 Apr 2026",
     nameMatch:   true,
   };
@@ -1746,7 +1766,7 @@ function BankAccountConfirm({ go }) {
             <div style={{position:"absolute",right:-10,bottom:-30,width:140,height:140,borderRadius:"50%",background:"rgba(26,115,232,0.08)"}}/>
             <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:1,marginBottom:16,position:"relative",zIndex:1}}>Disbursement Account · TruID Verified</div>
             <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20,position:"relative",zIndex:1}}>
-              <div style={{width:48,height:48,borderRadius:14,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{ACCOUNT.logo}</div>
+              <div style={{width:48,height:48,borderRadius:14,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{BANK_LOGO(ACCOUNT.bank, 32)}</div>
               <div>
                 <div style={{fontFamily:"'Sora',sans-serif",fontSize:18,fontWeight:800,color:"#fff"}}>{ACCOUNT.bank}</div>
                 <div style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginTop:2}}>{ACCOUNT.type}</div>
@@ -1805,7 +1825,7 @@ function BankAccountConfirm({ go }) {
             </button>
         }
         <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>
-          Disbursement account: Nedbank ••• ••• 2847
+          Disbursement account: Absa ••• ••• 2847
         </div>
       </div>
     </div>
@@ -2414,7 +2434,7 @@ function LoanSign({ go }) {
               </div>
               <div className="esign-clause">
                 <strong>4. Repayment</strong><br/>
-                The Borrower authorises a monthly debit order of <strong>R7,543</strong> against account held at <strong>Nedbank</strong> (acc. ending 2847) on the 1st of each month, commencing 11 May 2026.
+                The Borrower authorises a monthly debit order of <strong>R7,543</strong> against account held at <strong>Absa</strong> (acc. ending 2847) on the 1st of each month, commencing 11 May 2026.
               </div>
               <div className="esign-clause">
                 <strong>5. NCA disclosure</strong><br/>
@@ -2862,7 +2882,7 @@ function Disbursement({ go }) {
                         <div className="tranche-step-sub">
                           {st === "locked"
                             ? "Waiting for previous tranche to be confirmed"
-                            : `${fmt(t.amount)} sent to Nedbank cheque acc. ••2847`}
+                            : `${fmt(t.amount)} sent to Absa cheque acc. ••2847`}
                         </div>
                         {st !== "locked" && <div className="tranche-step-date">✓ {i === 0 ? "Apr 15" : i === 1 ? "Apr 17" : "Pending"} · Ref MUL{(2026048291 + i).toString()}</div>}
                       </div>
@@ -3158,14 +3178,24 @@ function Dashboard({ go }) {
           ))}
         </div>
         <div style={{height:8}}/>
+        {tab==="profile" && <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
+          <div style={{fontSize:14,fontWeight:700,color:"#0A1628",marginBottom:16}}>Account</div>
+          <button className="btn btn-outline" style={{width:"100%",color:"#FF7043",borderColor:"#FF7043"}} onClick={() => { window._muloIdNumber=null; window._muloFirstName=null; window._muloLastName=null; go("landing"); }}>Sign out</button>
+        </div>}
       </div>
       <div className="mini-nav">
-        {[["🏠","Home"],["💸","Tranches"],["💬","Support"],["👤","Profile"]].map(([icon,label],i) => (
-          <div key={label} className={`nav-tab ${tab===["home","tranches","support","profile"][i]?"active":""}`} onClick={() => {
-            if(i===1) go("disbursement");
-            else setTab(["home","tranches","support","profile"][i]);
-          }}>
-            <div className="nav-tab-icon">{icon}</div>
+        {[
+          {label:"Home",     svg:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10", key:"home",     action:()=>setTab("home")},
+          {label:"Tranches", svg:"M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",    key:"tranches",  action:()=>go("disbursement")},
+          {label:"Support",  svg:"M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z", key:"support",   action:()=>setTab("support")},
+          {label:"Profile",  svg:"M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z",  key:"profile",   action:()=>setTab("profile")},
+        ].map(({label,svg,key,action}) => (
+          <div key={label} className={`nav-tab ${tab===key?"active":""}`} onClick={action}>
+            <div className="nav-tab-icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={tab===key?"#00B8A9":"#C5D0DC"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={svg}/>
+              </svg>
+            </div>
             <div className="nav-tab-label">{label}</div>
           </div>
         ))}
