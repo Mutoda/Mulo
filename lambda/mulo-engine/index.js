@@ -555,6 +555,73 @@ exports.handler = async (event) => {
       if (!id_number) return resp(400, { error: 'id_number is required' });
       return resp(200, await getBureauData(id_number));
     }
+    if (path.endsWith('/admin/migrate') && method === 'POST') {
+      const db = await getDb();
+      try {
+        await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS email TEXT');
+        await db.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS current_screen TEXT DEFAULT 'id-verify'");
+        await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS password_hash TEXT');
+        return resp(200, { migrated: true });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/save-screen') && method === 'POST') {
+      const { id_number, screen } = body;
+      if (!id_number || !screen) return resp(400, { error: 'id_number and screen required' });
+      const db = await getDb();
+      try {
+        await db.query('UPDATE applicants SET current_screen = $1 WHERE id_number_hash = $2', [screen, hashId(id_number)]);
+        return resp(200, { saved: true });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/save-account') && method === 'POST') {
+      const { id_number, email, password } = body;
+      if (!id_number || !email || !password) return resp(400, { error: 'id_number, email and password required' });
+      const crypto = require('crypto');
+      const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+      const emailHash = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
+      const db = await getDb();
+      try {
+        await db.query(
+          'UPDATE applicants SET email = $1, password_hash = $2 WHERE id_number_hash = $3',
+          [emailHash, passwordHash, hashId(id_number)]
+        );
+        return resp(200, { saved: true });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/login') && method === 'POST') {
+      const { email, password } = body;
+      if (!email || !password) return resp(400, { error: 'email and password required' });
+      const crypto = require('crypto');
+      const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+      const emailHash = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
+      const db = await getDb();
+      try {
+        const result = await db.query(
+          `SELECT a.id_number_hash, a.dha_verified, a.cellphone, a.current_screen,
+                  ap.status, ap.mulo_score, ap.loan_amount, ap.interest_rate, ap.monthly_repayment, ap.monthly_saving
+           FROM applicants a
+           LEFT JOIN applications ap ON ap.applicant_id = a.id
+           WHERE a.email = $1 AND a.password_hash = $2
+           ORDER BY a.created_at DESC LIMIT 1`,
+          [emailHash, passwordHash]
+        );
+        if (result.rows.length === 0) return resp(401, { error: 'Invalid email or password' });
+        const applicant = result.rows[0];
+        return resp(200, {
+          authenticated: true,
+          currentScreen: applicant.current_screen || 'consent',
+          cellphone: applicant.cellphone,
+          dhaVerified: applicant.dha_verified,
+          offer: applicant.loan_amount ? {
+            loan_amount: applicant.loan_amount,
+            interest_rate: applicant.interest_rate,
+            monthly_repayment: applicant.monthly_repayment,
+            monthly_saving: applicant.monthly_saving,
+            mulo_score: applicant.mulo_score,
+          } : null
+        });
+      } finally { await db.end(); }
+    }
     if ((path.endsWith('/admin/applications') || path.includes('/admin/applications')) && method === 'GET') {
       const db = await getDb();
       try {

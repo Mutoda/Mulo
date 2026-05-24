@@ -1367,7 +1367,19 @@ function Signup({ go }) {
         </div>
       </div>
       <div className="bottom-cta">
-        <button className="btn btn-primary" style={{opacity:ready?1:.45}} disabled={!ready} onClick={() => go("consent")}>
+        <button className="btn btn-primary" style={{opacity:ready?1:.45}} disabled={!ready} onClick={async () => {
+          await fetch(`${API}/save-account`, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ id_number: window._muloIdNumber, email: form.email, password: form.pass })
+          });
+          await fetch(`${API}/save-screen`, {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ id_number: window._muloIdNumber, screen: "consent" })
+          });
+          go("consent");
+        }}>
           Create account →
         </button>
       </div>
@@ -3024,19 +3036,33 @@ function Login({ go }) {
   const [phase, setPhase] = useState("idle");
   const [showPass, setShowPass] = useState(false);
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!email || !password) return;
     setPhase("checking");
-    setTimeout(() => {
-      if (password.length >= 6) {
+    try {
+      const res = await fetch(API + '/login', {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.authenticated) {
         const parts = email.split("@")[0].split(".");
         window._muloFirstName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : "User";
         window._muloLastName = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : "";
-        go("dashboard");
+        window._muloCellphone = data.cellphone;
+        if (data.offer) {
+          window._muloLoanAmount = data.offer.loan_amount;
+          window._muloRateAnnual = data.offer.interest_rate;
+          window._muloTermMonths = data.offer.term_months || 60;
+        }
+        go(data.currentScreen || "dashboard");
       } else {
         setPhase("error");
       }
-    }, 1200);
+    } catch(err) {
+      setPhase("error");
+    }
   };
 
   return (
