@@ -3178,9 +3178,81 @@ function Dashboard({ go }) {
           ))}
         </div>
         <div style={{height:8}}/>
-        {tab==="profile" && <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
-          <div style={{fontSize:14,fontWeight:700,color:"#0A1628",marginBottom:16}}>Account</div>
-          <button className="btn btn-outline" style={{width:"100%",color:"#FF7043",borderColor:"#FF7043"}} onClick={() => { window._muloIdNumber=null; window._muloFirstName=null; window._muloLastName=null; go("landing"); }}>Sign out</button>
+        {tab==="profile" && <div>
+          {/* Profile header */}
+          <div style={{background:"#fff",borderRadius:18,padding:20,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12,display:"flex",alignItems:"center",gap:14}}>
+            <div style={{width:56,height:56,borderRadius:18,background:"linear-gradient(135deg,#00B8A9,#1A73E8)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:800,color:"#fff",fontFamily:"'Sora',sans-serif",flexShrink:0}}>
+              {((window._muloFirstName||'T')[0]+(window._muloLastName||'N')[0]).toUpperCase()}
+            </div>
+            <div>
+              <div style={{fontSize:16,fontWeight:700,color:"#0A1628"}}>{window._muloFirstName||'Thabo'} {window._muloLastName||'Nkosi'}</div>
+              <div style={{fontSize:12,color:"#8FA3BE",marginTop:2}}>Verified homeowner · Muḽo client</div>
+              <div style={{display:"flex",alignItems:"center",gap:4,marginTop:4}}>
+                <span style={{width:6,height:6,borderRadius:"50%",background:"#12C26B",display:"inline-block"}}/>
+                <span style={{fontSize:11,color:"#12C26B",fontWeight:600}}>Active loan</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Personal details */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:14}}>Personal details</div>
+            {[
+              {label:"Full name", value:(window._muloFirstName||'Thabo')+" "+(window._muloLastName||'Nkosi')},
+              {label:"SA ID number", value:"83010123••••••"},
+              {label:"Mobile", value:window._muloCellphone ? "+27 "+window._muloCellphone.slice(1,3)+"* *** "+window._muloCellphone.slice(-3) : "+27 82* *** 222"},
+              {label:"Email", value:"••••@gmail.com"},
+              {label:"DHA verified", value:"✓ Confirmed"},
+            ].map(({label,value})=>(
+              <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:12,marginBottom:12,borderBottom:"1px solid #F0F4F8"}}>
+                <span style={{fontSize:13,color:"#8FA3BE"}}>{label}</span>
+                <span style={{fontSize:13,fontWeight:600,color:"#0A1628"}}>{value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Loan details */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:14}}>Loan details</div>
+            {[
+              {label:"Loan amount", value:"R 517,500"},
+              {label:"Interest rate", value:"11.25% p.a. (Prime − 0.5%)"},
+              {label:"Term", value:"60 months"},
+              {label:"Monthly repayment", value:"R 7,543"},
+              {label:"Disbursement account", value:"Absa ••• ••• 2847"},
+              {label:"Muḽo Score", value:"82 / 100"},
+            ].map(({label,value})=>(
+              <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:12,marginBottom:12,borderBottom:"1px solid #F0F4F8"}}>
+                <span style={{fontSize:13,color:"#8FA3BE"}}>{label}</span>
+                <span style={{fontSize:13,fontWeight:600,color:"#0A1628"}}>{value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick actions */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8,marginBottom:14}}>Quick actions</div>
+            {[
+              {icon:"📄", label:"View loan agreement", action:()=>go("loan-sign")},
+              {icon:"🏠", label:"View property details", action:()=>go("bond-confirm")},
+              {icon:"💸", label:"Manage tranches", action:()=>go("disbursement")},
+              {icon:"📞", label:"Contact Muḽo support", action:()=>{}},
+            ].map(({icon,label,action})=>(
+              <div key={label} onClick={action} style={{display:"flex",alignItems:"center",gap:12,paddingBottom:14,marginBottom:14,borderBottom:"1px solid #F0F4F8",cursor:"pointer"}}>
+                <span style={{fontSize:18}}>{icon}</span>
+                <span style={{fontSize:13,fontWeight:500,color:"#0A1628",flex:1}}>{label}</span>
+                <span style={{color:"#C5D0DC",fontSize:16}}>›</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Sign out */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:12}}>
+            <button className="btn btn-outline" style={{width:"100%",color:"#FF7043",borderColor:"#FF7043"}} onClick={() => { window._muloIdNumber=null; window._muloFirstName=null; window._muloLastName=null; window._muloCellphone=null; go("landing"); }}>
+              Sign out
+            </button>
+            <div style={{fontSize:11,color:"#C5D0DC",textAlign:"center",marginTop:10}}>Muḽo v1.0 · NCR Registered · POPIA Compliant</div>
+          </div>
         </div>}
       </div>
       <div className="mini-nav">
