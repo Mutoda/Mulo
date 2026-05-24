@@ -1724,7 +1724,7 @@ function BankAccountConfirm({ go }) {
 
   const ACCOUNT = {
     bank:        "Absa",
-    logo:        BANK.bank,
+    logo:        "Absa",
     type:        "Cheque Account",
     holder: (window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi'),
     number:      "••• ••• 2847",
