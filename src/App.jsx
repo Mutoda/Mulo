@@ -1333,7 +1333,7 @@ function Signup({ go }) {
           </div>
           <div className="input-group">
             <label className="input-label">Cell number</label>
-            <input className="input-field" placeholder="+27 82 000 0000" value={form.phone} onChange={e=>s("phone",e.target.value)} />
+            <input className="input-field" value={window._muloCellphone ? "+27 " + (window._muloCellphone.startsWith("0") ? window._muloCellphone.slice(1) : window._muloCellphone) : ""} readOnly style={{background:"#F7F9FC",color:"#8FA3BE",cursor:"not-allowed"}} />
           </div>
           <div className="input-group">
             <label className="input-label">Password</label>
