@@ -3479,7 +3479,7 @@ function Dashboard({ go }) {
 const SCREENS = { landing:Landing, login:Login, "id-verify":IdVerify, "forgot-password":ForgotPassword, "phone-select":PhoneSelect, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
 
 export default function App() {
-  const [screen, setScreen] = useState("landing");
+  const [screen, setScreen] = useState(() => { const p = new URLSearchParams(window.location.search); if (p.get("verified") === "true") { window.history.replaceState({}, "", "/"); return "liveness"; } return "landing"; });
   const Screen = SCREENS[screen] || Landing;
 
   return (

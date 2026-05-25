@@ -683,7 +683,7 @@ exports.handler = async (event) => {
       console.log('Smile callback received:', JSON.stringify(body));
       const { ResultCode, IDNumber, Actions } = body;
       if (!IDNumber) return resp(200, { received: true });
-      const verified = ResultCode === '0990' || Actions?.Verify_ID_Against_ID_Authority === 'Verified';
+      const verified = ResultCode === '0990' || Actions?.Verify_ID_Against_ID_Authority === 'Verified' || ResultCode === '1014';
       const db = await getDb();
       try {
         await db.query(
