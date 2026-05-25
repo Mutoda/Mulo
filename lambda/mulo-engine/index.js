@@ -300,7 +300,7 @@ const sendWhatsAppOtp = async (cellphone, otp) => {
       messaging_product: 'whatsapp',
       to,
       type: 'template',
-      template: { name: 'hello_world', language: { code: 'en_US' } }
+      template: { name: 'mulo_otp_verification', language: { code: 'en' }, components: [{ type: 'body', parameters: [{ type: 'text', text: otp }] }] }
     })
   });
   const data = await res.json();
