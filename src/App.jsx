@@ -1194,7 +1194,7 @@ function OtpVerify({ go }) {
 function LivenessCheck({ go }) {
   const [phase, setPhase] = useState("idle"); // idle | scanning | verified
   const [livenessStep, setLivenessStep] = useState(0);
-  const SMILE_URL = "https://links.sandbox.usesmileid.com/8712/9c906829-ca12-465e-a807-e6cb75a5713a";
+  const SMILE_URL = "https://links.sandbox.usesmileid.com/8712/9f25a566-e908-4267-9f36-8f04c55c174f";
   const startVerification = () => { setPhase("waiting"); window.open(SMILE_URL, "_blank"); const poll = setInterval(async () => { try { const res = await fetch(API + "/smile-status?id_number=" + (window._muloIdNumber || "")); const data = await res.json(); if (data.verified) { clearInterval(poll); setPhase("verified"); setTimeout(() => go("loan-sign"), 1500); } } catch(e) {} }, 3000); };
 
   const steps = [
