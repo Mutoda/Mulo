@@ -678,6 +678,39 @@ exports.handler = async (event) => {
         return resp(200, { reset: true });
       } finally { await db.end(); }
     }
+    if (path.endsWith('/smile-capture') && method === 'POST') {
+      const { id_number, images } = body;
+      if (!id_number || !images) return resp(400, { error: 'id_number and images required' });
+      try {
+        const smileCore = require('smile-identity-core');
+        const secret = await getSecret('mulo/smileid');
+        const { partnerId, apiKey } = JSON.parse(secret);
+        const WebApi = smileCore.WebApi;
+        const connection = new WebApi(partnerId, process.env.SMILE_CALLBACK_URL || 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/smile-callback', apiKey, '0');
+        const partner_params = {
+          job_id: 'job-' + hashId(id_number).substring(0, 16),
+          user_id: hashId(id_number).substring(0, 16),
+          job_type: 1
+        };
+        const id_info = {
+          first_name: '',
+          last_name: '',
+          country: 'ZA',
+          id_type: 'NATIONAL_ID',
+          id_number: id_number,
+          entered: true
+        };
+        const imageList = images.map(img => ({
+          image_type_id: img.image_type_id,
+          image: img.image
+        }));
+        await connection.submit_job(partner_params, imageList, id_info, {});
+        return resp(200, { submitted: true });
+      } catch(err) {
+        console.error('Smile capture error:', err.message);
+        return resp(500, { error: err.message });
+      }
+    }
     if (path.endsWith('/smile-callback') && method === 'POST') {
       // Smile ID posts verification result here
       console.log('Smile callback received:', JSON.stringify(body));
