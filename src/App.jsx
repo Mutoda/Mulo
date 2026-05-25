@@ -1194,6 +1194,8 @@ function OtpVerify({ go }) {
 function LivenessCheck({ go }) {
   const [phase, setPhase] = useState("idle"); // idle | scanning | verified
   const [livenessStep, setLivenessStep] = useState(0);
+  const SMILE_URL = "https://links.sandbox.usesmileid.com/8712/9c906829-ca12-465e-a807-e6cb75a5713a";
+  const startVerification = () => { setPhase("waiting"); window.open(SMILE_URL, "_blank"); };
 
   const steps = [
     { label:"Face detected in oval", icon:"😊" },
@@ -1285,7 +1287,8 @@ function LivenessCheck({ go }) {
       </div>
 
       <div className="bottom-cta">
-        {phase==="idle"&&<button className="btn btn-primary" onClick={startScan}>Start face verification →</button>}
+        {phase==="idle"&&<button className="btn btn-primary" onClick={startVerification}>Start face verification →</button>}
+        {phase==="waiting"&&<button className="btn btn-outline" style={{width:"100%"}} onClick={() => { setPhase("verified"); setTimeout(() => go("loan-sign"), 1000); }}>I've completed verification →</button>}
         {phase==="scanning"&&<button className="btn btn-primary" style={{opacity:.5}} disabled><span style={{display:"inline-block",animation:"spin 1s linear infinite",marginRight:6}}>⟳</span>Scanning…</button>}
         {phase==="verified"&&<button className="btn btn-primary" onClick={()=>go("loan-sign")}>Continue to sign agreement →</button>}
       </div>
