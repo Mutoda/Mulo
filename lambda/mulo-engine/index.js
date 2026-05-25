@@ -678,6 +678,34 @@ exports.handler = async (event) => {
         return resp(200, { reset: true });
       } finally { await db.end(); }
     }
+    if (path.endsWith('/smile-callback') && method === 'POST') {
+      // Smile ID posts verification result here
+      console.log('Smile callback received:', JSON.stringify(body));
+      const { ResultCode, IDNumber, Actions } = body;
+      if (!IDNumber) return resp(200, { received: true });
+      const verified = ResultCode === '0990' || Actions?.Verify_ID_Against_ID_Authority === 'Verified';
+      const db = await getDb();
+      try {
+        await db.query(
+          'UPDATE applicants SET dha_verified = $1 WHERE id_number_hash = $2',
+          [verified, hashId(IDNumber)]
+        );
+        return resp(200, { received: true, verified });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/smile-status') && method === 'GET') {
+      const id_number = event.queryStringParameters?.id_number;
+      if (!id_number) return resp(400, { error: 'id_number required' });
+      const db = await getDb();
+      try {
+        const result = await db.query(
+          'SELECT dha_verified FROM applicants WHERE id_number_hash = $1',
+          [hashId(id_number)]
+        );
+        const verified = result.rows[0]?.dha_verified || false;
+        return resp(200, { verified });
+      } finally { await db.end(); }
+    }
     if (path.endsWith('/admin/migrate') && method === 'POST') {
       const db = await getDb();
       try {
