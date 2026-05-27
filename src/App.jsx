@@ -1140,7 +1140,7 @@ function OtpVerify({ go }) {
                   transition:"all .2s",boxSizing:"border-box",
                   animation: phase==="error" ? "shake .4s ease" : "none",
                 }}
-                maxLength={1} value={phase==="done"?"✓":d} inputMode="numeric"
+                maxLength={1} value={phase==="done"?"✓":d} inputMode="numeric" autoComplete={i===0 ? "one-time-code" : "off"}
                 onChange={e => handleDigit(i, e.target.value)}
                 onKeyDown={e => handleKey(i,e)}
               />
