@@ -1635,7 +1635,7 @@ function BondConfirm({ go }) {
   return (
     <div className="screen fade-in">
       <div className="screen-header">
-        <div className="back-btn" onClick={() => go("loading")}>←</div>
+        <div className="back-btn" onClick={() => go("consent")}>←</div>
         <div className="screen-header-text">
           <div className="screen-header-title">Confirm your bond</div>
           <div className="screen-header-sub">Please verify this is correct</div>
