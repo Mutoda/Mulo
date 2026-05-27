@@ -929,9 +929,18 @@ function PhoneSelect({ go }) {
     { masked: "+27 61* *** 8823", full: "0618228823" },
   ];
 
+  const [manualMode, setManualMode] = useState(false);
+  const [manualNumber, setManualNumber] = useState("");
+  const manualValid = manualNumber.replace(/\D/g,"").length === 10;
+
   const handleContinue = () => {
-    if (!selected) return;
-    window._muloCellphone = selected.full;
+    if (manualMode) {
+      if (!manualValid) return;
+      window._muloCellphone = manualNumber.replace(/\D/g,"");
+    } else {
+      if (!selected) return;
+      window._muloCellphone = selected.full;
+    }
     setPhase("sending");
     go("otp");
   };
@@ -984,16 +993,40 @@ function PhoneSelect({ go }) {
             </div>
           ))}
 
+          {!manualMode ? (
+            <div style={{textAlign:"center",marginTop:16}}>
+              <span style={{fontSize:13,color:"#8FA3BE"}}>Don't see your number? </span>
+              <span style={{fontSize:13,color:"#00B8A9",fontWeight:600,cursor:"pointer"}} onClick={() => { setManualMode(true); setSelected(null); }}>Enter it manually</span>
+            </div>
+          ) : (
+            <div style={{marginTop:16}}>
+              <div style={{fontSize:13,fontWeight:600,color:"#0A1628",marginBottom:8}}>Enter your WhatsApp number</div>
+              <input
+                type="tel"
+                inputMode="numeric"
+                placeholder="e.g. 082 123 4567"
+                value={manualNumber}
+                onChange={e => setManualNumber(e.target.value)}
+                style={{width:"100%",padding:"14px 16px",borderRadius:12,border:"1.5px solid #00B8A9",fontSize:15,fontFamily:"'IBM Plex Sans',sans-serif",boxSizing:"border-box",outline:"none"}}
+              />
+              <div style={{fontSize:12,color:"#8FA3BE",marginTop:8,lineHeight:1.6}}>
+                Enter your 10-digit SA mobile number. An OTP will be sent to verify you own it.
+              </div>
+              <div style={{textAlign:"center",marginTop:8}}>
+                <span style={{fontSize:13,color:"#8FA3BE",cursor:"pointer"}} onClick={() => setManualMode(false)}>← Back to bureau numbers</span>
+              </div>
+            </div>
+          )}
           <div style={{background:"#F7F9FC",border:"1px solid #E8EDF4",borderRadius:14,padding:14,fontSize:12,color:"#8FA3BE",lineHeight:1.6,marginTop:8}}>
-            <span>🔒 These numbers are sourced from the credit bureau linked to your ID number. Only numbers on record can receive your OTP.</span>
+            <span>🔒 Your OTP will be sent to your selected WhatsApp number to confirm ownership.</span>
           </div>
         </div>
       </div>
 
       <div className="bottom-cta">
         <button className="btn btn-primary"
-          style={{opacity: selected ? 1 : 0.4}}
-          disabled={!selected}
+          style={{opacity: (manualMode ? manualValid : selected) ? 1 : 0.4}}
+          disabled={manualMode ? !manualValid : !selected}
           onClick={handleContinue}>
           Send OTP to this number →
         </button>
