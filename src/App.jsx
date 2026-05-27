@@ -1132,7 +1132,7 @@ function OtpVerify({ go }) {
             {digits.map((d,i) => (
               <input key={i} ref={el => inputRefs.current[i] = el}
                 style={{
-                  width:46,height:56,borderRadius:13,border:"none",outline:"none",textAlign:"center",
+                  width:46,height:56,borderRadius:13,outline:"none",textAlign:"center",
                   border: phase==="error" ? "1.5px solid #FF7043" : phase==="done" ? "1.5px solid #12C26B" : d ? "1.5px solid #25D366" : "1.5px solid #E2E9F0",
                   background: phase==="done" ? "rgba(18,194,107,0.05)" : d ? "rgba(37,211,102,0.04)" : "#fff",
                   fontFamily:"'Sora',sans-serif",fontSize:22,fontWeight:700,
