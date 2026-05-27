@@ -1010,15 +1010,9 @@ function OtpVerify({ go }) {
   const [timer, setTimer] = useState(59);
   const [attempts, setAttempts] = useState(0);
   const [sendError, setSendError] = useState(null);
-  const [demoOtp, setDemoOtp] = useState(null);
 
   // Auto-fill boxes when demo OTP arrives
-  useEffect(() => {
-    if (demoOtp && demoOtp.length === 6) {
-      setDigits(demoOtp.split(""));
-      inputRefs.current[5]?.focus();
-    }
-  }, [demoOtp]);
+
   const inputRefs = useRef([]);
 
   // Send OTP when screen loads
@@ -1031,7 +1025,7 @@ function OtpVerify({ go }) {
       body: JSON.stringify({ cellphone: phone, id_number: window._muloIdNumber }),
     })
       .then(r => r.json())
-      .then(d => { if (!d.sent) setSendError("Could not send OTP. Please go back and try again."); else if (d.otp) setDemoOtp(d.otp); })
+      .then(d => { if (!d.sent) setSendError("Could not send OTP. Please go back and try again.");  })
       .catch(() => setSendError("Could not send OTP. Please check your connection."));
   }, []);
 
@@ -1102,7 +1096,7 @@ function OtpVerify({ go }) {
       body: JSON.stringify({ cellphone: phone, id_number: window._muloIdNumber }),
     })
       .then(r => r.json())
-      .then(d => { if (!d.sent) setSendError("Could not resend OTP. Please try again."); else if (d.otp) setDemoOtp(d.otp); })
+      .then(d => { if (!d.sent) setSendError("Could not resend OTP. Please try again.");  })
       .catch(() => setSendError("Could not resend OTP. Please check your connection."));
   };
   const allFilled = digits.every(Boolean);
@@ -1154,7 +1148,7 @@ function OtpVerify({ go }) {
           </div>
 
           {sendError && <div style={{textAlign:"center",fontSize:13,color:"#FF7043",fontWeight:600,marginBottom:10}} className="fade-up">⚠️ {sendError}</div>}
-          {demoOtp && <div style={{textAlign:"center",fontSize:13,color:"#25D366",fontWeight:700,marginBottom:10,letterSpacing:4}} className="fade-up">🔑 Demo OTP: {demoOtp}</div>}
+          
           {phase==="error" && <div style={{textAlign:"center",fontSize:13,color:"#FF7043",fontWeight:600,marginBottom:10}} className="fade-up">✕ Incorrect code — try again</div>}
           {phase==="done"  && <div style={{textAlign:"center",fontSize:13,color:"#12C26B",fontWeight:600,marginBottom:10}} className="fade-up">✓ Verified — redirecting…</div>}
 
