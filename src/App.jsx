@@ -1194,27 +1194,35 @@ function OtpVerify({ go }) {
 ───────────────────────────────────────────── */
 function LivenessCheck({ go }) {
   const [phase, setPhase] = useState("idle");
-  const cameraRef = useRef(null);
+  const [checkStep, setCheckStep] = useState(0);
 
-  useEffect(() => {
-    const el = cameraRef.current;
-    if (!el) return;
-    const handler = async (e) => {
-      setPhase("uploading");
-      try {
-        const res = await fetch(API + '/smile-capture', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_number: window._muloIdNumber, images: e.detail })
-        });
-        const data = await res.json();
-        if (data.submitted) { setPhase("verified"); setTimeout(() => go("loan-sign"), 1500); }
-        else { setPhase("error"); }
-      } catch(err) { setPhase("error"); }
-    };
-    el.addEventListener('imagesComputed', handler);
-    return () => el.removeEventListener('imagesComputed', handler);
-  }, [cameraRef.current]);
+  const checks = [
+    "Detecting face position…",
+    "Checking liveness…",
+    "Matching to Home Affairs…",
+    "Confirming identity…",
+  ];
+
+  const startScan = () => {
+    setPhase("scanning");
+    setTimeout(() => {
+      setPhase("checks");
+      setCheckStep(0);
+      let step = 0;
+      const stepTimer = setInterval(() => {
+        step++;
+        setCheckStep(step);
+        if (step >= checks.length) {
+          clearInterval(stepTimer);
+          setTimeout(() => {
+            setPhase("verified");
+            setTimeout(() => go("loan-sign"), 2000);
+          }, 600);
+        }
+      }, 900);
+    }, 2500);
+  };
+
   return (
     <div className="screen fade-in" style={{background:"#F7F9FC"}}>
       <div className="screen-header">
@@ -1227,24 +1235,68 @@ function LivenessCheck({ go }) {
       <div className="progress-track"><div className="progress-fill" style={{width:"85%"}} /></div>
       <div className="screen-scroll">
         <div style={{padding:"16px 24px 8px",fontSize:13,color:"#8FA3BE",lineHeight:1.6}}>
-          We'll match your face to your Home Affairs photo to confirm you are the ID holder.
+          We’ll match your face to your Home Affairs photo to confirm you are the ID holder.
         </div>
-        {phase === "idle" || phase === "uploading" || phase === "error" ? (
-          <div style={{padding:"0 16px"}}>
-            <smart-camera-web ref={cameraRef} />
+
+        {phase === "verified" ? (
+          <div style={{textAlign:"center",padding:"48px 24px"}}>
+            <div style={{width:88,height:88,borderRadius:"50%",background:"linear-gradient(135deg,#12C26B,#00B8A9)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px",fontSize:40,color:"#fff"}}>&#10003;</div>
+            <div style={{fontFamily:"Sora,sans-serif",fontSize:20,fontWeight:700,color:"#0A1628",marginBottom:8}}>Identity verified!</div>
+            <div style={{fontSize:13,color:"#8FA3BE"}}>Redirecting to your loan agreement...</div>
           </div>
-        ) : null}
-        {phase === "uploading" && <div style={{textAlign:"center",padding:16,fontSize:13,color:"#00B8A9",fontWeight:600}}>⏳ Verifying your identity...</div>}
-        {phase === "verified" && <div style={{textAlign:"center",padding:32}}>
-          <div style={{fontSize:48,marginBottom:12}}>✅</div>
-          <div style={{fontFamily:"'Sora',sans-serif",fontSize:18,fontWeight:700,color:"#0A1628",marginBottom:8}}>Identity verified!</div>
-          <div style={{fontSize:13,color:"#8FA3BE"}}>Redirecting to your loan agreement...</div>
-        </div>}
-        {phase === "error" && <div style={{textAlign:"center",padding:16,fontSize:13,color:"#FF7043",fontWeight:600}}>⚠️ Verification failed. Please try again.</div>}
+        ) : (
+          <>
+            <div style={{margin:"8px 24px",borderRadius:20,overflow:"hidden",background:"#1a1a2e",position:"relative",height:300,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#0d1117 0%,#1a1f35 50%,#0d1117 100%)"}} />
+              <div style={{position:"relative",zIndex:2,width:160,height:200,border:phase==="scanning" ? "3px solid #00B8A9" : "3px solid #ffffff44",borderRadius:"50%",transition:"border-color 0.3s",boxShadow:phase==="scanning" ? "0 0 30px #00B8A930" : "none"}} />
+              {["tl","tr","bl","br"].map(c => (
+                <div key={c} style={{position:"absolute",zIndex:3,width:20,height:20,
+                  top:c.startsWith("t") ? 16 : "auto",bottom:c.startsWith("b") ? 16 : "auto",
+                  left:c.endsWith("l") ? 16 : "auto",right:c.endsWith("r") ? 16 : "auto",
+                  borderTop:c.startsWith("t") ? "3px solid #00B8A9" : "none",
+                  borderBottom:c.startsWith("b") ? "3px solid #00B8A9" : "none",
+                  borderLeft:c.endsWith("l") ? "3px solid #00B8A9" : "none",
+                  borderRight:c.endsWith("r") ? "3px solid #00B8A9" : "none"}} />
+              ))}
+              <div style={{position:"absolute",bottom:16,left:0,right:0,textAlign:"center",fontSize:12,zIndex:4,color:phase==="scanning" ? "#00B8A9" : "#ffffff88",fontWeight:phase==="scanning" ? 600 : 400}}>
+                {phase==="scanning" ? "Hold still…" : "Position your face in the oval"}
+              </div>
+            </div>
+
+            {phase === "checks" && (
+              <div className="liveness-checks" style={{marginTop:16}}>
+                {checks.map((label, i) => (
+                  <div key={i} className="liveness-check">
+                    <div className={"liveness-check-dot " + (i < checkStep ? "done" : i === checkStep ? "active" : "wait")} />
+                    <div className="liveness-check-label">{label}</div>
+                    <div className="liveness-check-icon">{i < checkStep ? "✓" : ""}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {phase === "idle" && (
+              <div style={{padding:"20px 24px 0"}}>
+                <div style={{background:"#fff",borderRadius:16,padding:"16px 20px",border:"1px solid #E8EEF6"}}>
+                  <div style={{fontSize:13,fontWeight:600,color:"#0A1628",marginBottom:6}}>Before you start</div>
+                  <div style={{fontSize:12,color:"#8FA3BE",lineHeight:1.7}}>&#8226; Good lighting on your face&#10;&#8226; Remove glasses if possible&#10;&#8226; Look directly at the camera</div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
-      {phase === "verified" && <div className="bottom-cta">
-        <button className="btn btn-primary" onClick={() => go("loan-sign")}>Continue to sign agreement →</button>
-      </div>}
+
+      {phase === "idle" && (
+        <div className="bottom-cta">
+          <button className="btn btn-primary" onClick={startScan}>Start face scan →</button>
+        </div>
+      )}
+      {phase === "verified" && (
+        <div className="bottom-cta">
+          <button className="btn btn-primary" onClick={() => go("loan-sign")}>Continue to sign agreement →</button>
+        </div>
+      )}
     </div>
   );
 }
