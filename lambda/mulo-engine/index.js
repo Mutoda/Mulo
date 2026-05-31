@@ -290,7 +290,7 @@ const sendWhatsAppOtp = async (cellphone, otp) => {
   if (!token || !phoneNumberId) { console.log('WhatsApp not configured'); return; }
 
   // Format SA number to international format
-  let to = cellphone.replace(/D/g, '');
+  let to = cellphone.replace(/\D/g, '');
   if (to.startsWith('0')) to = '27' + to.slice(1);
 
   const res = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
@@ -300,7 +300,7 @@ const sendWhatsAppOtp = async (cellphone, otp) => {
       messaging_product: 'whatsapp',
       to,
       type: 'template',
-      template: { name: 'mulo_otp_verification', language: { code: 'en' }, components: [{ type: 'body', parameters: [{ type: 'text', text: otp }] }] }
+      template: { name: 'mulo_otp_verification', language: { code: 'en' }, components: [{ type: 'body', parameters: [{ type: 'text', text: otp }] }, { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: otp }] }] }
     })
   });
   const data = await res.json();
@@ -322,7 +322,7 @@ const sendOtp = async (body) => {
     );
     console.log(`OTP CODE FOR ${cellphone}: ${otp}`);
     await sendWhatsAppOtp(cellphone, otp);
-    return resp(200, { sent: true, success: true, otp, message: `OTP sent to ${cellphone}` });
+    return resp(200, { sent: true, success: true, message: `OTP sent to ${cellphone}` });
   } finally {
     await db.end();
   }

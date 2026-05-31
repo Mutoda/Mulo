@@ -924,7 +924,7 @@ function PhoneSelect({ go }) {
 
   const handleContinue = () => {
     if (!valid) return;
-    window._muloCellphone = number.replace(/\D/g,"");
+    const digits = number.replace(/\D/g,""); window._muloCellphone = digits.startsWith("0") ? digits : "0" + digits;
     go("otp");
   };
 
