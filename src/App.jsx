@@ -2,6 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import "@smile_identity/smart-camera-web";
 
 const API = "https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod";
+const saveScreen = (screen) => {
+  if (!window._muloIdNumber) return;
+  fetch(`${API}/save-screen`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ id_number: window._muloIdNumber, screen })
+  }).catch(() => {});
+};
 
 const BANK_LOGO = (bank, size=24) => {
   const logos = {
@@ -1054,7 +1062,7 @@ function OtpVerify({ go }) {
       if(data.verified) {
         window._muloVerifiedToken = data.verifiedToken;
         setPhase("done");
-        setTimeout(() => go("signup"), 900);
+        saveScreen("signup"); setTimeout(() => go("signup"), 900);
       } else {
         setAttempts(a => a+1);
         setPhase("error");
@@ -1196,7 +1204,7 @@ function LivenessCheck({ go }) {
           clearInterval(stepTimer);
           setTimeout(() => {
             setPhase("verified");
-            setTimeout(() => go("loan-sign"), 2000);
+            saveScreen("loan-sign"); setTimeout(() => go("loan-sign"), 2000);
           }, 600);
         }
       }, 900);
@@ -1448,7 +1456,7 @@ function Consent({ go }) {
                 body: JSON.stringify({ id_number: window._muloIdNumber || "demo", sources })
               });
             } catch(e) { console.error("Consent save failed", e); }
-            go("loading");
+            saveScreen("loading"); go("loading");
           }} style={{opacity:allOn?1:.5}}>
           {allOn ? "Authorise & continue →" : "Please enable all sources"}
         </button>
@@ -1482,7 +1490,7 @@ function Loading({ go }) {
   }, [step]);
 
   useEffect(() => {
-    if(done) { const t = setTimeout(() => go("bond-confirm"), 800); return () => clearTimeout(t); }
+    if(done) { const t = setTimeout(() => { saveScreen("bond-confirm"); go("bond-confirm"); }, 800); return () => clearTimeout(t); }
   }, [done]);
 
   return (
@@ -1711,7 +1719,7 @@ function BondConfirm({ go }) {
         <button className="btn btn-primary"
           style={{opacity: confirmed && !disputed ? 1 : 0.35}}
           disabled={!confirmed || disputed}
-          onClick={() => go("bank-account")}>
+          onClick={() => { saveScreen("bank-account"); go("bank-account"); }}>
           Confirm bank account →
         </button>
         {!confirmed && !disputed && (
@@ -1830,7 +1838,7 @@ function BankAccountConfirm({ go }) {
           ? <button className="btn btn-primary" onClick={() => setConfirmed(true)}>
               ✓ Confirm this account →
             </button>
-          : <button className="btn btn-primary" onClick={() => go("offer")}>
+          : <button className="btn btn-primary" onClick={() => { saveScreen("offer"); go("offer"); }}>
               View my offer →
             </button>
         }
@@ -2242,7 +2250,7 @@ if (loading) return (
         </div>
       </div>
       <div className="bottom-cta">
-        <button className="btn btn-primary" onClick={() => go("doc-upload")}>Upload documents →</button>
+        <button className="btn btn-primary" onClick={() => { saveScreen("doc-upload"); go("doc-upload"); }}>Upload documents →</button>
         <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>No obligation · Rate locked for 48 hours</div>
       </div>
     </div>
@@ -2276,7 +2284,7 @@ const uploadFile = async (file, docType, setter) => {
 
   const submit = () => {
     setSubmitting(true);
-    setTimeout(() => go("liveness"), 1200);
+    saveScreen("liveness"); setTimeout(() => go("liveness"), 1200);
   };
 
   return (
@@ -2716,7 +2724,7 @@ function Settlement({ go }) {
       <div className="bottom-cta">
         {!confirmed
           ? <button className="btn btn-primary" onClick={() => setConfirmed(true)}>Confirm settlement plan →</button>
-          : <button className="btn btn-primary" onClick={() => go("dashboard")}>Go to my dashboard →</button>
+          : <button className="btn btn-primary" onClick={() => { saveScreen("dashboard"); go("dashboard"); }}>Go to my dashboard →</button>
         }
       </div>
     </div>
