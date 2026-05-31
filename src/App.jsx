@@ -713,6 +713,7 @@ function IdVerify({ go }) {
   const [phase, setPhase]   = useState("idle"); // idle | validating | invalid | checking | done
   const [hasAccount, setHasAccount] = useState(false);
   const [validation, setValidation] = useState(null);
+  const [showFraudWarning, setShowFraudWarning] = useState(true);
   const [checks, setChecks] = useState([
     { label:"Valid SA ID format",    sub:"13 digits · Luhn checksum · Date of birth", status:"wait" },
     { label:"Homeowner status",      sub:"Deeds Office verification", status:"wait" },
@@ -720,6 +721,25 @@ function IdVerify({ go }) {
   ]);
 
   const fmt = v => v.replace(/\D/g,"").slice(0,13);
+
+  if (showFraudWarning) return (
+    <div style={{position:"fixed",inset:0,background:"rgba(10,22,40,0.7)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:1000,backdropFilter:"blur(4px)"}}>
+      <div style={{background:"#fff",borderRadius:"24px 24px 0 0",padding:"32px 24px 40px",width:"100%",maxWidth:480,boxShadow:"0 -8px 40px rgba(0,0,0,0.15)"}}>
+        <div style={{width:48,height:4,background:"#E2E9F0",borderRadius:2,margin:"0 auto 24px"}} />
+        <div style={{width:56,height:56,borderRadius:16,background:"#FFF3F0",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,fontSize:28}}>⚠️</div>
+        <div style={{fontFamily:"'Sora',sans-serif",fontSize:18,fontWeight:700,color:"#0A1628",marginBottom:12}}>Important notice</div>
+        <div style={{fontSize:14,color:"#4A5568",lineHeight:1.7,marginBottom:8}}>
+          By continuing, you confirm that you are applying using <strong>your own South African ID number</strong>.
+        </div>
+        <div style={{fontSize:14,color:"#4A5568",lineHeight:1.7,marginBottom:24}}>
+          Entering another person's ID number — even with their knowledge — constitutes <strong style={{color:"#FF7043"}}>identity fraud</strong> and is a criminal offence under the <strong>Cybercrimes Act 19 of 2020</strong> and the <strong>Identification Act 68 of 1997</strong>. Muḽo reports all suspected fraud to the SAPS and relevant authorities.
+        </div>
+        <button className="btn btn-primary" style={{width:"100%"}} onClick={() => setShowFraudWarning(false)}>
+          I understand — continue with my ID →
+        </button>
+      </div>
+    </div>
+  );
 
   const handleChange = (val) => {
     const cleaned = fmt(val);
