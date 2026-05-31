@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { Client } = require('pg');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const s3 = new S3Client({ region: 'af-south-1', requestChecksumCalculation: 'WHEN_REQUIRED', responseChecksumValidation: 'WHEN_REQUIRED' });
 const DOCS_BUCKET = 'mulo-documents-prod';
@@ -586,6 +587,7 @@ exports.handler = async (event) => {
         if (email_confirm) {
           if (email_confirm.toLowerCase() !== emailPlain) return resp(400, { error: 'Email does not match our records' });
           const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
           const resetCode = crypto.randomInt(100000, 999999).toString();
           const resetHash = crypto.createHash('sha256').update(resetCode).digest('hex');
           const expires = new Date(Date.now() + 15 * 60 * 1000);
@@ -662,6 +664,7 @@ exports.handler = async (event) => {
       const { id_number, reset_code, new_password } = body;
       if (!id_number || !reset_code || !new_password) return resp(400, { error: 'Missing fields' });
       const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
       const db = await getDb();
       try {
         const result = await db.query('SELECT password_hash FROM applicants WHERE id_number_hash = $1', [hashId(id_number)]);
@@ -673,7 +676,7 @@ exports.handler = async (event) => {
         const expiresStr = parts[1];
         if (new Date() > new Date(expiresStr)) return resp(400, { error: 'Reset code expired' });
         if (crypto.createHash('sha256').update(reset_code).digest('hex') !== storedHash) return resp(400, { error: 'Invalid reset code' });
-        const newHash = crypto.createHash('sha256').update(new_password).digest('hex');
+        const newHash = await bcrypt.hash(new_password, 12);
         await db.query('UPDATE applicants SET password_hash = $1 WHERE id_number_hash = $2', [newHash, hashId(id_number)]);
         return resp(200, { reset: true });
       } finally { await db.end(); }
@@ -763,7 +766,8 @@ exports.handler = async (event) => {
       const { id_number, email, password } = body;
       if (!id_number || !email || !password) return resp(400, { error: 'id_number, email and password required' });
       const crypto = require('crypto');
-      const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+const bcrypt = require('bcryptjs');
+      const passwordHash = await bcrypt.hash(password, 12);
       const emailHash = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
       const db = await getDb();
       try {
@@ -778,7 +782,7 @@ exports.handler = async (event) => {
       const { email, password } = body;
       if (!email || !password) return resp(400, { error: 'email and password required' });
       const crypto = require('crypto');
-      const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+const bcrypt = require('bcryptjs');
       const emailHash = crypto.createHash('sha256').update(email.toLowerCase()).digest('hex');
       const db = await getDb();
       try {
@@ -792,6 +796,8 @@ exports.handler = async (event) => {
           [emailHash, passwordHash]
         );
         if (result.rows.length === 0) return resp(401, { error: 'Invalid email or password' });
+        const passwordMatch = await bcrypt.compare(password, result.rows[0].password_hash || '');
+        if (!passwordMatch) return resp(401, { error: 'Invalid email or password' });
         const applicant = result.rows[0];
         return resp(200, {
           authenticated: true,
