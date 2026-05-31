@@ -920,11 +920,11 @@ setPhase("checking");
 ───────────────────────────────────────────── */
 function PhoneSelect({ go }) {
   const [number, setNumber] = useState("");
-  const valid = number.replace(/\D/g,"").length === 10;
+  const digits = number.replace(/\D/g,""); const valid = digits.length === 9 || digits.length === 10;
 
   const handleContinue = () => {
     if (!valid) return;
-    const digits = number.replace(/\D/g,""); window._muloCellphone = digits.startsWith("0") ? digits : "0" + digits;
+    const rawDigits = number.replace(/\D/g,""); const normalized = rawDigits.startsWith("0") ? rawDigits : "0" + rawDigits; window._muloCellphone = normalized;
     go("otp");
   };
 
@@ -948,7 +948,7 @@ function PhoneSelect({ go }) {
               <span style={{fontSize:14,fontWeight:600,color:"#0A1628"}}>+27</span>
               <span style={{color:"#E2E9F0"}}>|</span>
             </div>
-            <input type="tel" inputMode="numeric" placeholder="82 123 4567" value={number}
+            <input type="tel" inputMode="numeric" placeholder="82 123 4567 (without leading 0)" value={number}
               onChange={e => setNumber(e.target.value)}
               style={{width:"100%",padding:"16px 16px 16px 80px",borderRadius:14,border:"1.5px solid " + (valid ? "#25D366" : "#E2E9F0"),fontSize:16,fontFamily:"IBM Plex Sans,sans-serif",boxSizing:"border-box",outline:"none",transition:"border-color .2s"}}
             />
