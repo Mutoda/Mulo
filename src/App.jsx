@@ -721,7 +721,7 @@ function IdVerify({ go }) {
   const [phase, setPhase]   = useState("idle"); // idle | validating | invalid | checking | done
   const [hasAccount, setHasAccount] = useState(false);
   const [validation, setValidation] = useState(null);
-  const [showFraudWarning, setShowFraudWarning] = useState(true);
+  const [showFraudWarning, setShowFraudWarning] = useState(false);
   const [checks, setChecks] = useState([
     { label:"Valid SA ID format",    sub:"13 digits · Luhn checksum · Date of birth", status:"wait" },
     { label:"Homeowner status",      sub:"Deeds Office verification", status:"wait" },
@@ -742,9 +742,14 @@ function IdVerify({ go }) {
         <div style={{fontSize:14,color:"#4A5568",lineHeight:1.7,marginBottom:24}}>
           Entering another person's ID number — even with their knowledge — constitutes <strong style={{color:"#FF7043"}}>identity fraud</strong> and is a criminal offence under the <strong>Cybercrimes Act 19 of 2020</strong> and the <strong>Identification Act 68 of 1997</strong>. Muḽo reports all suspected fraud to the SAPS and relevant authorities.
         </div>
-        <button className="btn btn-primary" style={{width:"100%"}} onClick={() => setShowFraudWarning(false)}>
-          I understand — continue with my ID →
-        </button>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          <button className="btn btn-primary" style={{width:"100%"}} onClick={() => { setShowFraudWarning(false); go("phone-select"); }}>
+            I confirm this is my ID — continue →
+          </button>
+          <button className="btn btn-ghost" style={{width:"100%",textAlign:"center"}} onClick={() => { setShowFraudWarning(false); window._muloIdNumber = null; }}>
+            ← Go back and re-enter ID
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -933,7 +938,7 @@ setPhase("checking");
               onClick={handleCheck}>
               {phase === "checking" ? "Verifying…" : "Verify my ID →"}
             </button>
-          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; window._muloFirstName = firstName; window._muloLastName = lastName; go("phone-select"); }} disabled={!firstName.trim() || !lastName.trim()} style={{opacity: !firstName.trim() || !lastName.trim() ? 0.4 : 1}}>
+          : <button className="btn btn-primary" onClick={() => { window._muloIdNumber = idNum; window._muloFirstName = firstName; window._muloLastName = lastName; setShowFraudWarning(true); }} disabled={!firstName.trim() || !lastName.trim()} style={{opacity: !firstName.trim() || !lastName.trim() ? 0.4 : 1}}>
               Continue to authentication →
             </button>
         }
