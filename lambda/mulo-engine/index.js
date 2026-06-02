@@ -787,13 +787,13 @@ const bcrypt = require('bcryptjs');
       const db = await getDb();
       try {
         const result = await db.query(
-          `SELECT a.id_number_hash, a.dha_verified, a.cellphone, a.current_screen,
+          `SELECT a.id_number_hash, a.dha_verified, a.cellphone, a.current_screen, a.password_hash,
                   ap.status, ap.mulo_score, ap.loan_amount, ap.interest_rate, ap.monthly_repayment, ap.monthly_saving
            FROM applicants a
            LEFT JOIN applications ap ON ap.applicant_id = a.id
-           WHERE a.email = $1 AND a.password_hash = $2
+           WHERE a.email = $1
            ORDER BY a.created_at DESC LIMIT 1`,
-          [emailHash, passwordHash]
+          [emailHash]
         );
         if (result.rows.length === 0) return resp(401, { error: 'Invalid email or password' });
         const passwordMatch = await bcrypt.compare(password, result.rows[0].password_hash || '');
