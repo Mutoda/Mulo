@@ -1297,6 +1297,7 @@ function Signup({ go }) {
   const s = (k,v) => setForm(f=>({...f,[k]:v}));
   const passwordsMatch = form.pass.length >= 8 && form.confirm === form.pass;
   const ready = form.email && form.phone && passwordsMatch;
+  const [showPass, setShowPass] = useState(false);
 
   return (
     <div className="screen fade-in">
@@ -1342,8 +1343,8 @@ function Signup({ go }) {
             <input className="input-field" value={window._muloCellphone ? "+27 " + (window._muloCellphone.startsWith("0") ? window._muloCellphone.slice(1) : window._muloCellphone) : ""} readOnly style={{background:"#F7F9FC",color:"#8FA3BE",cursor:"not-allowed"}} />
           </div>
           <div className="input-group">
-            <label className="input-label">Password</label>
-            <input className="input-field" type="password" placeholder="Min. 8 characters" value={form.pass} onChange={e=>s("pass",e.target.value)} />
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><label className="input-label" style={{margin:0}}>Password</label><span style={{fontSize:12,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => setShowPass(p => !p)}>{showPass ? "Hide" : "Show"} password</span></div>
+            <input className="input-field" type={showPass ? "text" : "password"} placeholder="Min. 8 characters" value={form.pass} onChange={e=>s("pass",e.target.value)} />
             {form.pass.length > 0 && (
               <div style={{display:"flex",gap:4,marginTop:8}}>
                 {[form.pass.length>=8, /[A-Z]/.test(form.pass), /[0-9]/.test(form.pass)].map((ok,i) => (
@@ -1356,7 +1357,7 @@ function Signup({ go }) {
             <label className="input-label">Confirm Password</label>
             <input
               className={`input-field ${form.confirm.length > 0 ? (passwordsMatch ? "success" : "error") : ""}`}
-              type="password"
+              type={showPass ? "text" : "password"}
               placeholder="Re-enter your password"
               value={form.confirm}
               onChange={e=>s("confirm",e.target.value)}
@@ -3173,7 +3174,7 @@ function ForgotPassword({ go }) {
           {step==="newpass" && <>
             <div className="input-group">
               <label className="input-label">New password</label>
-              <input className="input-field" type="password" placeholder="Min. 8 characters"
+              <input className="input-field" type={showPass ? "text" : "password"} placeholder="Min. 8 characters"
                 value={newPass} onChange={e => { setNewPass(e.target.value); setError(""); }} />
             </div>
             <div className="input-group">
@@ -3264,7 +3265,7 @@ function Login({ go }) {
             <input className="input-field" type="email" placeholder="you@example.com" value={email} onChange={e => { setEmail(e.target.value); setPhase("idle"); }} autoCapitalize="none" />
           </div>
           <div className="input-group">
-            <label className="input-label">Password</label>
+            <div style={{display:"flex",justifyContent:"space-between"}}><label className="input-label" style={{margin:0}}>Password</label><span style={{fontSize:12,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => setShowPass(p => !p)}>{showPass ? "Hide" : "Show"} password</span></div>
             <div style={{position:"relative"}}>
               <input className={"input-field" + (phase==="error" ? " error" : "")} type={showPass ? "text" : "password"} placeholder="Enter your password" value={password} onChange={e => { setPassword(e.target.value); setPhase("idle"); }} />
               <div onClick={() => setShowPass(s=>!s)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:12,color:"#8FA3BE",cursor:"pointer"}}>{showPass ? "Hide" : "Show"}</div>
