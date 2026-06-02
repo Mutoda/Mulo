@@ -1343,9 +1343,11 @@ function Signup({ go }) {
             <input className="input-field" value={window._muloCellphone ? "+27 " + (window._muloCellphone.startsWith("0") ? window._muloCellphone.slice(1) : window._muloCellphone) : ""} readOnly style={{background:"#F7F9FC",color:"#8FA3BE",cursor:"not-allowed"}} />
           </div>
           <div className="input-group">
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><label className="input-label" style={{margin:0}}>Password</label><span style={{fontSize:12,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => setShowPass(p => !p)}>{showPass ? "Hide" : "Show"} password</span></div>
-            <input className="input-field" type={showPass ? "text" : "password"} placeholder="Min. 8 characters" value={form.pass} onChange={e=>s("pass",e.target.value)} />
-            {form.pass.length > 0 && (
+            <label className="input-label">Password</label>
+            <div style={{position:"relative"}}>
+              <input className="input-field" type={showPass ? "text" : "password"} placeholder="Min. 8 characters" value={form.pass} onChange={e=>s("pass",e.target.value)} style={{paddingRight:44}} />
+              <span onClick={() => setShowPass(p => !p)} style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",cursor:"pointer",fontSize:18,color:"#8FA3BE"}}>{showPass ? "👁" : "🔒"}</span>
+            </div>
               <div style={{display:"flex",gap:4,marginTop:8}}>
                 {[form.pass.length>=8, /[A-Z]/.test(form.pass), /[0-9]/.test(form.pass)].map((ok,i) => (
                   <div key={i} style={{flex:1,height:3,borderRadius:99,background:ok?"#00B8A9":"#E2E9F0",transition:"background .3s"}} />
