@@ -1114,7 +1114,7 @@ function OtpVerify({ go }) {
           </div>
           <div>
             <div className="wa-sent-label">OTP sent via WhatsApp to</div>
-            <div className="wa-phone-num">{window._muloCellphone ? '+27 ' + window._muloCellphone.slice(1,3) + '* *** ' + window._muloCellphone.slice(-3) : '+27 *** *** ***'}</div>
+            <div className="wa-phone-num">{window._muloCellphone ? '+27 ' + window._muloCellphone.slice(1) : '+27 *** *** ***'}</div>
             <div className="wa-tick">✓✓ Delivered to your WhatsApp</div>
           </div>
         </div>
