@@ -3496,7 +3496,7 @@ export default function App() {
       </div>
       <div className="desktop-info" style={{display:"none"}}>
         <div className="desktop-title">Muḽo<br/>Refinancing Platform</div>
-        <div className="desktop-sub">South Africa's fastest debt consolidation using home equity. Navigate screens on the phone prototype.</div>
+        <div className="desktop-sub">The smart way to refinance and settle expensive debt. Navigate screens on the phone prototype.</div>
         {[["🏡","Property-backed lending","Use your equity to settle all debt"],["⚡","5-minute digital journey","From ID to offer without a branch visit"],["🔒","NCR & FSCA compliant","Fully regulated fintech platform"]].map(([i,t,s]) => (
           <div className="desktop-feature" key={t}>
             <div className="desktop-feature-icon">{i}</div>
