@@ -7,7 +7,33 @@
 
 import React, { useState, useEffect } from 'react'
 
-// ─── Brand tokens ──────────────────────────────────────────────────────────────
+const API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod'
+
+function validateSAID(id) {
+  if (!/^\d{13}$/.test(id)) return { valid: false, error: 'Must be exactly 13 digits' }
+  const yy = parseInt(id.slice(0, 2)), mm = parseInt(id.slice(2, 4)), dd = parseInt(id.slice(4, 6))
+  const gender = parseInt(id.slice(6, 10)), citizen = parseInt(id.slice(10, 11))
+  const year = yy <= new Date().getFullYear() % 100 ? 2000 + yy : 1900 + yy
+  const dob = new Date(year, mm - 1, dd)
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31 || dob.getMonth() !== mm - 1 || dob.getDate() !== dd)
+    return { valid: false, error: 'Invalid date of birth in ID number' }
+  const today = new Date()
+  const age = today.getFullYear() - dob.getFullYear() - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0)
+  if (age < 18) return { valid: false, error: 'Applicant must be 18 or older' }
+  if (age > 100) return { valid: false, error: 'Date of birth appears invalid' }
+  if (citizen !== 0 && citizen !== 1) return { valid: false, error: 'Invalid citizenship digit' }
+  let sum = 0
+  for (let i = 0; i < 12; i++) {
+    let digit = parseInt(id[i])
+    if (i % 2 === 1) { digit *= 2; if (digit > 9) digit -= 9 }
+    sum += digit
+  }
+  if ((10 - (sum % 10)) % 10 !== parseInt(id[12])) return { valid: false, error: 'Checksum failed — please check your ID number' }
+  const genderStr = gender >= 5000 ? 'Male' : 'Female'
+  const citizenStr = citizen === 0 ? 'SA Citizen' : 'Permanent Resident'
+  const dobFormatted = dob.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })
+  return { valid: true, dob: dobFormatted, age, gender: genderStr, citizen: citizenStr }
+}
 const C = {
   navy:      '#0A1628',
   navyLight: '#132035',
@@ -56,9 +82,9 @@ const MOCK_QUOTES = {
 // ─── Shared UI components ──────────────────────────────────────────────────────
 const Screen = ({ children, style = {} }) => (
   <div style={{
-    height: '100%', background: C.navy, color: C.white,
+    minHeight: '100vh', background: C.navy, color: C.white,
     fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column',
-    maxWidth: 480, margin: '0 auto', position: 'relative', overflow: 'hidden',
+    maxWidth: 480, margin: '0 auto', position: 'relative',
     ...style,
   }}>
     {children}
@@ -100,7 +126,7 @@ const ProgressBar = ({ step, total }) => (
 
 const Btn = ({ children, onClick, variant = 'primary', disabled = false, style = {} }) => {
   const styles = {
-    primary:   { background: 'linear-gradient(135deg,#00B8A9,#1A73E8)', color: '#fff', boxShadow: '0 8px 24px rgba(0,184,169,0.35)' },
+    primary:   { background: C.green,  color: C.navy },
     secondary: { background: C.subtle, color: C.white, border: `1px solid ${C.border}` },
     teal:      { background: C.teal,   color: C.navy },
     ghost:     { background: 'transparent', color: C.teal, border: `1.5px solid ${C.teal}` },
@@ -112,7 +138,7 @@ const Btn = ({ children, onClick, variant = 'primary', disabled = false, style =
       style={{
         ...styles[variant],
         border: styles[variant].border || 'none',
-        borderRadius: 16, padding: '17px 24px',
+        borderRadius: 12, padding: '16px 24px',
         fontSize: 15, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.45 : 1, width: '100%',
         transition: 'opacity 0.15s', ...style,
@@ -196,7 +222,11 @@ const ScrollBody = ({ children, style = {} }) => (
 )
 
 const BottomBar = ({ children }) => (
-  <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,background:"linear-gradient(to bottom,transparent,#0A1628 45%)",padding:"12px 20px 24px"}}>  
+  <div style={{
+    position: 'sticky', bottom: 0, padding: '12px 20px 20px',
+    background: `linear-gradient(to bottom, transparent, ${C.navy} 40%)`,
+    flexShrink: 0,
+  }}>
     {children}
   </div>
 )
@@ -224,6 +254,28 @@ function buildScreenList(selected) {
 // ─── Main component ────────────────────────────────────────────────────────────
 export default function Insure({ client, onBack }) {
   const isRefinance = client?.isRefinance ?? false
+
+  // Pre-journey auth flow: 'landing' | 'id' | 'phone' | 'otp' | 'register' | 'journey'
+  const [preStep, setPreStep]           = useState(isRefinance ? 'journey' : 'landing')
+
+  // Auth state
+  const [authId, setAuthId]             = useState('')
+  const [authFirstName, setAuthFirstName] = useState('')
+  const [authLastName, setAuthLastName]   = useState('')
+  const [authPhone, setAuthPhone]         = useState('')
+  const [authEmail, setAuthEmail]         = useState('')
+  const [authPass, setAuthPass]           = useState('')
+  const [authOtp, setAuthOtp]             = useState(['','','','','',''])
+  const [showAuthPass, setShowAuthPass]   = useState(false)
+  const [authPhase, setAuthPhase]         = useState('idle')
+  const [authValidation, setAuthValidation] = useState(null)
+  const [authTimer, setAuthTimer]         = useState(59)
+  const [authChecks, setAuthChecks]       = useState([
+    { label:'Valid SA ID format',  sub:'13 digits · Luhn checksum · Date of birth', status:'wait' },
+    { label:'Homeowner status',    sub:'Deeds Office verification', status:'wait' },
+    { label:'No sequestration',    sub:'Master of High Court check', status:'wait' },
+  ])
+  const otpRefs = React.useRef([])
 
   // Journey state — starts at -1 (Insure landing), 0+ = quote journey
   const [screenIdx, setScreenIdx]       = useState(-1)
@@ -303,12 +355,399 @@ export default function Insure({ client, onBack }) {
     setScreenIdx(i => i - 1)
   }
 
-  // ── Insure landing screen ─────────────────────────────────────────────────────
-  const renderLanding = () => (
-    <div className="screen fade-in" style={{background:'#F7F9FC'}}>
+  // OTP countdown timer
+  useEffect(() => {
+    if (preStep !== 'otp' || authTimer <= 0) return
+    const t = setTimeout(() => setAuthTimer(s => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [preStep, authTimer])
 
-      {/* single scrollable container — hero + body together */}
-      <div className="screen-scroll">
+  // ── Pre-journey: ID verification ──────────────────────────────────────────────
+  const renderIdVerify = () => {
+    const fmt = v => v.replace(/\D/g, '').slice(0, 13)
+
+    const handleChange = val => {
+      const cleaned = fmt(val)
+      setAuthId(cleaned)
+      setAuthPhase('idle')
+      setAuthValidation(null)
+      setAuthChecks(c => c.map(x => ({ ...x, status: 'wait' })))
+      if (cleaned.length === 13) {
+        const result = validateSAID(cleaned)
+        setAuthValidation(result)
+        if (!result.valid) setAuthPhase('invalid')
+      }
+    }
+
+    const handleCheck = async () => {
+      if (authId.length < 13) return
+      const result = validateSAID(authId)
+      if (!result.valid) { setAuthPhase('invalid'); setAuthValidation(result); return }
+      setAuthPhase('checking')
+      setAuthChecks(c => c.map((x, i) => i === 0 ? { ...x, status: 'loading' } : x))
+      try {
+        const res = await fetch(`${API}/verify-id`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_number: authId })
+        })
+        const data = await res.json()
+        setAuthChecks(c => c.map((x, i) => i === 0 ? { ...x, status: 'ok', sub: `DOB: ${result.dob} · ${result.gender}` } : x))
+        setTimeout(() => {
+          setAuthChecks(c => c.map((x, i) => i === 1 ? { ...x, status: 'loading' } : x))
+          setTimeout(() => {
+            setAuthChecks(c => c.map((x, i) => i === 1 ? { ...x, status: 'ok' } : x))
+            setTimeout(() => {
+              setAuthChecks(c => c.map((x, i) => i === 2 ? { ...x, status: 'loading' } : x))
+              setTimeout(() => {
+                setAuthChecks(c => c.map((x, i) => i === 2 ? { ...x, status: 'ok' } : x))
+                setAuthPhase('done')
+                window._muloIdNumber = authId
+              }, 900)
+            }, 400)
+          }, 900)
+        }, 400)
+      } catch (err) {
+        setAuthPhase('invalid')
+        setAuthValidation({ valid: false, error: err.message })
+        setAuthChecks(c => c.map(x => ({ ...x, status: 'wait' })))
+      }
+    }
+
+    const inputClass = `input-field${authPhase === 'invalid' ? ' error' : authPhase === 'done' ? ' success' : ''}`
+
+    return (
+      <div className="screen fade-in">
+        <div className="screen-header">
+          <div className="back-btn" onClick={() => setPreStep('landing')}>←</div>
+          <div className="screen-header-text">
+            <div className="screen-header-title">Verify your identity</div>
+            <div className="screen-header-sub">Step 1 of 4</div>
+          </div>
+          <div style={{ fontSize: 12, color: '#00B8A9', fontWeight: 600 }}>muḽo insure</div>
+        </div>
+        <div className="progress-track"><div className="progress-fill" style={{ width: '25%' }} /></div>
+        <div className="screen-scroll">
+          <div className="id-graphic">
+            <div className="id-card-label">South African ID Number</div>
+            <div className="id-card-number" style={{ letterSpacing: authId ? 3 : 1 }}>
+              {authId ? `${authId.slice(0,6)} ${authId.slice(6,10)} ${authId.slice(10)}` : '000000 0000 000'}
+            </div>
+            {authValidation?.valid && (
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 8, display: 'flex', gap: 12 }}>
+                <span>🎂 {authValidation.dob}</span><span>{authValidation.gender}</span>
+              </div>
+            )}
+            <div className="id-card-flag">🇿🇦</div>
+          </div>
+          <div className="form-pad">
+            <div className="input-group">
+              <label className="input-label">SA ID Number</label>
+              <input className={inputClass} placeholder="e.g. 8001015009087"
+                value={authId} maxLength={13} inputMode="numeric"
+                onChange={e => handleChange(e.target.value)} />
+              {authId.length > 0 && authId.length < 13 && <div className="input-hint">{authId.length}/13 digits</div>}
+              {authPhase === 'invalid' && authValidation && <div className="input-hint err">✕ {authValidation.error}</div>}
+              {authValidation?.valid && <div className="input-hint ok">✓ Valid · DOB {authValidation.dob} · {authValidation.gender}</div>}
+            </div>
+            {authId.length === 13 && authValidation?.valid && (
+              <div className="fade-up">
+                <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                  <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
+                    <label className="input-label">First name</label>
+                    <input className="input-field" placeholder="e.g. Thabo" value={authFirstName}
+                      onChange={e => setAuthFirstName(e.target.value)} autoCapitalize="words" />
+                  </div>
+                  <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
+                    <label className="input-label">Last name</label>
+                    <input className="input-field" placeholder="e.g. Nkosi" value={authLastName}
+                      onChange={e => setAuthLastName(e.target.value)} autoCapitalize="words" />
+                  </div>
+                </div>
+              </div>
+            )}
+            {(authPhase === 'checking' || authPhase === 'done') && (
+              <div style={{ padding: '4px 0 20px' }} className="fade-up">
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#8FA3BE', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10 }}>Verification checks</div>
+                {authChecks.map((c, i) => (
+                  <div className="check-row" key={i}>
+                    <div className={`check-icon ${c.status === 'wait' ? 'pending' : c.status}`}>
+                      {c.status === 'ok' ? '✓' : c.status === 'loading' ? '⟳' : '○'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="check-text">{c.label}</div>
+                      <div className="check-sub">{c.sub}</div>
+                    </div>
+                    {c.status === 'ok' && <div style={{ fontSize: 11, color: '#12C26B', fontWeight: 600 }}>Passed</div>}
+                    {c.status === 'loading' && <div style={{ fontSize: 11, color: '#00B8A9', fontWeight: 600 }}>Checking…</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="bottom-cta">
+          {authPhase !== 'done'
+            ? <button className="btn btn-primary"
+                disabled={authId.length < 13 || authPhase === 'invalid' || authPhase === 'checking'}
+                style={{ opacity: authId.length < 13 || authPhase === 'invalid' ? 0.4 : 1 }}
+                onClick={handleCheck}>
+                {authPhase === 'checking' ? 'Verifying…' : 'Verify my ID →'}
+              </button>
+            : <button className="btn btn-primary"
+                disabled={!authFirstName.trim() || !authLastName.trim()}
+                style={{ opacity: !authFirstName.trim() || !authLastName.trim() ? 0.4 : 1 }}
+                onClick={() => {
+                  window._muloFirstName = authFirstName
+                  window._muloLastName = authLastName
+                  setPreStep('phone')
+                }}>
+                Continue →
+              </button>
+          }
+        </div>
+      </div>
+    )
+  }
+
+  // ── Pre-journey: WhatsApp number ──────────────────────────────────────────────
+  const renderPhoneSelect = () => {
+    const digits = authPhone.replace(/\D/g, '')
+    const valid = digits.length === 9 || digits.length === 10
+
+    const handleContinue = async () => {
+      if (!valid) return
+      const normalized = digits.startsWith('0') ? digits : '0' + digits
+      window._muloCellphone = normalized
+      setAuthPhone(normalized)
+      try {
+        await fetch(`${API}/otp/send`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cellphone: normalized, id_number: authId })
+        })
+      } catch (e) {}
+      setAuthTimer(59)
+      setAuthOtp(['', '', '', '', '', ''])
+      setPreStep('otp')
+    }
+
+    return (
+      <div className="screen fade-in">
+        <div className="screen-header">
+          <div className="back-btn" onClick={() => setPreStep('id')}>←</div>
+          <div className="screen-header-text">
+            <div className="screen-header-title">Your WhatsApp number</div>
+            <div className="screen-header-sub">Step 2 of 4</div>
+          </div>
+          <div style={{ fontSize: 12, color: '#00B8A9', fontWeight: 600 }}>muḽo insure</div>
+        </div>
+        <div className="progress-track"><div className="progress-fill" style={{ width: '50%' }} /></div>
+        <div className="screen-scroll">
+          <div style={{ padding: '24px 20px 8px' }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#0A1628', marginBottom: 6 }}>Enter your WhatsApp number</div>
+            <div style={{ fontSize: 13, color: '#8FA3BE', marginBottom: 24, lineHeight: 1.6 }}>We'll send a one-time verification code to this number via WhatsApp.</div>
+            <div style={{ position: 'relative', marginBottom: 16 }}>
+              <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', gap: 8, pointerEvents: 'none' }}>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#0A1628' }}>+27</span>
+                <span style={{ color: '#E2E9F0' }}>|</span>
+              </div>
+              <input type="tel" inputMode="numeric" placeholder="82 123 4567"
+                value={authPhone.replace(/^0/, '')}
+                onChange={e => setAuthPhone(e.target.value)}
+                style={{ width: '100%', padding: '16px 16px 16px 80px', borderRadius: 14, border: '1.5px solid ' + (valid ? '#25D366' : '#E2E9F0'), fontSize: 16, fontFamily: 'IBM Plex Sans,sans-serif', boxSizing: 'border-box', outline: 'none' }} />
+            </div>
+            <div style={{ background: '#F7F9FC', border: '1px solid #E8EDF4', borderRadius: 14, padding: 14, fontSize: 12, color: '#8FA3BE', lineHeight: 1.6 }}>
+              Your OTP will be sent to this WhatsApp number to confirm you own it.
+            </div>
+          </div>
+        </div>
+        <div className="bottom-cta">
+          <button className="btn btn-primary" style={{ opacity: valid ? 1 : 0.4 }} disabled={!valid} onClick={handleContinue}>
+            Send OTP via WhatsApp →
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Pre-journey: OTP verify ───────────────────────────────────────────────────
+  const renderOtpVerify = () => {
+    const code = authOtp.join('')
+
+    const handleDigit = (i, val) => {
+      const v = val.replace(/\D/g, '').slice(-1)
+      const next = [...authOtp]; next[i] = v; setAuthOtp(next)
+      setAuthPhase('idle')
+      if (v && i < 5) otpRefs.current[i + 1]?.focus()
+    }
+
+    const handleKey = (i, e) => {
+      if (e.key === 'Backspace' && !authOtp[i] && i > 0) otpRefs.current[i - 1]?.focus()
+    }
+
+    const handlePaste = e => {
+      const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+      if (pasted.length === 6) { setAuthOtp(pasted.split('')); otpRefs.current[5]?.focus() }
+    }
+
+    const verify = async () => {
+      if (code.length < 6) return
+      setAuthPhase('checking')
+      try {
+        const res = await fetch(`${API}/otp/verify`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_number: authId, otp: code })
+        })
+        const data = await res.json()
+        if (data.verified) {
+          window._muloVerifiedToken = data.verifiedToken
+          setAuthPhase('done')
+          setTimeout(() => setPreStep('register'), 900)
+        } else {
+          setAuthPhase('error')
+          setAuthOtp(['', '', '', '', '', ''])
+          otpRefs.current[0]?.focus()
+        }
+      } catch {
+        setAuthPhase('error')
+        setAuthOtp(['', '', '', '', '', ''])
+        otpRefs.current[0]?.focus()
+      }
+    }
+
+    return (
+      <div className="screen fade-in">
+        <div className="screen-header">
+          <div className="back-btn" onClick={() => setPreStep('phone')}>←</div>
+          <div className="screen-header-text">
+            <div className="screen-header-title">Enter your OTP</div>
+            <div className="screen-header-sub">Step 3 of 4</div>
+          </div>
+          <div style={{ fontSize: 12, color: '#00B8A9', fontWeight: 600 }}>muḽo insure</div>
+        </div>
+        <div className="progress-track"><div className="progress-fill" style={{ width: '75%' }} /></div>
+        <div className="screen-scroll">
+          <div className="form-pad" style={{ paddingTop: 24 }}>
+            <div className="wa-card" style={{ marginBottom: 20 }}>
+              <div className="wa-icon-wrap">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              </div>
+              <div>
+                <div className="wa-sent-label">OTP sent via WhatsApp to</div>
+                <div className="wa-phone-num">+27 {window._muloCellphone?.slice(1)}</div>
+              </div>
+            </div>
+            <div className="otp-boxes" onPaste={handlePaste}>
+              {authOtp.map((d, i) => (
+                <input key={i} ref={el => otpRefs.current[i] = el}
+                  type="tel" inputMode="numeric" maxLength={1} value={d}
+                  onChange={e => handleDigit(i, e.target.value)}
+                  onKeyDown={e => handleKey(i, e)}
+                  style={{ width: 44, height: 52, borderRadius: 12, border: '2px solid ' + (authPhase === 'error' ? '#FF7043' : authPhase === 'done' ? '#12C26B' : d ? '#00B8A9' : '#E2E9F0'), textAlign: 'center', fontSize: 22, fontWeight: 700, fontFamily: 'Sora,sans-serif', outline: 'none' }} />
+              ))}
+            </div>
+            {authPhase === 'error' && <div style={{ color: '#FF7043', fontSize: 13, textAlign: 'center', marginTop: 8 }}>✕ Incorrect OTP. Please try again.</div>}
+            {authPhase === 'done' && <div style={{ color: '#12C26B', fontSize: 13, textAlign: 'center', marginTop: 8 }}>✓ Verified!</div>}
+            <div className="otp-resend-row" style={{ marginTop: 16 }}>
+              {authTimer > 0
+                ? <span>Resend in <span className="otp-timer">{authTimer}s</span></span>
+                : <span className="otp-resend-link" onClick={() => { setAuthTimer(59); setAuthOtp(['','','','','','']) }}>Resend OTP</span>
+              }
+            </div>
+          </div>
+        </div>
+        <div className="bottom-cta">
+          <button className="btn btn-primary"
+            disabled={code.length < 6 || authPhase === 'checking' || authPhase === 'done'}
+            style={{ opacity: code.length < 6 ? 0.4 : 1 }}
+            onClick={verify}>
+            {authPhase === 'checking' ? 'Verifying…' : authPhase === 'done' ? 'Verified ✓' : 'Verify OTP →'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Pre-journey: Register ─────────────────────────────────────────────────────
+  const renderRegister = () => {
+    const ready = authEmail && authPass.length >= 8
+
+    const handleRegister = async () => {
+      if (!ready) return
+      setAuthPhase('checking')
+      try {
+        await fetch(`${API}/signup`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id_number: authId, first_name: authFirstName, last_name: authLastName,
+            cellphone: window._muloCellphone, email: authEmail, password: authPass,
+            verified_token: window._muloVerifiedToken,
+          })
+        })
+      } catch (e) {}
+      window._muloEmail = authEmail
+      setAuthPhase('idle')
+      setPreStep('journey')
+      setScreenIdx(0)
+    }
+
+    return (
+      <div className="screen fade-in">
+        <div className="screen-header">
+          <div className="back-btn" onClick={() => setPreStep('otp')}>←</div>
+          <div className="screen-header-text">
+            <div className="screen-header-title">Create your account</div>
+            <div className="screen-header-sub">Step 4 of 4</div>
+          </div>
+          <div style={{ fontSize: 12, color: '#00B8A9', fontWeight: 600 }}>muḽo insure</div>
+        </div>
+        <div className="progress-track"><div className="progress-fill" style={{ width: '100%' }} /></div>
+        <div className="screen-scroll">
+          <div className="form-pad" style={{ paddingTop: 24 }}>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#0A1628', marginBottom: 4 }}>Welcome, {authFirstName}! 👋</div>
+              <div style={{ fontSize: 13, color: '#8FA3BE' }}>Just your email and a password to finish setting up your account.</div>
+            </div>
+            <div className="input-group">
+              <label className="input-label">Email address</label>
+              <input className="input-field" type="email" placeholder="you@example.com"
+                value={authEmail} onChange={e => setAuthEmail(e.target.value)} autoCapitalize="none" />
+            </div>
+            <div className="input-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label className="input-label" style={{ margin: 0 }}>Password</label>
+                <span style={{ fontSize: 12, color: '#00B8A9', cursor: 'pointer', fontWeight: 600 }} onClick={() => setShowAuthPass(p => !p)}>{showAuthPass ? 'Hide' : 'Show'}</span>
+              </div>
+              <input className="input-field" type={showAuthPass ? 'text' : 'password'} placeholder="Min. 8 characters"
+                value={authPass} onChange={e => setAuthPass(e.target.value)} />
+              {authPass.length > 0 && (
+                <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                  {[authPass.length >= 8, /[A-Z]/.test(authPass), /[0-9]/.test(authPass)].map((ok, i) => (
+                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, background: ok ? '#00B8A9' : '#E2E9F0', transition: 'background .3s' }} />
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ fontSize: 11, color: '#8FA3BE', lineHeight: 1.6, marginBottom: 16 }}>
+              By creating an account you agree to Muḽo's Terms of Service and Privacy Policy. Your information is processed in terms of POPIA.
+            </div>
+          </div>
+        </div>
+        <div className="bottom-cta">
+          <button className="btn btn-primary"
+            disabled={!ready || authPhase === 'checking'}
+            style={{ opacity: !ready ? 0.4 : 1 }}
+            onClick={handleRegister}>
+            {authPhase === 'checking' ? 'Creating account…' : 'Get my free quotes →'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+  const renderLanding = () => (
+    <div className="screen fade-in" style={{background:'#F7F9FC',display:'flex',flexDirection:'column',overflow:'hidden'}}>
+
+      <div className="screen-scroll" style={{flex:1,overflowY:'auto'}}>
 
         {/* ── Hero ── */}
         <div style={{background:'linear-gradient(160deg,#0A1628 0%,#0E2344 60%,#0B3040 100%)',padding:'28px 24px 0',position:'relative',overflow:'hidden'}}>
@@ -327,17 +766,23 @@ export default function Insure({ client, onBack }) {
             </div>
           </div>
 
-          <div className="hero-eyebrow" style={{position:'relative',zIndex:1}}>💸 Earn 1× your first month's premium as cashback</div>
-          <h1 className="hero-title" style={{position:'relative',zIndex:1}}>South Africa's smartest<br/><em>insurance comparison.</em></h1>
-          <p className="hero-sub" style={{position:'relative',zIndex:1}}>Compare quotes from 5 leading insurers in minutes. Get covered, earn cashback, pay less.</p>
+          <div className={"hero-eyebrow"} style={{position:"relative",zIndex:1}}>🏆 South Africa's only cashback insurance platform</div>
+          <h1 className={"hero-title"} style={{fontSize:22,lineHeight:1.2,position:"relative",zIndex:1}}>Anyone can compare insurance.<br/><em>Only Muḽo pays you for it.</em></h1>
+          <p className={"hero-sub"} style={{position:"relative",zIndex:1}}>Insure your car, home or contents through Muḽo and earn your first month's premium back — guaranteed. Every time.</p>
+          <p className={"hero-sub"} style={{position:"relative",zIndex:1,marginTop:-8,fontStyle:"italic",color:"rgba(255,255,255,0.65)"}}>The smart move isn't just finding a better rate. It's getting paid when you find it.</p>
 
-          <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:20,position:'relative',zIndex:1}}>
-            {[['🟠','Naked'],['👑','King Price'],['🍍','Pineapple'],['🔵','iWYZE'],['🔴','Absa']].map(([e,n]) => (
-              <div key={n} style={{display:'flex',alignItems:'center',gap:5,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:99,padding:'4px 10px'}}>
-                <span style={{fontSize:13}}>{e}</span>
-                <span style={{fontSize:11,fontWeight:600,color:'rgba(255,255,255,0.6)'}}>{n}</span>
-              </div>
-            ))}
+          <div style={{position:"relative",zIndex:1,overflow:"hidden",marginBottom:20}}>
+            <div style={{display:"flex",gap:8,animation:"insurerScroll 22s linear infinite",width:"max-content"}}>
+              {[["https://www.absa.co.za/favicon.ico","Absa"],["https://www.pineapple.co.za/favicon.ico","Pineapple"],["https://www.nedbank.co.za/favicon.ico","Nedbank"],["https://www.oldmutual.co.za/favicon.ico","Old Mutual"],["https://www.miway.co.za/favicon.ico","MiWay"],["https://www.momentum.co.za/favicon.ico","Momentum"],["https://www.kingprice.co.za/favicon.ico","King Price"],["https://www.iwyze.co.za/favicon.ico","iWYZE"],
+                ["https://www.absa.co.za/favicon.ico","Absa"],["https://www.pineapple.co.za/favicon.ico","Pineapple"],["https://www.nedbank.co.za/favicon.ico","Nedbank"],["https://www.oldmutual.co.za/favicon.ico","Old Mutual"],["https://www.miway.co.za/favicon.ico","MiWay"],["https://www.momentum.co.za/favicon.ico","Momentum"],["https://www.kingprice.co.za/favicon.ico","King Price"],["https://www.iwyze.co.za/favicon.ico","iWYZE"]
+              ].map(([src,n],idx) => (
+                <div key={idx} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:99,padding:"5px 12px",whiteSpace:"nowrap",flexShrink:0}}>
+                  <img src={src} width={18} height={18} style={{borderRadius:3,objectFit:"contain",background:"#fff",padding:2}} onError={ev=>ev.target.style.display="none"}/>
+                  <span style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.75)"}}>{n}</span>
+                </div>
+              ))}
+            </div>
+            <style>{`@keyframes insurerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
           </div>
 
           <div className="hero-stats" style={{position:'relative',zIndex:1}}>
@@ -346,6 +791,10 @@ export default function Insure({ client, onBack }) {
             ))}
           </div>
 
+          <div style={{marginBottom:20,position:"relative",zIndex:1}}>
+            <button className="btn btn-primary" onClick={() => setPreStep('journey')}>Get my free quotes →</button>
+            <div style={{textAlign:"center",marginTop:8,fontSize:11,color:"rgba(255,255,255,0.5)"}}>Free to compare · No obligation · Takes 3 minutes</div>
+          </div>
           <div className="trust-strip">
             {[['🛡️','FSP 49169'],['🔒','POPIA Compliant'],['⚡','5 insurers']].map(([i,l]) => (
               <div className="trust-item" key={l}><span className="trust-icon">{i}</span>{l}</div>
@@ -354,44 +803,6 @@ export default function Insure({ client, onBack }) {
         </div>
 
         {/* ── Body ── */}
-        <div className="landing-body">
-          <div className="section-title">Why Muḽo Insure</div>
-          {[
-            ['💸','Earn your first month back',    'Every policy earns you 1× your first month\'s premium as cashback — paid within 30 days of cover starting.'],
-            ['⚡','Quotes in under 3 minutes',      'Answer 3–5 questions. We pull quotes from all 5 insurers simultaneously and rank them by value.'],
-            ['🏆','Best price, not just cheapest',  'We rank by value, claims reputation and acceptance likelihood — not just the lowest number.'],
-            ['📱','Fully digital, start to finish', 'Compare, choose, sign. Policy documents on WhatsApp and email the moment you\'re covered.'],
-          ].map(([icon,title,body]) => (
-            <div className="step-card" key={title}>
-              <div className="step-num">{icon}</div>
-              <div><div className="step-content-title">{title}</div><div className="step-content-sub">{body}</div></div>
-            </div>
-          ))}
-
-          <div className="section-title" style={{marginTop:24}}>What we cover</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:20}}>
-            {[['🚗','Car insurance'],['🏠','Buildings'],['📦','Home contents'],['💎','All risk'],['🚐','Caravan'],['🔗','Trailer']].map(([icon,label]) => (
-              <div key={label} style={{display:'flex',alignItems:'center',gap:10,background:'#fff',border:'1px solid #EEF2F8',borderRadius:14,padding:'12px 14px',boxShadow:'0 2px 8px rgba(0,0,0,0.04)'}}>
-                <span style={{fontSize:20}}>{icon}</span>
-                <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>{label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{background:'linear-gradient(135deg,rgba(18,194,107,0.08),rgba(0,184,169,0.06))',border:'1px solid rgba(18,194,107,0.2)',borderRadius:18,padding:18,marginBottom:16}}>
-            <div style={{fontFamily:"'Sora',sans-serif",fontSize:14,fontWeight:700,color:'#12C26B',marginBottom:8}}>💸 How cashback works</div>
-            <div style={{fontSize:13,color:'#8FA3BE',lineHeight:1.65}}>Take out any policy through Muḽo Insure and the insurer pays back your <strong style={{color:'#0A1628'}}>full first month's premium</strong> — per product. Insure your car <em>and</em> your home, earn cashback on both.</div>
-            <div style={{display:'flex',gap:16,marginTop:12,fontSize:12,color:'#8FA3BE'}}>
-              <span>🔒 12-month lock-in</span><span>📅 Paid within 30 days</span>
-            </div>
-          </div>
-
-          <button className="btn btn-primary" onClick={goNext} style={{marginBottom:12}}>Get my free quotes →</button>
-          <div style={{textAlign:'center',fontSize:11,color:'#8FA3BE',marginBottom:8}}>Free to compare · No obligation · Takes 3 minutes</div>
-          <div style={{textAlign:'center',fontSize:11,color:'#C5D0DC',lineHeight:1.6,paddingBottom:24}}>
-            Muḽo Financial Services (Pty) Ltd · FSP 49169<br/>Authorised Financial Services Provider
-          </div>
-        </div>
       </div>
     </div>
   )
@@ -522,7 +933,7 @@ export default function Insure({ client, onBack }) {
           </div>
         </ScrollBody>
         <BottomBar>
-          <Btn onClick={goNext} disabled={!canProceed || errors.length > 0}>
+          <Btn onClick={() => { if (preStep !== 'journey' || !window._muloIdNumber) { setPreStep('id'); } else { goNext(); } }} disabled={!canProceed || errors.length > 0}>
             {selected.length === 0 ? 'Select a product to continue' : `Continue with ${selected.length} product${selected.length > 1 ? 's' : ''} →`}
           </Btn>
         </BottomBar>
@@ -1145,6 +1556,12 @@ export default function Insure({ client, onBack }) {
       </Screen>
     )
   }
+
+  // ── Route preStep screens ─────────────────────────────────────────────────────
+  if (preStep === 'id')       return renderIdVerify()
+  if (preStep === 'phone')    return renderPhoneSelect()
+  if (preStep === 'otp')      return renderOtpVerify()
+  if (preStep === 'register') return renderRegister()
 
   // ── Route to correct screen renderer ─────────────────────────────────────────
   switch (currentScreen) {

@@ -62,10 +62,10 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
-body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8;min-height:100vh}
+html,body{margin:0;padding:0;height:100vh;overflow:hidden}body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8}
 
 /* ── SHELL ── */
-.shell{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:32px 16px}
+.shell{display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:16px}
 .phone{width:390px;height:min(780px,92vh);min-height:600px;background:#F7F9FC;border-radius:0;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25);position:relative;display:flex;flex-direction:column}
 .phone-notch{display:none}
 
@@ -573,6 +573,7 @@ function Landing({ go }) {
             <div className="mulo-logo">Mu<span>ḽ</span>o</div>
             <div style={{display:"flex",alignItems:"center",gap:16}}>
               <div style={{fontSize:13,color:"rgba(255,255,255,0.7)",cursor:"pointer",fontWeight:500}} onClick={() => setFaqOpen(true)}>FAQ</div>
+              <div style={{fontSize:13,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => go("insure")}>Insure</div>
               <div className="login-link" onClick={() => go("login")}>Sign in →</div>
             </div>
           </div>
@@ -3459,6 +3460,7 @@ function Dashboard({ go }) {
         {[
           {label:"Home",     svg:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10", key:"home",     action:()=>setTab("home")},
           {label:"Tranches", svg:"M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",    key:"tranches",  action:()=>go("disbursement")},
+          {label:"Insure",   svg:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",              key:"insure",    action:()=>go("insure")},
           {label:"Support",  svg:"M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z", key:"support",   action:()=>setTab("support")},
           {label:"Profile",  svg:"M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z",  key:"profile",   action:()=>setTab("profile")},
         ].map(({label,svg,key,action}) => (
@@ -3479,7 +3481,22 @@ function Dashboard({ go }) {
 /* ─────────────────────────────────────────────
    ROOT
 ───────────────────────────────────────────── */
-const SCREENS = { landing:Landing, login:Login, "id-verify":IdVerify, "forgot-password":ForgotPassword, "phone-select":PhoneSelect, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard };
+import Insure from "./Insure.jsx";
+function InsureWrapper({ go }) {
+  const isRefinance = !!(window._muloFirstName && window._muloLastName);
+  const client = {
+    isRefinance,
+    name: (window._muloFirstName || "") + " " + (window._muloLastName || ""),
+    idNumber: window._muloIdNumber || "",
+    email: window._muloEmail || "",
+    phone: window._muloCellphone || "",
+    property: { address: window._muloPropertyAddress || "", buildingValue: window._muloBuildingValue || 0, contentsValue: window._muloContentsValue || 0, riskScore: window._muloRiskScore || null },
+    vehicle: { make: window._muloVehicleMake || "", model: window._muloVehicleModel || "", year: window._muloVehicleYear || "", reg: window._muloVehicleReg || "", colour: window._muloVehicleColour || "" },
+    bankAccount: { bank: window._muloBankName || "", accountNumber: window._muloBankAccount || "", accountType: "Cheque" },
+  };
+  return <Insure client={client} onBack={() => go("landing")} />;
+}
+const SCREENS = { landing:Landing, login:Login, "id-verify":IdVerify, "forgot-password":ForgotPassword, "phone-select":PhoneSelect, otp:OtpVerify, liveness:LivenessCheck, signup:Signup, consent:Consent, loading:Loading, "bond-confirm":BondConfirm, "bank-account":BankAccountConfirm, offer:Offer, "doc-upload":DocUpload, "loan-sign":LoanSign, conveyancing:Conveyancing, settlement:Settlement, disbursement:Disbursement, dashboard:Dashboard, insure:InsureWrapper };
 
 export default function App() {
   const [screen, setScreen] = useState(() => { const p = new URLSearchParams(window.location.search); if (p.get("verified") === "true") { window.history.replaceState({}, "", "/"); return "liveness"; } return "landing"; });
