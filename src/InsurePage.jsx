@@ -73,45 +73,46 @@ const MOCK_QUOTES = {
 // ─── Global CSS ────────────────────────────────────────────────────────────
 const GS = `
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:#F0F4F8;font-family:'IBM Plex Sans',sans-serif;color:#fff}
+html,body{margin:0;padding:0;background:#F0F4F8;font-family:'IBM Plex Sans',sans-serif;color:#0A1628}
 @keyframes insurerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ip-fade{animation:fadeUp .3s ease forwards}
 .ip-shell{min-height:100vh;background:#F0F4F8;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px 60px}
-.ip-card{width:100%;max-width:390px;background:${NAVY};border-radius:28px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25)}
-.ip-btn{display:block;width:100%;padding:17px 24px;background:linear-gradient(135deg,${TEAL},#1A73E8);color:#fff;border:none;border-radius:14px;font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,184,169,0.3);transition:opacity .15s,transform .1s;text-align:center}
+.ip-card{width:100%;max-width:390px;background:#F7F9FC;border-radius:28px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12)}
+.ip-btn{display:block;width:100%;padding:17px 24px;background:linear-gradient(135deg,${TEAL},#1A73E8);color:#fff;border:none;border-radius:16px;font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,184,169,0.35);transition:opacity .15s,transform .1s;text-align:center}
 .ip-btn:hover{opacity:.92}
 .ip-btn:active{transform:scale(.98)}
 .ip-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.ip-input{width:100%;padding:13px 15px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
-.ip-input:focus{border-color:${TEAL}}
+.ip-input{width:100%;padding:14px 16px;background:#fff;border:1.5px solid #E2E9F0;border-radius:14px;color:#0A1628;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;transition:all .2s}
+.ip-input:focus{border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.1)}
 .ip-input.ok{border-color:${GREEN}}
-.ip-input.err{border-color:#FF5C5C}
-.ip-label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.ip-input.err{border-color:#FF5C5C;box-shadow:0 0 0 3px rgba(255,92,92,0.1)}
+.ip-label{display:block;font-size:11px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .ip-hint-ok{font-size:12px;color:${GREEN};margin-top:5px}
 .ip-hint-err{font-size:12px;color:#FF5C5C;margin-top:5px}
-.ip-otp-box{width:44px;height:52px;border-radius:12px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#fff;text-align:center;font-size:22px;font-weight:700;outline:none;transition:border-color .2s}
+.ip-otp-box{width:44px;height:52px;border-radius:12px;border:1.5px solid #E2E9F0;background:#fff;color:#0A1628;text-align:center;font-size:22px;font-weight:700;outline:none;transition:border-color .2s}
 .ip-otp-box:focus{border-color:${TEAL}}
-.ip-progress{height:3px;background:rgba(255,255,255,0.1)}
-.ip-progress-fill{height:3px;background:linear-gradient(90deg,${TEAL},#1A73E8);transition:width .4s ease}
-.ip-bottom{padding:12px 20px 24px;background:linear-gradient(to bottom,transparent,${NAVY} 45%)}
-.ip-product{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s}
-.ip-product.sel{background:rgba(0,184,169,0.1);border-color:${TEAL}}
+.ip-progress{height:3px;background:#E8EDF4;border-radius:99px;margin:0 24px 4px}
+.ip-progress-fill{height:3px;border-radius:99px;background:linear-gradient(90deg,${TEAL},#1A73E8);transition:width .4s ease}
+.ip-bottom{padding:12px 20px 24px;background:linear-gradient(to bottom,transparent,#F7F9FC 45%)}
+.ip-product{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid #E2E9F0;border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.ip-product.sel{background:rgba(0,184,169,0.06);border-color:${TEAL}}
 .ip-product.dis{opacity:.4;cursor:not-allowed}
-.ip-quote-card{background:rgba(255,255,255,0.05);border:2px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .15s}
-.ip-quote-card.sel{border-color:${TEAL};background:rgba(0,184,169,0.08)}
-.ip-check-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
-.ip-spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-top-color:${TEAL};border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-.ip-select{width:100%;padding:13px 15px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;appearance:none;cursor:pointer}
-.ip-select option{background:${NAVY};color:#fff}
+.ip-quote-card{background:#fff;border:1.5px solid #E2E9F0;border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.ip-quote-card.sel{border-color:${TEAL};background:rgba(0,184,169,0.04)}
+.ip-check-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #F0F4F8}
+.ip-spinner{width:20px;height:20px;border:2px solid #E2E9F0;border-top-color:${TEAL};border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.ip-select{width:100%;padding:14px 16px;background:#fff;border:1.5px solid #E2E9F0;border-radius:14px;color:#0A1628;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;appearance:none;cursor:pointer;transition:all .2s}
+.ip-select:focus{border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.1)}
+.ip-select option{background:#fff;color:#0A1628}
 `
 
 // ─── Nav component ─────────────────────────────────────────────────────────
 const Nav = ({onBack,showBack}) => (
   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 20px 12px',borderBottom:'1px solid rgba(255,255,255,0.07)'}}>
     <div style={{display:'flex',alignItems:'center',gap:10}}>
-      {showBack && <button onClick={onBack} style={{width:32,height:32,borderRadius:8,background:'rgba(255,255,255,0.08)',border:'none',color:'#fff',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>←</button>}
+      {showBack && <button onClick={onBack} style={{width:32,height:32,borderRadius:8,background:'#fff',border:'1.5px solid #E2E9F0',color:'#0A1628',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>←</button>}
       <div style={{fontFamily:"'Sora',sans-serif",fontSize:18,fontWeight:800,color:'#fff'}}>Mu<span style={{color:TEAL}}>ḽ</span>o <span style={{fontSize:11,fontWeight:600,color:'rgba(255,255,255,0.4)'}}>insure</span></div>
     </div>
     <div style={{fontSize:10,color:'rgba(255,255,255,0.3)'}}>FSP 49169</div>
@@ -125,12 +126,12 @@ const ProgressBar = ({step,total}) => (
 const StepHeader = ({title,subtitle,step,total,onBack}) => (
   <>
     <div style={{display:'flex',alignItems:'center',gap:10,padding:'16px 20px 8px'}}>
-      <button onClick={onBack} style={{width:32,height:32,borderRadius:8,background:'rgba(255,255,255,0.08)',border:'none',color:'#fff',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>←</button>
+      <button onClick={onBack} style={{width:32,height:32,borderRadius:8,background:'#fff',border:'1.5px solid #E2E9F0',color:'#0A1628',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>←</button>
       <div style={{flex:1}}>
-        <div style={{fontFamily:"'Sora',sans-serif",fontSize:16,fontWeight:700}}>{title}</div>
-        {subtitle && <div style={{fontSize:11,color:'rgba(255,255,255,0.45)',marginTop:1}}>{subtitle}</div>}
+        <div style={{fontFamily:"'Sora',sans-serif",fontSize:16,fontWeight:700,color:'#0A1628'}}>{title}</div>
+        {subtitle && <div style={{fontSize:11,color:'#8FA3BE',marginTop:1}}>{subtitle}</div>}
       </div>
-      <div style={{fontSize:11,color:TEAL,fontWeight:600}}>muḽo insure</div>
+      <div style={{fontSize:11,color:TEAL,fontWeight:600,background:'rgba(0,184,169,0.08)',padding:'4px 10px',borderRadius:99}}>muḽo insure</div>
     </div>
     <ProgressBar step={step} total={total}/>
   </>
@@ -442,7 +443,7 @@ export default function InsurePage() {
       <>
         <StepHeader title="What do you want to insure?" subtitle="Select all that apply" step={1} total={5} onBack={()=>setStep('landing')}/>
         <div style={{overflowY:'auto',padding:'16px 20px 0'}}>
-          <p style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:16,lineHeight:1.6}}>Every product earns 1× your first month's premium as cashback.</p>
+          <p style={{fontSize:13,color:'#8FA3BE',marginBottom:16,lineHeight:1.6}}>Every product earns 1× your first month's premium as cashback.</p>
           {PRODUCTS.map(p=>{
             const isSel=selected.includes(p.code)
             const isDis=(p.code==='ALLRISK'&&selected.filter(c=>c!=='ALLRISK').length===0)||((p.code==='CARAVAN'||p.code==='TRAILER')&&!selected.includes('CAR'))
@@ -450,11 +451,11 @@ export default function InsurePage() {
               <div key={p.code} className={`ip-product${isSel?' sel':''}${isDis?' dis':''}`} onClick={()=>!isDis&&toggle(p.code)}>
                 <span style={{fontSize:26}}>{p.icon}</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:600,color:'#fff'}}>{p.label}</div>
-                  <div style={{fontSize:12,color:'rgba(255,255,255,0.45)',marginTop:2}}>{p.sub}</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{p.label}</div>
+                  <div style={{fontSize:12,color:'#8FA3BE',marginTop:2}}>{p.sub}</div>
                 </div>
                 <div style={{width:20,height:20,borderRadius:99,border:`2px solid ${isSel?TEAL:'rgba(255,255,255,0.2)'}`,background:isSel?TEAL:'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                  {isSel&&<span style={{color:NAVY,fontSize:11,fontWeight:700}}>✓</span>}
+                  {isSel&&<span style={{color:'#fff',fontSize:11,fontWeight:700}}>✓</span>}
                 </div>
               </div>
             )
@@ -538,8 +539,8 @@ export default function InsurePage() {
                     {c.status==='loading'?<div className="ip-spinner"/>:c.status==='ok'?'✓':'○'}
                   </div>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:13,fontWeight:600,color:'#fff'}}>{c.label}</div>
-                    <div style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>{c.sub}</div>
+                    <div style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>{c.label}</div>
+                    <div style={{fontSize:11,color:'#8FA3BE'}}>{c.sub}</div>
                   </div>
                   {c.status==='ok'&&<div style={{fontSize:11,color:GREEN,fontWeight:600,flexShrink:0}}>Passed</div>}
                 </div>
@@ -656,8 +657,8 @@ export default function InsurePage() {
         <StepHeader title="Create your account" subtitle="Step 4 of 5" step={4} total={5} onBack={()=>setStep('otp')}/>
         <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
           <div style={{marginBottom:20}}>
-            <div style={{fontSize:16,fontWeight:700,color:'#fff',marginBottom:4}}>Welcome, {authFirstName}! 👋</div>
-            <div style={{fontSize:13,color:'rgba(255,255,255,0.5)'}}>Just your email and a password to finish setting up your account.</div>
+            <div style={{fontSize:16,fontWeight:700,color:'#0A1628',marginBottom:4}}>Welcome, {authFirstName}! 👋</div>
+            <div style={{fontSize:13,color:'#8FA3BE'}}>Just your email and a password to finish setting up your account.</div>
           </div>
           <div style={{marginBottom:14}}>
             <label className="ip-label">Email address</label>
@@ -671,7 +672,7 @@ export default function InsurePage() {
             <input className="ip-input" type={showPass?'text':'password'} placeholder="Min. 8 characters" value={authPass} onChange={e=>setAuthPass(e.target.value)}/>
             {authPass.length>0&&<div style={{display:'flex',gap:4,marginTop:8}}>{[authPass.length>=8,/[A-Z]/.test(authPass),/[0-9]/.test(authPass)].map((ok,i)=><div key={i} style={{flex:1,height:3,borderRadius:99,background:ok?TEAL:'rgba(255,255,255,0.1)',transition:'background .3s'}}/>)}</div>}
           </div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',lineHeight:1.6,marginBottom:8}}>By creating an account you agree to Muḽo's Terms of Service and Privacy Policy. Your information is processed in terms of POPIA.</div>
+          <div style={{fontSize:11,color:'#8FA3BE',lineHeight:1.6,marginBottom:8}}>By creating an account you agree to Muḽo's Terms of Service and Privacy Policy. Your information is processed in terms of POPIA.</div>
         </div>
         <div className="ip-bottom" style={{marginTop:8}}>
           <button className="ip-btn" disabled={!ready||authPhase==='checking'} onClick={handleRegister}>{authPhase==='checking'?'Creating account…':'Get my free quotes →'}</button>
@@ -857,7 +858,7 @@ export default function InsurePage() {
                 const active=o==='Yes'?vehicle.financed===true:vehicle.financed===false
                 return(
                   <button key={o} onClick={()=>setVehicle(p=>({...p,financed:o==='Yes',financeHouse:o==='No'?'':p.financeHouse}))}
-                    style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${active?TEAL:'rgba(255,255,255,0.12)'}`,background:active?'rgba(0,184,169,0.1)':'transparent',color:'#fff',fontSize:14,fontWeight:600,cursor:'pointer'}}>
+                    style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${active?TEAL:'#E2E9F0'}`,background:active?'rgba(0,184,169,0.08)':'#fff',color:'#0A1628',fontSize:14,fontWeight:600,cursor:'pointer'}}>
                     {o}
                   </button>
                 )
@@ -899,7 +900,7 @@ export default function InsurePage() {
             <div style={{display:'flex',gap:8}}>
               {['Comprehensive','Third party fire & theft','Third party only'].map(o=>(
                 <button key={o} onClick={()=>setCarDriver(p=>({...p,coverType:o}))}
-                  style={{flex:1,padding:'10px 6px',borderRadius:10,border:`1.5px solid ${carDriver.coverType===o?TEAL:'rgba(255,255,255,0.12)'}`,background:carDriver.coverType===o?'rgba(0,184,169,0.1)':'transparent',color:carDriver.coverType===o?TEAL:'rgba(255,255,255,0.6)',fontSize:11,fontWeight:600,cursor:'pointer',lineHeight:1.3,textAlign:'center'}}>
+                  style={{flex:1,padding:'10px 6px',borderRadius:10,border:`1.5px solid ${carDriver.coverType===o?TEAL:'#E2E9F0'}`,background:carDriver.coverType===o?'rgba(0,184,169,0.08)':'#fff',color:carDriver.coverType===o?TEAL:'#5A7A9A',fontSize:11,fontWeight:600,cursor:'pointer',lineHeight:1.3,textAlign:'center'}}>
                   {o}
                 </button>
               ))}
@@ -939,7 +940,7 @@ export default function InsurePage() {
             <div style={{display:'flex',gap:8}}>
               {['No','Yes — 1 claim','Yes — 2+ claims'].map(o=>(
                 <button key={o} onClick={()=>setCarDriver(p=>({...p,claims:o}))}
-                  style={{flex:1,padding:'10px 6px',borderRadius:10,border:`1.5px solid ${carDriver.claims===o?TEAL:'rgba(255,255,255,0.12)'}`,background:carDriver.claims===o?'rgba(0,184,169,0.1)':'transparent',color:carDriver.claims===o?TEAL:'rgba(255,255,255,0.6)',fontSize:11,fontWeight:600,cursor:'pointer',textAlign:'center'}}>
+                  style={{flex:1,padding:'10px 6px',borderRadius:10,border:`1.5px solid ${carDriver.claims===o?TEAL:'#E2E9F0'}`,background:carDriver.claims===o?'rgba(0,184,169,0.08)':'#fff',color:carDriver.claims===o?TEAL:'#5A7A9A',fontSize:11,fontWeight:600,cursor:'pointer',textAlign:'center'}}>
                   {o}
                 </button>
               ))}
@@ -951,7 +952,7 @@ export default function InsurePage() {
             <div style={{display:'flex',gap:8}}>
               {['No','Yes'].map(o=>(
                 <button key={o} onClick={()=>setCarDriver(p=>({...p,convictions:o}))}
-                  style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${carDriver.convictions===o?TEAL:'rgba(255,255,255,0.12)'}`,background:carDriver.convictions===o?'rgba(0,184,169,0.1)':'transparent',color:carDriver.convictions===o?TEAL:'rgba(255,255,255,0.6)',fontSize:14,fontWeight:600,cursor:'pointer'}}>
+                  style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${carDriver.convictions===o?TEAL:'#E2E9F0'}`,background:carDriver.convictions===o?'rgba(0,184,169,0.08)':'#fff',color:carDriver.convictions===o?TEAL:'#5A7A9A',fontSize:14,fontWeight:600,cursor:'pointer'}}>
                   {o}
                 </button>
               ))}
@@ -961,7 +962,7 @@ export default function InsurePage() {
           <div style={{marginBottom:14}}>
             <label className="ip-label">Overnight parking address</label>
             <input className="ip-input" type="text" placeholder="Suburb where car is parked overnight" value={carDriver.parkingAddress||''} onChange={e=>setCarDriver(p=>({...p,parkingAddress:e.target.value}))}/>
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',marginTop:4}}>Used to assess area risk — suburb is sufficient</div>
+            <div style={{fontSize:11,color:'#8FA3BE',marginTop:4}}>Used to assess area risk — suburb is sufficient</div>
           </div>
 
           <div style={{marginBottom:14}}>
@@ -980,7 +981,7 @@ export default function InsurePage() {
             <div style={{display:'flex',gap:8}}>
               {['No','Yes'].map(o=>(
                 <button key={o} onClick={()=>setCarDriver(p=>({...p,tracking:o,trackingProvider:o==='No'?'':p.trackingProvider}))}
-                  style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${carDriver.tracking===o?TEAL:'rgba(255,255,255,0.12)'}`,background:carDriver.tracking===o?'rgba(0,184,169,0.1)':'transparent',color:carDriver.tracking===o?TEAL:'rgba(255,255,255,0.6)',fontSize:14,fontWeight:600,cursor:'pointer'}}>
+                  style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${carDriver.tracking===o?TEAL:'#E2E9F0'}`,background:carDriver.tracking===o?'rgba(0,184,169,0.08)':'#fff',color:carDriver.tracking===o?TEAL:'#5A7A9A',fontSize:14,fontWeight:600,cursor:'pointer'}}>
                   {o}
                 </button>
               ))}
@@ -1061,15 +1062,15 @@ export default function InsurePage() {
                       <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
                         <img src={q.logo} width={24} height={24} style={{borderRadius:4,objectFit:'contain',background:'#fff',padding:2}} onError={e=>e.target.style.display='none'}/>
                         <div style={{flex:1}}>
-                          <div style={{fontSize:14,fontWeight:600,color:'#fff'}}>{q.insurer}</div>
+                          <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{q.insurer}</div>
                           {q.highlight&&<div style={{fontSize:11,color:TEAL,fontWeight:600}}>★ {q.highlight}</div>}
                         </div>
                         <div style={{textAlign:'right'}}>
-                          <div style={{fontSize:18,fontWeight:700,color:'#fff'}}>R{q.premium.toLocaleString()}</div>
-                          <div style={{fontSize:10,color:'rgba(255,255,255,0.4)'}}>/month</div>
+                          <div style={{fontSize:18,fontWeight:700,color:'#0A1628'}}>R{q.premium.toLocaleString()}</div>
+                          <div style={{fontSize:10,color:'#8FA3BE'}}>/month</div>
                         </div>
                       </div>
-                      <div style={{display:'flex',gap:12,fontSize:12,color:'rgba(255,255,255,0.5)'}}>
+                      <div style={{display:'flex',gap:12,fontSize:12,color:'#8FA3BE'}}>
                         <span>Excess: R{q.excess.toLocaleString()}</span>
                         <span>⭐ {q.rating}</span>
                         <span style={{color:GREEN,fontWeight:600}}>💸 R{q.cashback.toLocaleString()} cashback</span>
@@ -1084,7 +1085,7 @@ export default function InsurePage() {
             )
           })}
 
-          <div style={{background:'rgba(255,255,255,0.04)',borderRadius:12,padding:14,marginBottom:8}}>
+          <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
             <div style={{fontSize:12,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>
               Quotes are indicative and subject to final underwriting. Muḽo Financial Services (Pty) Ltd, FSP 49169, obtains these quotes on your behalf.
             </div>
@@ -1092,8 +1093,8 @@ export default function InsurePage() {
         </div>
         <div className="ip-bottom" style={{marginTop:4}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-            <span style={{fontSize:13,color:'rgba(255,255,255,0.5)'}}>Total monthly premium</span>
-            <span style={{fontSize:18,fontWeight:700,color:'#fff'}}>R{totalPremium.toLocaleString()}/mo</span>
+            <span style={{fontSize:13,color:'#8FA3BE'}}>Total monthly premium</span>
+            <span style={{fontSize:18,fontWeight:700,color:'#0A1628'}}>R{totalPremium.toLocaleString()}/mo</span>
           </div>
           <button className="ip-btn" onClick={goNextJourney}>Review & confirm →</button>
         </div>
@@ -1118,11 +1119,11 @@ export default function InsurePage() {
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
                 <span style={{fontSize:20}}>{product?.icon}</span>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:600,color:'#fff'}}>{product?.label}</div>
-                  <div style={{fontSize:12,color:'rgba(255,255,255,0.5)'}}>{q.insurer}</div>
+                  <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{product?.label}</div>
+                  <div style={{fontSize:12,color:'#8FA3BE'}}>{q.insurer}</div>
                 </div>
                 <div style={{textAlign:'right'}}>
-                  <div style={{fontSize:16,fontWeight:700,color:'#fff'}}>R{q.premium.toLocaleString()}/mo</div>
+                  <div style={{fontSize:16,fontWeight:700,color:'#0A1628'}}>R{q.premium.toLocaleString()}/mo</div>
                   <div style={{fontSize:11,color:GREEN}}>💸 R{q.cashback.toLocaleString()} cashback</div>
                 </div>
               </div>
@@ -1137,8 +1138,8 @@ export default function InsurePage() {
         {/* Totals */}
         <div style={{background:'rgba(29,185,122,0.08)',border:'1px solid rgba(29,185,122,0.15)',borderRadius:14,padding:14,marginBottom:16}}>
           <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
-            <span style={{fontSize:14,color:'rgba(255,255,255,0.6)'}}>Total monthly premium</span>
-            <span style={{fontSize:16,fontWeight:700,color:'#fff'}}>R{totalPremium.toLocaleString()}</span>
+            <span style={{fontSize:14,color:'#5A7A9A'}}>Total monthly premium</span>
+            <span style={{fontSize:16,fontWeight:700,color:'#0A1628'}}>R{totalPremium.toLocaleString()}</span>
           </div>
           <div style={{display:'flex',justifyContent:'space-between'}}>
             <span style={{fontSize:14,color:GREEN,fontWeight:600}}>💸 Total cashback</span>
@@ -1148,12 +1149,12 @@ export default function InsurePage() {
         </div>
 
         {/* Client details */}
-        <div style={{background:'rgba(255,255,255,0.04)',borderRadius:12,padding:14,marginBottom:8}}>
-          <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Your details</div>
+        <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
+          <div style={{fontSize:11,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Your details</div>
           {[[authFirstName+' '+authLastName,'Name'],[authId,'ID number'],[authEmail,'Email'],[window._muloCellphone,'Mobile']].map(([v,l])=>(
-            <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
-              <span style={{fontSize:12,color:'rgba(255,255,255,0.4)'}}>{l}</span>
-              <span style={{fontSize:12,color:'#fff',fontWeight:500}}>{v}</span>
+            <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid #F0F4F8'}}>
+              <span style={{fontSize:12,color:'#8FA3BE'}}>{l}</span>
+              <span style={{fontSize:12,color:'#0A1628',fontWeight:500}}>{v}</span>
             </div>
           ))}
         </div>
@@ -1221,13 +1222,13 @@ export default function InsurePage() {
               {[1,5,15,25,28].map(d=><option key={d} value={d}>{d === 1 ? '1st' : d === 5 ? '5th' : d === 15 ? '15th' : d === 25 ? '25th' : '28th'} of the month</option>)}
             </select>
           </div>
-          <div style={{background:'rgba(255,255,255,0.04)',borderRadius:12,padding:14,marginBottom:8}}>
+          <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
             <div style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.6)',marginBottom:6}}>Debit order mandate</div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>
+            <div style={{fontSize:11,color:'#8FA3BE',lineHeight:1.6}}>
               By clicking "Confirm & bind policy" below, you authorise Muḽo Financial Services (Pty) Ltd (FSP 49169) to debit your account with R{totalPremium.toLocaleString()}/month for the above insurance policies. This mandate is subject to NAEDO/DebiCheck rules.
             </div>
           </div>
-          <div style={{background:'rgba(255,255,255,0.04)',borderRadius:12,padding:14,marginBottom:8}}>
+          <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
             <div style={{fontSize:12,fontWeight:600,color:GREEN,marginBottom:4}}>💸 Your cashback: R{totalCashback.toLocaleString()}</div>
             <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>Paid to your bank account within 30 days of your policy start date. Lock-in: 12 months.</div>
           </div>
@@ -1249,22 +1250,23 @@ export default function InsurePage() {
       <Nav/>
       <div style={{padding:'32px 24px',textAlign:'center'}}>
         <div style={{fontSize:56,marginBottom:16}}>🎉</div>
-        <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:24,fontWeight:800,color:'#fff',margin:'0 0 8px'}}>You're covered, {authFirstName}!</h2>
-        <p style={{fontSize:14,color:'rgba(255,255,255,0.6)',lineHeight:1.6,marginBottom:24}}>
-          Your policies are now active. Policy documents will be sent to {authEmail} and via WhatsApp.
+        <h2 style={{fontFamily:"'Sora',sans-serif",fontSize:24,fontWeight:800,color:'#0A1628',margin:'0 0 8px'}}>Congratulations, {authFirstName}!</h2>
+        <p style={{fontSize:15,color:'#5A7A9A',lineHeight:1.6,marginBottom:4}}>You're officially covered.</p>
+        <p style={{fontSize:14,color:'#8FA3BE',lineHeight:1.6,marginBottom:24}}>
+          Your policy documents will be sent to {authEmail} and via WhatsApp within minutes.
         </p>
 
         {/* Policy reference */}
-        <div style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:14,padding:16,marginBottom:20,textAlign:'left'}}>
-          <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,0.4)',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Your policies</div>
+        <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:14,padding:16,marginBottom:20,textAlign:'left'}}>
+          <div style={{fontSize:11,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Your policies</div>
           {selected.map(code=>{
             const q = selectedQuotes[code]
             const product = PRODUCTS.find(p=>p.code===code)
             if(!q)return null
             return(
               <div key={code} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-                <span style={{fontSize:13,color:'rgba(255,255,255,0.7)'}}>{product?.icon} {product?.label}</span>
-                <span style={{fontSize:13,fontWeight:600,color:'#fff'}}>R{q.premium.toLocaleString()}/mo via {q.insurer}</span>
+                <span style={{fontSize:13,color:'#0A1628'}}>{product?.icon} {product?.label}</span>
+                <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>R{q.premium.toLocaleString()}/mo via {q.insurer}</span>
               </div>
             )
           })}
@@ -1273,21 +1275,21 @@ export default function InsurePage() {
         {/* Cashback timeline */}
         <div style={{background:'rgba(29,185,122,0.08)',border:'1px solid rgba(29,185,122,0.2)',borderRadius:14,padding:16,marginBottom:20,textAlign:'left'}}>
           <div style={{fontSize:14,fontWeight:700,color:GREEN,marginBottom:8}}>💸 R{totalCashback.toLocaleString()} cashback incoming</div>
-          <div style={{fontSize:12,color:'rgba(255,255,255,0.5)',lineHeight:1.6}}>
+          <div style={{fontSize:12,color:'#5A7A9A',lineHeight:1.6}}>
             Your cashback of R{totalCashback.toLocaleString()} will be paid to your bank account within 30 days of your policy start date.
           </div>
-          <div style={{display:'flex',gap:12,marginTop:12,fontSize:11,color:'rgba(255,255,255,0.4)'}}>
+          <div style={{display:'flex',gap:12,marginTop:12,fontSize:11,color:'#8FA3BE'}}>
             <span>🔒 12-month lock-in</span>
             <span>📅 Paid within 30 days</span>
           </div>
         </div>
 
-        {policyRef&&<div style={{fontSize:11,color:'rgba(255,255,255,0.3)',marginBottom:20}}>Reference: {policyRef}</div>}
+        {policyRef&&<div style={{fontSize:11,color:'#8FA3BE',marginBottom:20}}>Reference: {policyRef}</div>}
 
         <button className="ip-btn" onClick={()=>window.location.href='/'} style={{marginBottom:12}}>
           Back to Muḽo →
         </button>
-        <div style={{fontSize:11,color:'rgba(255,255,255,0.3)',lineHeight:1.6}}>
+        <div style={{fontSize:11,color:'#8FA3BE',lineHeight:1.6}}>
           Muḽo Financial Services (Pty) Ltd · FSP 49169<br/>Authorised Financial Services Provider
         </div>
       </div>
