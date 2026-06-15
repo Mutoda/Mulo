@@ -186,8 +186,9 @@ export default function InsurePage() {
 
   // ── Landing ────────────────────────────────────────────────────────────────
   const renderLanding = () => (
+    <>
     <div style={{ minHeight:'100vh', background:`linear-gradient(160deg,${C.navy} 0%,${C.navyMid} 60%,#0B3040 100%)`, display:'flex', flexDirection:'column' }}>
-      <div style={{ flex:1, overflowY:'auto', padding:'28px 24px 0' }}>
+      <div style={{ overflowY:'auto', padding:'28px 24px 24px' }}>
         {/* header */}
         <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28 }}>
           <div style={{ fontFamily:"'Sora',sans-serif",fontSize:22,fontWeight:800,color:C.white,letterSpacing:'-0.5px' }}>
@@ -254,10 +255,33 @@ export default function InsurePage() {
             <span key={l}>{i} {l}</span>
           ))}
         </div>
+
       </div>
     </div>
+    {/* White section below dark card */}
+    <div style={{background:'#fff',borderRadius:'0 0 28px 28px',padding:'32px 24px 40px',marginTop:0}}>
+      <div style={{fontFamily:"'Sora',sans-serif",fontSize:20,fontWeight:700,color:'#0A1628',marginBottom:16}}>How it works</div>
+      {[
+        ['1','Select your products','Choose car, home, contents, all risk and more.'],
+        ['2','Verify your identity','Quick SA ID check — takes 30 seconds.'],
+        ['3','Get instant quotes','We fetch quotes from 8 leading insurers and rank by value.'],
+        ['4','Earn cashback','Bind your policy and earn 1× your first month’s premium back.'],
+      ].map(([n,t,s])=>(
+        <div key={n} style={{display:'flex',alignItems:'flex-start',gap:14,padding:'14px 0',borderBottom:'1px solid #F0F4F8'}}>
+          <div style={{width:36,height:36,borderRadius:10,background:'linear-gradient(135deg,#00B8A9,#1A73E8)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Sora',sans-serif",fontSize:14,fontWeight:700,color:'#fff',flexShrink:0}}>{n}</div>
+          <div>
+            <div style={{fontSize:14,fontWeight:600,color:'#0A1628',marginBottom:2}}>{t}</div>
+            <div style={{fontSize:12,color:'#8FA3BE',lineHeight:1.5}}>{s}</div>
+          </div>
+        </div>
+      ))}
+      <div style={{textAlign:'center',fontSize:10,color:'#C5D0DC',paddingTop:24,lineHeight:1.6}}>
+        Muḽo Financial Services (Pty) Ltd · FSP 49169 · Authorised Financial Services Provider
+      </div>
+    </div>
+    </>
   )
-
+  // ── Product selector ───────────────────────────────────────────────────────
   // ── Product selector ───────────────────────────────────────────────────────
   const renderProducts = () => {
     const toggle = code => {
@@ -600,13 +624,18 @@ export default function InsurePage() {
   return (
     <>
       <style>{GLOBAL_STYLE}</style>
-      {step==='landing'  && renderLanding()}
-      {step==='products' && renderProducts()}
-      {step==='id'       && renderIdVerify()}
-      {step==='phone'    && renderPhone()}
-      {step==='otp'      && renderOtp()}
-      {step==='register' && renderRegister()}
-      {step==='journey'  && renderJourney()}
+      <style>{`.ip-shell{min-height:100vh;background:#F0F4F8;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px}.ip-phone-card{width:100%;max-width:390px;background:#0A1628;border-radius:28px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25)}`}</style>
+      <div className="ip-shell">
+        <div className="ip-phone-card">
+          {step==='landing'  && renderLanding()}
+          {step==='products' && renderProducts()}
+          {step==='id'       && renderIdVerify()}
+          {step==='phone'    && renderPhone()}
+          {step==='otp'      && renderOtp()}
+          {step==='register' && renderRegister()}
+          {step==='journey'  && renderJourney()}
+        </div>
+      </div>
     </>
   )
 }
