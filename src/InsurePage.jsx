@@ -73,39 +73,47 @@ const MOCK_QUOTES = {
 // ─── Global CSS ────────────────────────────────────────────────────────────
 const GS = `
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;background:#F0F4F8;font-family:'IBM Plex Sans',sans-serif;color:#0A1628}
+html,body{margin:0;padding:0;background:#F0F4F8;font-family:'IBM Plex Sans',sans-serif}
 @keyframes insurerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ip-fade{animation:fadeUp .3s ease forwards}
-.ip-shell{min-height:100vh;background:#F0F4F8;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px 60px}
-.ip-card{width:100%;max-width:390px;background:#F7F9FC;border-radius:28px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12)}
-.ip-btn{display:block;width:100%;padding:17px 24px;background:linear-gradient(135deg,${TEAL},#1A73E8);color:#fff;border:none;border-radius:16px;font-family:'IBM Plex Sans',sans-serif;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,184,169,0.35);transition:opacity .15s,transform .1s;text-align:center}
-.ip-btn:hover{opacity:.92}
-.ip-btn:active{transform:scale(.98)}
-.ip-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.ip-shell{min-height:100vh;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px 60px}
+.ip-card{width:100%;max-width:390px;background:#F7F9FC;border-radius:24px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25);display:flex;flex-direction:column}
+.ip-screen-header{padding:20px 20px 0;display:flex;align-items:center;gap:12px;margin-bottom:8px;background:#F7F9FC}
+.ip-back-btn{width:36px;height:36px;border-radius:12px;background:#fff;border:1.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.06);color:#0A1628}
+.ip-header-title{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:#0A1628;flex:1}
+.ip-header-sub{font-size:12px;color:#8FA3BE;margin-top:1px}
+.ip-progress{height:3px;background:#E8EDF4;margin:0 20px 0;overflow:hidden}
+.ip-progress-fill{height:3px;background:linear-gradient(90deg,${TEAL},#1A73E8);transition:width .4s ease}
+.ip-body{padding:20px;background:#F7F9FC;flex:1;overflow-y:auto}
+.ip-bottom{padding:12px 20px 24px;background:#F7F9FC;border-top:1px solid #EEF2F8}
+.ip-btn{display:block;width:100%;padding:17px 24px;background:linear-gradient(135deg,${TEAL},#1A73E8);color:#fff;border:none;border-radius:16px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(0,184,169,0.35);transition:all .2s;text-align:center;letter-spacing:.1px}
+.ip-btn:hover{transform:translateY(-1px);box-shadow:0 12px 32px rgba(0,184,169,0.4)}
+.ip-btn:active{transform:translateY(0)}
+.ip-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
 .ip-input{width:100%;padding:14px 16px;background:#fff;border:1.5px solid #E2E9F0;border-radius:14px;color:#0A1628;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;transition:all .2s}
-.ip-input:focus{border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.1)}
+.ip-input:focus{border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.12)}
+.ip-input::placeholder{color:#C5D0DC}
 .ip-input.ok{border-color:${GREEN}}
 .ip-input.err{border-color:#FF5C5C;box-shadow:0 0 0 3px rgba(255,92,92,0.1)}
-.ip-label{display:block;font-size:11px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.ip-hint-ok{font-size:12px;color:${GREEN};margin-top:5px}
-.ip-hint-err{font-size:12px;color:#FF5C5C;margin-top:5px}
+.ip-label{display:block;font-size:11px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+.ip-hint-ok{font-size:11px;color:${GREEN};margin-top:5px;display:flex;align-items:center;gap:4px}
+.ip-hint-err{font-size:11px;color:#FF5C5C;margin-top:5px}
 .ip-otp-box{width:44px;height:52px;border-radius:12px;border:1.5px solid #E2E9F0;background:#fff;color:#0A1628;text-align:center;font-size:22px;font-weight:700;outline:none;transition:border-color .2s}
 .ip-otp-box:focus{border-color:${TEAL}}
-.ip-progress{height:3px;background:#E8EDF4;border-radius:99px;margin:0 24px 4px}
-.ip-progress-fill{height:3px;border-radius:99px;background:linear-gradient(90deg,${TEAL},#1A73E8);transition:width .4s ease}
-.ip-bottom{padding:12px 20px 24px;background:linear-gradient(to bottom,transparent,#F7F9FC 45%)}
 .ip-product{display:flex;align-items:center;gap:14px;background:#fff;border:1.5px solid #E2E9F0;border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-.ip-product.sel{background:rgba(0,184,169,0.06);border-color:${TEAL}}
+.ip-product.sel{background:rgba(0,184,169,0.06);border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.1)}
 .ip-product.dis{opacity:.4;cursor:not-allowed}
 .ip-quote-card{background:#fff;border:1.5px solid #E2E9F0;border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-.ip-quote-card.sel{border-color:${TEAL};background:rgba(0,184,169,0.04)}
+.ip-quote-card.sel{border-color:${TEAL};background:rgba(0,184,169,0.04);box-shadow:0 0 0 3px rgba(0,184,169,0.1)}
 .ip-check-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #F0F4F8}
 .ip-spinner{width:20px;height:20px;border:2px solid #E2E9F0;border-top-color:${TEAL};border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
-.ip-select{width:100%;padding:14px 16px;background:#fff;border:1.5px solid #E2E9F0;border-radius:14px;color:#0A1628;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;appearance:none;cursor:pointer;transition:all .2s}
-.ip-select:focus{border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.1)}
+.ip-select{width:100%;padding:14px 16px;background:#fff;border:1.5px solid #E2E9F0;border-radius:14px;color:#0A1628;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;appearance:none;cursor:pointer;transition:all .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238FA3BE' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.ip-select:focus{border-color:${TEAL};box-shadow:0 0 0 3px rgba(0,184,169,0.12)}
 .ip-select option{background:#fff;color:#0A1628}
+.ip-card-box{background:#fff;border:1.5px solid #E2E9F0;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.ip-section-label{font-size:11px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
 `
 
 // ─── Nav component ─────────────────────────────────────────────────────────
@@ -125,15 +133,15 @@ const ProgressBar = ({step,total}) => (
 
 const StepHeader = ({title,subtitle,step,total,onBack}) => (
   <>
-    <div style={{display:'flex',alignItems:'center',gap:10,padding:'16px 20px 8px'}}>
-      <button onClick={onBack} style={{width:32,height:32,borderRadius:8,background:'#fff',border:'1.5px solid #E2E9F0',color:'#0A1628',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>←</button>
+    <div className="ip-screen-header">
+      <button className="ip-back-btn" onClick={onBack}>←</button>
       <div style={{flex:1}}>
-        <div style={{fontFamily:"'Sora',sans-serif",fontSize:16,fontWeight:700,color:'#0A1628'}}>{title}</div>
-        {subtitle && <div style={{fontSize:11,color:'#8FA3BE',marginTop:1}}>{subtitle}</div>}
+        <div className="ip-header-title">{title}</div>
+        {subtitle && <div className="ip-header-sub">{subtitle}</div>}
       </div>
-      <div style={{fontSize:11,color:TEAL,fontWeight:600,background:'rgba(0,184,169,0.08)',padding:'4px 10px',borderRadius:99}}>muḽo insure</div>
+      <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:14,color:'#0A1628'}}>Mu<span style={{color:TEAL}}>ḽ</span>o <span style={{fontSize:10,fontWeight:600,color:'#8FA3BE'}}>insure</span></div>
     </div>
-    <ProgressBar step={step} total={total}/>
+    <div className="ip-progress"><div className="ip-progress-fill" style={{width:`${(step/total)*100}%`}}/></div>
   </>
 )
 
@@ -442,7 +450,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="What do you want to insure?" subtitle="Select all that apply" step={1} total={5} onBack={()=>setStep('landing')}/>
-        <div style={{overflowY:'auto',padding:'16px 20px 0'}}>
+        <div className="ip-body">
           <p style={{fontSize:13,color:'#8FA3BE',marginBottom:16,lineHeight:1.6}}>Every product earns 1× your first month's premium as cashback.</p>
           {PRODUCTS.map(p=>{
             const isSel=selected.includes(p.code)
@@ -466,7 +474,7 @@ export default function InsurePage() {
             <div style={{fontSize:12,color:'rgba(255,255,255,0.5)',lineHeight:1.6}}>Every product earns 1× your first month's premium as cashback — paid within 30 days. 12-month lock-in applies.</div>
           </div>
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={selected.length===0||errors.length>0} onClick={()=>setStep('id')}>
             {selected.length===0?'Select a product to continue':`Continue with ${selected.length} product${selected.length>1?'s':''} →`}
           </button>
@@ -511,7 +519,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Verify your identity" subtitle="Step 2 of 5" step={2} total={5} onBack={()=>setStep('products')}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
           <div style={{background:'linear-gradient(135deg,#0E2344,#132035)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:16,padding:'18px 20px',marginBottom:20}}>
             <div style={{fontSize:10,fontWeight:600,color:'rgba(255,255,255,0.4)',letterSpacing:1,textTransform:'uppercase',marginBottom:6}}>South African ID Number</div>
             <div style={{fontFamily:"'Sora',sans-serif",fontSize:20,fontWeight:700,letterSpacing:3,color:'#fff',marginBottom:6}}>{authId?`${authId.slice(0,6)} ${authId.slice(6,10)} ${authId.slice(10)}`:'000000 0000 000'}</div>
@@ -548,7 +556,7 @@ export default function InsurePage() {
             </div>
           )}
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           {authPhase!=='done'
             ?<button className="ip-btn" disabled={authId.length<13||authPhase==='invalid'||authPhase==='checking'} onClick={handleCheck}>{authPhase==='checking'?'Verifying…':'Verify my ID →'}</button>
             :<button className="ip-btn" disabled={!authFirstName.trim()||!authLastName.trim()} onClick={()=>{window._muloFirstName=authFirstName;window._muloLastName=authLastName;setStep('phone')}}>Continue →</button>
@@ -573,7 +581,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Your WhatsApp number" subtitle="Step 3 of 5" step={3} total={5} onBack={()=>setStep('id')}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
           <p style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:20,lineHeight:1.6}}>We'll send a one-time verification code via WhatsApp.</p>
           <div style={{position:'relative',marginBottom:16}}>
             <div style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:6,pointerEvents:'none'}}>
@@ -584,7 +592,7 @@ export default function InsurePage() {
             <input className="ip-input" type="tel" inputMode="numeric" placeholder="82 123 4567" value={authPhone.replace(/^0/,'')} onChange={e=>setAuthPhone(e.target.value)} style={{paddingLeft:74,borderColor:valid?'#25D366':'rgba(255,255,255,0.12)'}}/>
           </div>
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={!valid} onClick={handleContinue}>Send OTP via WhatsApp →</button>
         </div>
       </>
@@ -614,7 +622,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Enter your OTP" subtitle="Step 3 of 5" step={3} total={5} onBack={()=>setStep('phone')}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
           <div style={{background:'rgba(37,211,102,0.07)',border:'1px solid rgba(37,211,102,0.15)',borderRadius:12,padding:14,marginBottom:24,display:'flex',alignItems:'center',gap:12}}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             <div><div style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>OTP sent to</div><div style={{fontSize:14,fontWeight:700,color:'#fff'}}>+27 {window._muloCellphone?.slice(1)}</div></div>
@@ -633,7 +641,7 @@ export default function InsurePage() {
               :<span style={{color:TEAL,cursor:'pointer'}} onClick={()=>{setAuthTimer(59);setAuthOtp(['','','','','',''])}}>Resend OTP</span>}
           </div>
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={code.length<6||authPhase==='checking'||authPhase==='done'} onClick={verify}>{authPhase==='checking'?'Verifying…':authPhase==='done'?'Verified ✓':'Verify OTP →'}</button>
         </div>
       </>
@@ -655,7 +663,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Create your account" subtitle="Step 4 of 5" step={4} total={5} onBack={()=>setStep('otp')}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
           <div style={{marginBottom:20}}>
             <div style={{fontSize:16,fontWeight:700,color:'#0A1628',marginBottom:4}}>Welcome, {authFirstName}! 👋</div>
             <div style={{fontSize:13,color:'#8FA3BE'}}>Just your email and a password to finish setting up your account.</div>
@@ -674,7 +682,7 @@ export default function InsurePage() {
           </div>
           <div style={{fontSize:11,color:'#8FA3BE',lineHeight:1.6,marginBottom:8}}>By creating an account you agree to Muḽo's Terms of Service and Privacy Policy. Your information is processed in terms of POPIA.</div>
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={!ready||authPhase==='checking'} onClick={handleRegister}>{authPhase==='checking'?'Creating account…':'Get my free quotes →'}</button>
         </div>
       </>
@@ -691,7 +699,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Tell us about your home" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
           <div style={{marginBottom:14}}>
             <label className="ip-label">Property address</label>
             <input id="ip-address-input" className="ip-input" type="text" placeholder="Start typing your address…" defaultValue={property.address}
@@ -737,7 +745,7 @@ export default function InsurePage() {
             </select>
           </div>
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={!canContinue} onClick={goNextJourney}>Continue →</button>
         </div>
       </>
@@ -756,7 +764,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Tell us about your car" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
 
           <div style={{marginBottom:14}}>
             <label className="ip-label">Vehicle make</label>
@@ -877,7 +885,7 @@ export default function InsurePage() {
           )}
 
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={!canContinue} onClick={goNextJourney}>Continue →</button>
         </div>
       </>
@@ -893,7 +901,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Driver & cover details" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
 
           <div style={{marginBottom:14}}>
             <label className="ip-label">Cover type</label>
@@ -1004,7 +1012,7 @@ export default function InsurePage() {
           )}
 
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={!canContinue} onClick={goNextJourney}>Continue →</button>
         </div>
       </>
@@ -1036,7 +1044,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Your quotes" subtitle={`${selected.length} product${selected.length>1?'s':''} · Ranked by value`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
-        <div style={{overflowY:'auto',padding:'16px 20px 0'}}>
+        <div className="ip-body">
           {/* Cashback banner */}
           <div style={{background:'rgba(29,185,122,0.1)',border:'1px solid rgba(29,185,122,0.2)',borderRadius:12,padding:'12px 14px',marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
             <span style={{fontSize:20}}>💸</span>
@@ -1091,7 +1099,7 @@ export default function InsurePage() {
             </div>
           </div>
         </div>
-        <div className="ip-bottom" style={{marginTop:4}}>
+        <div className="ip-bottom">
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
             <span style={{fontSize:13,color:'#8FA3BE'}}>Total monthly premium</span>
             <span style={{fontSize:18,fontWeight:700,color:'#0A1628'}}>R{totalPremium.toLocaleString()}/mo</span>
@@ -1108,7 +1116,7 @@ export default function InsurePage() {
   const renderReview = () => (
     <>
       <StepHeader title="Review & confirm" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
-      <div style={{overflowY:'auto',padding:'16px 20px 0'}}>
+      <div className="ip-body">
         {/* Summary per product */}
         {selected.map(code=>{
           const q = selectedQuotes[code]
@@ -1159,7 +1167,7 @@ export default function InsurePage() {
           ))}
         </div>
       </div>
-      <div className="ip-bottom" style={{marginTop:8}}>
+      <div className="ip-bottom">
         <button className="ip-btn" onClick={goNextJourney}>Confirm & set up debit order →</button>
       </div>
     </>
@@ -1196,7 +1204,7 @@ export default function InsurePage() {
     return(
       <>
         <StepHeader title="Debit order & sign" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
-        <div style={{overflowY:'auto',padding:'20px 20px 0'}}>
+        <div className="ip-body">
           <div style={{marginBottom:14}}>
             <label className="ip-label">Bank</label>
             <select className="ip-select" value={bankDetails.bank} onChange={e=>setBankDetails(p=>({...p,bank:e.target.value}))}>
@@ -1233,7 +1241,7 @@ export default function InsurePage() {
             <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>Paid to your bank account within 30 days of your policy start date. Lock-in: 12 months.</div>
           </div>
         </div>
-        <div className="ip-bottom" style={{marginTop:8}}>
+        <div className="ip-bottom">
           <button className="ip-btn" disabled={!canContinue||authPhase==='checking'} onClick={handleBind}>
             {authPhase==='checking'?'Binding your policy…':'Confirm & bind policy →'}
           </button>
