@@ -1349,7 +1349,7 @@ export default function InsurePage() {
           <div style={{marginBottom:14}}>
             <label className="ip-label">Debit order day</label>
             <select className="ip-select" value={bankDetails.debitDay} onChange={e=>setBankDetails(p=>({...p,debitDay:parseInt(e.target.value)}))}>
-              {[1,5,15,25,28].map(d=><option key={d} value={d}>{d === 1 ? '1st' : d === 5 ? '5th' : d === 15 ? '15th' : d === 25 ? '25th' : '28th'} of the month</option>)}
+              {[1,5,15,20,25,28].map(d=><option key={d} value={d}>{d===1?'1st':d===5?'5th':d===15?'15th':d===20?'20th':d===25?'25th':'28th'} of the month</option>)}
             </select>
           </div>
           <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
