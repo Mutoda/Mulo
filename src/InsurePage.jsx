@@ -582,7 +582,7 @@ export default function InsurePage() {
       <>
         <StepHeader title="Your WhatsApp number" subtitle="Step 3 of 5" step={3} total={5} onBack={()=>setStep('id')}/>
         <div className="ip-body">
-          <p style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:20,lineHeight:1.6}}>We'll send a one-time verification code via WhatsApp.</p>
+          <p style={{fontSize:13,color:'#5A7A9A',marginBottom:20,lineHeight:1.6}}>We'll send a one-time verification code via WhatsApp.</p>
           <div style={{position:'relative',marginBottom:16}}>
             <div style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:6,pointerEvents:'none'}}>
               <svg viewBox="0 0 24 24" width="15" height="15" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -1030,8 +1030,8 @@ export default function InsurePage() {
           <div style={{display:'flex',justifyContent:'center',marginBottom:24}}>
             <div style={{width:48,height:48,border:`3px solid rgba(255,255,255,0.1)`,borderTop:`3px solid ${TEAL}`,borderRadius:'50%',animation:'spin .8s linear infinite'}}/>
           </div>
-          <div style={{fontSize:15,fontWeight:600,color:'#fff',marginBottom:8}}>Comparing quotes from 8 insurers…</div>
-          <div style={{fontSize:13,color:'rgba(255,255,255,0.5)'}}>Ranking by value, claims reputation and cashback</div>
+          <div style={{fontSize:15,fontWeight:600,color:'#0A1628',marginBottom:8}}>Comparing quotes from 8 insurers…</div>
+          <div style={{fontSize:13,color:'#8FA3BE'}}>Ranking by value, claims reputation and cashback</div>
           <div style={{marginTop:24,display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
             {['Absa','Pineapple','Naked','King Price','MiWay'].map(n=>(
               <div key={n} style={{background:'rgba(255,255,255,0.06)',borderRadius:99,padding:'4px 10px',fontSize:11,color:'rgba(255,255,255,0.4)'}}>{n}</div>
@@ -1050,7 +1050,7 @@ export default function InsurePage() {
             <span style={{fontSize:20}}>💸</span>
             <div>
               <div style={{fontSize:13,fontWeight:600,color:GREEN}}>R{totalCashback.toLocaleString()} cashback earned</div>
-              <div style={{fontSize:11,color:'rgba(255,255,255,0.5)'}}>Paid within 30 days of policy start · 12-month lock-in</div>
+              <div style={{fontSize:11,color:'#5A7A9A'}}>Paid within 30 days of policy start · 12-month lock-in</div>
             </div>
           </div>
 
@@ -1060,7 +1060,7 @@ export default function InsurePage() {
             const product = PRODUCTS.find(p=>p.code===code)
             return(
               <div key={code} style={{marginBottom:20}}>
-                <div style={{fontSize:13,fontWeight:700,color:'rgba(255,255,255,0.6)',textTransform:'uppercase',letterSpacing:.5,marginBottom:10}}>
+                <div style={{fontSize:13,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5,marginBottom:10}}>
                   {product?.icon} {product?.label}
                 </div>
                 {quotes.map((q,i)=>{
@@ -1135,7 +1135,7 @@ export default function InsurePage() {
                   <div style={{fontSize:11,color:GREEN}}>💸 R{q.cashback.toLocaleString()} cashback</div>
                 </div>
               </div>
-              <div style={{display:'flex',gap:12,fontSize:11,color:'rgba(255,255,255,0.4)',borderTop:'1px solid rgba(255,255,255,0.06)',paddingTop:8}}>
+              <div style={{display:'flex',gap:12,fontSize:11,color:'#8FA3BE',borderTop:'1px solid #F0F4F8',paddingTop:8}}>
                 <span>Excess: R{q.excess.toLocaleString()}</span>
                 <span>Cover starts: {new Date(Date.now()+86400000).toLocaleDateString('en-ZA',{day:'numeric',month:'short',year:'numeric'})}</span>
               </div>
@@ -1153,7 +1153,7 @@ export default function InsurePage() {
             <span style={{fontSize:14,color:GREEN,fontWeight:600}}>💸 Total cashback</span>
             <span style={{fontSize:16,fontWeight:700,color:GREEN}}>R{totalCashback.toLocaleString()}</span>
           </div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',marginTop:8,lineHeight:1.5}}>Cashback paid within 30 days of policy start. 12-month lock-in applies.</div>
+          <div style={{fontSize:11,color:'#5A7A9A',marginTop:8,lineHeight:1.5}}>Cashback paid within 30 days of policy start. 12-month lock-in applies.</div>
         </div>
 
         {/* Client details */}
@@ -1238,7 +1238,7 @@ export default function InsurePage() {
           </div>
           <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
             <div style={{fontSize:12,fontWeight:600,color:GREEN,marginBottom:4}}>💸 Your cashback: R{totalCashback.toLocaleString()}</div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>Paid to your bank account within 30 days of your policy start date. Lock-in: 12 months.</div>
+            <div style={{fontSize:11,color:'#5A7A9A',lineHeight:1.6}}>Paid to your bank account within 30 days of your policy start date. Lock-in: 12 months.</div>
           </div>
         </div>
         <div className="ip-bottom">
