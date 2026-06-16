@@ -1049,8 +1049,8 @@ export default function InsurePage() {
           <div style={{background:'rgba(29,185,122,0.1)',border:'1px solid rgba(29,185,122,0.2)',borderRadius:12,padding:'12px 14px',marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
             <span style={{fontSize:20}}>💸</span>
             <div>
-              <div style={{fontSize:13,fontWeight:600,color:GREEN}}>R{totalCashback.toLocaleString()} cashback earned</div>
-              <div style={{fontSize:11,color:'#5A7A9A'}}>Paid within 30 days of policy start · 12-month lock-in</div>
+              <div style={{fontSize:13,fontWeight:600,color:GREEN}}>R{totalCashback.toLocaleString()} cashback available</div>
+              <div style={{fontSize:11,color:'#5A7A9A'}}>Earn this when your first premium is collected · 12-month lock-in</div>
             </div>
           </div>
 
@@ -1081,10 +1081,10 @@ export default function InsurePage() {
                       <div style={{display:'flex',gap:12,fontSize:12,color:'#8FA3BE'}}>
                         <span>Excess: R{q.excess.toLocaleString()}</span>
                         <span>⭐ {q.rating}</span>
-                        <span style={{color:GREEN,fontWeight:600}}>💸 R{q.cashback.toLocaleString()} cashback</span>
+                        <span style={{color:GREEN,fontWeight:600}}>💸 R{q.cashback.toLocaleString()} cashback if you incepted</span>
                       </div>
                       {isSel&&<div style={{marginTop:10,padding:'8px 10px',background:'rgba(0,184,169,0.1)',borderRadius:8,fontSize:12,color:TEAL}}>
-                        ✓ Selected — R{q.cashback.toLocaleString()} cashback on acceptance
+                        ✓ Selected — R{q.cashback.toLocaleString()} cashback on first premium collected
                       </div>}
                     </div>
                   )
@@ -1293,6 +1293,27 @@ export default function InsurePage() {
         </div>
 
         {policyRef&&<div style={{fontSize:11,color:'#8FA3BE',marginBottom:20}}>Reference: {policyRef}</div>}
+
+        {/* Cross-sell */}
+        <div style={{background:'#fff',border:'1.5px solid #E2E9F0',borderRadius:16,padding:16,marginBottom:20,textAlign:'left',boxShadow:'0 2px 8px rgba(0,0,0,0.04)'}}>
+          <div style={{fontSize:13,fontWeight:700,color:'#0A1628',marginBottom:4}}>Want to add more cover?</div>
+          <div style={{fontSize:12,color:'#8FA3BE',marginBottom:14,lineHeight:1.5}}>Each product earns additional cashback — add now without starting over.</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+            {PRODUCTS.filter(p=>!selected.includes(p.code)).filter(p=>{
+              if(p.code==='ALLRISK') return selected.length>0
+              if(p.code==='CARAVAN'||p.code==='TRAILER') return selected.includes('CAR')
+              return true
+            }).map(p=>(
+              <button key={p.code} onClick={()=>{
+                setSelected(prev=>[...prev,p.code])
+                setJourneyStep(p.code==='CAR'?'car':p.code==='BUILDINGS'||p.code==='CONTENTS'?'home':'quotes')
+                setStep('journey')
+              }} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 12px',borderRadius:10,border:'1.5px solid #E2E9F0',background:'#F7F9FC',cursor:'pointer',fontSize:13,fontWeight:600,color:'#0A1628'}}>
+                <span>{p.icon}</span>{p.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <button className="ip-btn" onClick={()=>window.location.href='/'} style={{marginBottom:12}}>
           Back to Muḽo →
