@@ -261,7 +261,7 @@ export default function InsurePage() {
   const [journeyStep, setJourneyStep] = useState('home') // home|car|quotes|review|debit|done
   const [property, setProperty]   = useState({address:'',buildingValue:'',contentsValue:'',roofType:'Tiles',wallType:'Brick & plaster',alarmSystem:'Yes — monitored',armedResponse:'No'})
   const [vehicle, setVehicle]     = useState({make:'',model:'',variant:'',year:'',colour:'',reg:'',bodyType:'',fuelType:'',transmission:'',engineSize:'',use:'private',financed:false,financeHouse:''})
-  const [carDriver, setCarDriver]   = useState({coverType:'Comprehensive',driverAge:'',licence:'Code 8',yearsLicensed:'',claims:'No',convictions:'No',parkingAddress:'',parkingType:'Garage',tracking:'No',trackingProvider:''})
+  const [carDriver, setCarDriver]   = useState({coverType:'Comprehensive',regularDriver:'Myself',driverIdNumber:'',driverFirstName:'',driverLastName:'',driverAge:'',licence:'Code 8',yearsLicensed:'',claims:'No',convictions:'No',parkingAddress:'',parkingType:'Garage',tracking:'No',trackingProvider:''})
   const [selectedQuotes, setSelectedQuotes] = useState({})
   const [quotesLoading, setQuotesLoading]   = useState(false)
   const [quotesData, setQuotesData]         = useState({})
@@ -752,6 +752,25 @@ export default function InsurePage() {
     )
   }
 
+  // Google Places autocomplete for parking address
+  const initParkingAutocomplete = () => {
+    if(!window.google||!window.google.maps)return
+    const input = document.getElementById('ip-parking-input')
+    if(!input||input._parkingAC)return
+    const ac = new window.google.maps.places.Autocomplete(input,{
+      componentRestrictions:{country:'za'},
+      types:['geocode'],
+      fields:['formatted_address','address_components'],
+    })
+    input._parkingAC = ac
+    ac.addListener('place_changed',()=>{
+      const place = ac.getPlace()
+      if(place.formatted_address){
+        setCarDriver(p=>({...p,parkingAddress:place.formatted_address}))
+      }
+    })
+  }
+
   // ════════════════════════════════════════════════════════════════════════════
   // JOURNEY — CAR DETAILS
   // ════════════════════════════════════════════════════════════════════════════
@@ -897,7 +916,11 @@ export default function InsurePage() {
   // JOURNEY — DRIVER & COVER DETAILS
   // ════════════════════════════════════════════════════════════════════════════
   const renderCarDriver = () => {
-    const canContinue = carDriver.driverAge && carDriver.yearsLicensed && carDriver.parkingAddress
+    const canContinue = carDriver.yearsLicensed && carDriver.parkingAddress && (
+      (carDriver.regularDriver==='Another person')
+        ? (carDriver.driverIdNumber?.length===13 && carDriver.driverFirstName && carDriver.driverLastName)
+        : true
+    )
     return(
       <>
         <StepHeader title="Driver & cover details" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
@@ -915,20 +938,46 @@ export default function InsurePage() {
             </div>
           </div>
 
-          <div style={{display:'flex',gap:10,marginBottom:14}}>
-            <div style={{flex:1}}>
-              <label className="ip-label">Regular driver age</label>
-              <input className="ip-input" type="number" placeholder="e.g. 35" value={carDriver.driverAge} onChange={e=>setCarDriver(p=>({...p,driverAge:e.target.value}))} inputMode="numeric"/>
+          <div style={{marginBottom:14}}>
+            <label className="ip-label">Who is the regular driver?</label>
+            <div style={{display:'flex',gap:8}}>
+              {['Myself','Another person'].map(o=>(
+                <button key={o} onClick={()=>setCarDriver(p=>({...p,regularDriver:o,driverIdNumber:'',driverFirstName:'',driverLastName:'',driverAge:''}))}
+                  style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${(carDriver.regularDriver||'Myself')===o?TEAL:'#E2E9F0'}`,background:(carDriver.regularDriver||'Myself')===o?'rgba(0,184,169,0.08)':'#fff',color:(carDriver.regularDriver||'Myself')===o?TEAL:'#0A1628',fontSize:14,fontWeight:600,cursor:'pointer'}}>
+                  {o}
+                </button>
+              ))}
             </div>
-            <div style={{flex:1}}>
-              <label className="ip-label">Licence type</label>
-              <select className="ip-select" value={carDriver.licence} onChange={e=>setCarDriver(p=>({...p,licence:e.target.value}))}>
-                <option>Code 8</option>
-                <option>Code 10</option>
-                <option>Code 14</option>
-                <option>Learner licence</option>
-              </select>
+          </div>
+
+          {(carDriver.regularDriver==='Another person')&&(
+            <div style={{background:'rgba(0,184,169,0.04)',border:'1.5px solid rgba(0,184,169,0.15)',borderRadius:14,padding:14,marginBottom:14}}>
+              <div style={{fontSize:12,color:'#5A7A9A',marginBottom:12,lineHeight:1.5}}>We need the regular driver's details to rate this policy accurately.</div>
+              <div style={{marginBottom:10}}>
+                <label className="ip-label">Regular driver ID number</label>
+                <input className="ip-input" type="text" placeholder="13-digit SA ID number" value={carDriver.driverIdNumber||''} onChange={e=>setCarDriver(p=>({...p,driverIdNumber:e.target.value.replace(/\D/g,'').slice(0,13)}))} inputMode="numeric"/>
+              </div>
+              <div style={{display:'flex',gap:8}}>
+                <div style={{flex:1}}>
+                  <label className="ip-label">First name</label>
+                  <input className="ip-input" type="text" placeholder="e.g. Thabo" value={carDriver.driverFirstName||''} onChange={e=>setCarDriver(p=>({...p,driverFirstName:e.target.value}))} autoCapitalize="words"/>
+                </div>
+                <div style={{flex:1}}>
+                  <label className="ip-label">Last name</label>
+                  <input className="ip-input" type="text" placeholder="e.g. Nkosi" value={carDriver.driverLastName||''} onChange={e=>setCarDriver(p=>({...p,driverLastName:e.target.value}))} autoCapitalize="words"/>
+                </div>
+              </div>
             </div>
+          )}
+
+          <div style={{marginBottom:14}}>
+            <label className="ip-label">Licence type</label>
+            <select className="ip-select" value={carDriver.licence} onChange={e=>setCarDriver(p=>({...p,licence:e.target.value}))}>
+              <option>Code 8</option>
+              <option>Code 10</option>
+              <option>Code 14</option>
+              <option>Learner licence</option>
+            </select>
           </div>
 
           <div style={{marginBottom:14}}>
@@ -969,8 +1018,8 @@ export default function InsurePage() {
 
           <div style={{marginBottom:14}}>
             <label className="ip-label">Overnight parking address</label>
-            <input className="ip-input" type="text" placeholder="Suburb where car is parked overnight" value={carDriver.parkingAddress||''} onChange={e=>setCarDriver(p=>({...p,parkingAddress:e.target.value}))}/>
-            <div style={{fontSize:11,color:'#8FA3BE',marginTop:4}}>Used to assess area risk — suburb is sufficient</div>
+            <input id="ip-parking-input" className="ip-input" type="text" placeholder="Start typing suburb or address…" defaultValue={carDriver.parkingAddress||''} onChange={e=>setCarDriver(p=>({...p,parkingAddress:e.target.value}))} onFocus={initParkingAutocomplete}/>
+            <div style={{fontSize:11,color:'#8FA3BE',marginTop:4}}>🔍 Powered by Google Maps · suburb is sufficient</div>
           </div>
 
           <div style={{marginBottom:14}}>
