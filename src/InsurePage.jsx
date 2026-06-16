@@ -233,6 +233,12 @@ const VEHICLE_ENGINE_SIZES = ['Under 1.0L','1.0L','1.2L','1.4L','1.5L','1.6L','1
 const VEHICLE_FINANCE_HOUSES = ['ABSA Vehicle Finance','FNB Vehicle Finance','Nedbank Vehicle Finance','Standard Bank Vehicle Finance','WesBank','Investec','BMW Financial Services','Mercedes-Benz Financial Services','Volkswagen Financial Services','Other']
 const VEHICLE_YEARS = Array.from({length:2026-1990+1},(_,i)=>String(2026-i))
 
+// ─── VAPs (Value Added Products) ──────────────────────────────────────────
+const VAPS = [
+  {code:'CAR_HIRE',     label:'Car hire',          icon:'🚘', sub:'Rental car while yours is being repaired',    premium:89},
+  {code:'CREDIT_SHORT', label:'Credit shortfall',  icon:'💳', sub:'Covers the gap between settlement & payout',  premium:65},
+]
+
 // ─── Main component ────────────────────────────────────────────────────────
 export default function InsurePage() {
   const [step, setStep]           = useState('landing')
@@ -261,12 +267,13 @@ export default function InsurePage() {
   const [journeyStep, setJourneyStep] = useState('home') // home|car|quotes|review|debit|done
   const [property, setProperty]   = useState({address:'',buildingValue:'',contentsValue:'',roofType:'Tiles',wallType:'Brick & plaster',alarmSystem:'Yes — monitored',armedResponse:'No'})
   const [vehicle, setVehicle]     = useState({make:'',model:'',variant:'',year:'',colour:'',reg:'',bodyType:'',fuelType:'',transmission:'',engineSize:'',use:'private',financed:false,financeHouse:''})
-  const [carDriver, setCarDriver]   = useState({coverType:'Comprehensive',regularDriver:'Myself',driverIdNumber:'',driverFirstName:'',driverLastName:'',driverAge:'',licence:'Code 8',yearsLicensed:'',claims:'No',convictions:'No',parkingAddress:'',parkingType:'Garage',tracking:'No',trackingProvider:''})
+  const [carDriver, setCarDriver]   = useState({coverType:'Comprehensive',regularDriver:'Myself',driverIdNumber:'',driverFirstName:'',driverLastName:'',driverAge:'',licence:'Code 8',licenceDate:'',claims:'No',parkingAddress:'',parkingType:'Garage',tracking:'No',trackingProvider:''})
   const [selectedQuotes, setSelectedQuotes] = useState({})
   const [quotesLoading, setQuotesLoading]   = useState(false)
   const [quotesData, setQuotesData]         = useState({})
   const [bankDetails, setBankDetails]       = useState({bank:'',accountNumber:'',accountType:'Cheque',debitDay:1})
   const [policyRef, setPolicyRef]           = useState('')
+  const [selectedVaps, setSelectedVaps]     = useState([])
 
   // OTP timer
   useEffect(()=>{
@@ -342,10 +349,11 @@ export default function InsurePage() {
   const needsCar  = selected.includes('CAR')
 
   // Journey steps sequence
-  const journeySteps = ['home','car','cardriver','quotes','review','debit','done'].filter(s=>{
+  const journeySteps = ['home','car','cardriver','quotes','vaps','review','debit','done'].filter(s=>{
     if(s==='home'&&!needsHome)return false
     if(s==='car'&&!needsCar)return false
     if(s==='cardriver'&&!needsCar)return false
+    if(s==='vaps'&&!needsCar)return false
     return true
   })
   const journeyTotal = journeySteps.length
@@ -916,7 +924,7 @@ export default function InsurePage() {
   // JOURNEY — DRIVER & COVER DETAILS
   // ════════════════════════════════════════════════════════════════════════════
   const renderCarDriver = () => {
-    const canContinue = carDriver.yearsLicensed && carDriver.parkingAddress && (
+    const canContinue = carDriver.licenceDate && carDriver.parkingAddress && (
       (carDriver.regularDriver==='Another person')
         ? (carDriver.driverIdNumber?.length===13 && carDriver.driverFirstName && carDriver.driverLastName)
         : true
@@ -955,7 +963,8 @@ export default function InsurePage() {
               <div style={{fontSize:12,color:'#5A7A9A',marginBottom:12,lineHeight:1.5}}>We need the regular driver's details to rate this policy accurately.</div>
               <div style={{marginBottom:10}}>
                 <label className="ip-label">Regular driver ID number</label>
-                <input className="ip-input" type="text" placeholder="13-digit SA ID number" value={carDriver.driverIdNumber||''} onChange={e=>setCarDriver(p=>({...p,driverIdNumber:e.target.value.replace(/\D/g,'').slice(0,13)}))} inputMode="numeric"/>
+                <input className={`ip-input${carDriver.driverIdNumber?.length===13?(validateSAID(carDriver.driverIdNumber).valid?' ok':' err'):''}`} type="text" placeholder="13-digit SA ID number" value={carDriver.driverIdNumber||''} onChange={e=>{const v=e.target.value.replace(/[^0-9]/g,'').slice(0,13);const r=v.length===13?validateSAID(v):null;setCarDriver(p=>({...p,driverIdNumber:v,driverAge:r?.valid?String(r.age):p.driverAge}))}} inputMode="numeric"/>
+                {carDriver.driverIdNumber?.length===13&&(()=>{const r=validateSAID(carDriver.driverIdNumber);return r.valid?<div className="ip-hint-ok">✓ Valid · DOB {r.dob} · {r.gender}</div>:<div className="ip-hint-err">✕ {r.error}</div>})()}
               </div>
               <div style={{display:'flex',gap:8}}>
                 <div style={{flex:1}}>
@@ -981,15 +990,14 @@ export default function InsurePage() {
           </div>
 
           <div style={{marginBottom:14}}>
-            <label className="ip-label">Years licensed</label>
-            <select className="ip-select" value={carDriver.yearsLicensed} onChange={e=>setCarDriver(p=>({...p,yearsLicensed:e.target.value}))}>
-              <option value="">Select</option>
-              <option>Less than 1 year</option>
-              <option>1–2 years</option>
-              <option>3–5 years</option>
-              <option>6–10 years</option>
-              <option>More than 10 years</option>
-            </select>
+            <label className="ip-label">Date licence obtained</label>
+            <input className="ip-input" type="date" value={carDriver.licenceDate||''} onChange={e=>setCarDriver(p=>({...p,licenceDate:e.target.value}))}
+              max={new Date().toISOString().slice(0,10)}
+              min="1950-01-01"
+              style={{colorScheme:'light'}}/>
+            {carDriver.licenceDate&&<div style={{fontSize:11,color:TEAL,marginTop:4}}>
+              Licensed for {Math.floor((new Date()-new Date(carDriver.licenceDate))/31536000000)} year(s)
+            </div>}
           </div>
 
           <div style={{marginBottom:14}}>
@@ -1004,17 +1012,7 @@ export default function InsurePage() {
             </div>
           </div>
 
-          <div style={{marginBottom:14}}>
-            <label className="ip-label">Traffic convictions in the last 5 years?</label>
-            <div style={{display:'flex',gap:8}}>
-              {['No','Yes'].map(o=>(
-                <button key={o} onClick={()=>setCarDriver(p=>({...p,convictions:o}))}
-                  style={{flex:1,padding:11,borderRadius:10,border:`1.5px solid ${carDriver.convictions===o?TEAL:'#E2E9F0'}`,background:carDriver.convictions===o?'rgba(0,184,169,0.08)':'#fff',color:carDriver.convictions===o?TEAL:'#5A7A9A',fontSize:14,fontWeight:600,cursor:'pointer'}}>
-                  {o}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           <div style={{marginBottom:14}}>
             <label className="ip-label">Overnight parking address</label>
@@ -1068,6 +1066,62 @@ export default function InsurePage() {
     )
   }
 
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // JOURNEY — VALUE ADDED PRODUCTS (VAPs)
+  // ════════════════════════════════════════════════════════════════════════════
+  const renderVaps = () => {
+    const vapsTotal = selectedVaps.reduce((s,c)=>s+(VAPS.find(v=>v.code===c)?.premium||0),0)
+    const carPremium = Object.values(selectedQuotes).reduce((s,q)=>s+(q?.premium||0),0)
+    return(
+      <>
+        <StepHeader title="Enhance your cover" subtitle={`Step ${journeyIdx+1} of ${journeyTotal}`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
+        <div className="ip-body">
+          <p style={{fontSize:13,color:'#5A7A9A',marginBottom:16,lineHeight:1.6}}>Add these optional extras to your car insurance policy.</p>
+
+          {VAPS.map(v=>{
+            const isSel = selectedVaps.includes(v.code)
+            return(
+              <div key={v.code} className={`ip-product${isSel?' sel':''}`} onClick={()=>setSelectedVaps(p=>p.includes(v.code)?p.filter(c=>c!==v.code):[...p,v.code])}>
+                <span style={{fontSize:26}}>{v.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{v.label}</div>
+                  <div style={{fontSize:12,color:'#8FA3BE',marginTop:2}}>{v.sub}</div>
+                </div>
+                <div style={{textAlign:'right',flexShrink:0}}>
+                  <div style={{fontSize:14,fontWeight:700,color:'#0A1628'}}>+R{v.premium}/mo</div>
+                  <div style={{width:20,height:20,borderRadius:99,border:`2px solid ${isSel?TEAL:'#E2E9F0'}`,background:isSel?TEAL:'transparent',display:'flex',alignItems:'center',justifyContent:'center',marginTop:4,marginLeft:'auto'}}>
+                    {isSel&&<span style={{color:'#fff',fontSize:11,fontWeight:700}}>✓</span>}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+
+          <div style={{background:'#fff',border:'1.5px solid #E2E9F0',borderRadius:14,padding:14,marginTop:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <span style={{fontSize:13,color:'#8FA3BE'}}>Base premium</span>
+              <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>R{carPremium.toLocaleString()}/mo</span>
+            </div>
+            {vapsTotal>0&&<div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <span style={{fontSize:13,color:'#8FA3BE'}}>VAPs</span>
+              <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>+R{vapsTotal}/mo</span>
+            </div>}
+            <div style={{display:'flex',justifyContent:'space-between',paddingTop:8,borderTop:'1px solid #F0F4F8'}}>
+              <span style={{fontSize:14,fontWeight:700,color:'#0A1628'}}>Total</span>
+              <span style={{fontSize:16,fontWeight:700,color:TEAL}}>R{(carPremium+vapsTotal).toLocaleString()}/mo</span>
+            </div>
+          </div>
+        </div>
+        <div className="ip-bottom">
+          <button className="ip-btn" onClick={goNextJourney}>
+            {selectedVaps.length>0?`Continue with ${selectedVaps.length} extra${selectedVaps.length>1?'s':''} →`:'Continue without extras →'}
+          </button>
+        </div>
+      </>
+    )
+  }
+
   // ════════════════════════════════════════════════════════════════════════════
   // JOURNEY — QUOTES
   // ════════════════════════════════════════════════════════════════════════════
@@ -1092,7 +1146,7 @@ export default function InsurePage() {
 
     return(
       <>
-        <StepHeader title="Your quotes" subtitle={`${selected.length} product${selected.length>1?'s':''} · Ranked by value`} step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
+        <StepHeader title="Your quotes" subtitle="Ranked by total premium — lowest first" step={journeyIdx+1} total={journeyTotal} onBack={goPrevJourney}/>
         <div className="ip-body">
           {/* Cashback banner */}
           <div style={{background:'rgba(29,185,122,0.1)',border:'1px solid rgba(29,185,122,0.2)',borderRadius:12,padding:'12px 14px',marginBottom:16,display:'flex',alignItems:'center',gap:10}}>
@@ -1103,47 +1157,54 @@ export default function InsurePage() {
             </div>
           </div>
 
-          {/* Quotes per product */}
-          {selected.map(code=>{
-            const quotes = quotesData[code] || []
-            const product = PRODUCTS.find(p=>p.code===code)
-            return(
-              <div key={code} style={{marginBottom:20}}>
-                <div style={{fontSize:13,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5,marginBottom:10}}>
-                  {product?.icon} {product?.label}
-                </div>
-                {quotes.map((q,i)=>{
-                  const isSel = selectedQuotes[code]?.insurer===q.insurer
-                  return(
-                    <div key={i} className={`ip-quote-card${isSel?' sel':''}`} onClick={()=>setSelectedQuotes(p=>({...p,[code]:q}))}>
-                      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
-                        <img src={q.logo} width={24} height={24} style={{borderRadius:4,objectFit:'contain',background:'#fff',padding:2}} onError={e=>e.target.style.display='none'}/>
-                        <div style={{flex:1}}>
-                          <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{q.insurer}</div>
-                          {q.highlight&&<div style={{fontSize:11,color:TEAL,fontWeight:600}}>★ {q.highlight}</div>}
-                        </div>
-                        <div style={{textAlign:'right'}}>
-                          <div style={{fontSize:18,fontWeight:700,color:'#0A1628'}}>R{q.premium.toLocaleString()}</div>
-                          <div style={{fontSize:10,color:'#8FA3BE'}}>/month</div>
-                        </div>
-                      </div>
-                      <div style={{display:'flex',gap:12,fontSize:12,color:'#8FA3BE'}}>
-                        <span>Excess: R{q.excess.toLocaleString()}</span>
-                        <span>⭐ {q.rating}</span>
-                        <span style={{color:GREEN,fontWeight:600}}>💸 R{q.cashback.toLocaleString()} cashback if you incepted</span>
-                      </div>
-                      {isSel&&<div style={{marginTop:10,padding:'8px 10px',background:'rgba(0,184,169,0.1)',borderRadius:8,fontSize:12,color:TEAL}}>
-                        ✓ Selected — R{q.cashback.toLocaleString()} cashback on first premium collected
-                      </div>}
+          {(()=>{
+            const insurers=[...new Set(Object.values(quotesData).flat().map(q=>q.insurer))]
+            const ranked=insurers.map(insurer=>{
+              const quotes={};let total=0,totalCB=0,minExcess=999999,minRating=5
+              selected.forEach(code=>{
+                const q=(quotesData[code]||[]).find(q=>q.insurer===insurer)
+                if(q){quotes[code]=q;total+=q.premium;totalCB+=q.cashback;minExcess=Math.min(minExcess,q.excess);minRating=Math.min(minRating,q.rating)}
+              })
+              return{insurer,quotes,total,totalCB,minExcess,minRating,covered:Object.keys(quotes).length}
+            }).filter(r=>r.covered===selected.length).sort((a,b)=>a.total-b.total)
+            return ranked.map((r,idx)=>{
+              const isSelected=selected.every(code=>selectedQuotes[code]?.insurer===r.insurer)
+              const sampleQ=Object.values(r.quotes)[0]
+              return(
+                <div key={r.insurer} className={`ip-quote-card${isSelected?' sel':''}`}
+                  onClick={()=>setSelectedQuotes(prev=>{const n={...prev};selected.forEach(code=>{if(r.quotes[code])n[code]=r.quotes[code]});return n})}>
+                  {idx===0&&<div style={{fontSize:10,fontWeight:700,color:TEAL,textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>⭐ Best price</div>}
+                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                    <img src={sampleQ?.logo} width={32} height={32} style={{borderRadius:8,objectFit:'contain',background:'#F7F9FC',padding:4,border:'1px solid #E2E9F0'}} onError={e=>e.target.style.display='none'}/>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:15,fontWeight:700,color:'#0A1628'}}>{r.insurer}</div>
+                      <div style={{fontSize:11,color:'#8FA3BE'}}>⭐ {r.minRating} · {selected.length} product{selected.length>1?'s':''} covered</div>
                     </div>
-                  )
-                })}
-              </div>
-            )
-          })}
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontSize:20,fontWeight:800,color:'#0A1628'}}>R{r.total.toLocaleString()}</div>
+                      <div style={{fontSize:10,color:'#8FA3BE'}}>/month total</div>
+                    </div>
+                  </div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:10}}>
+                    {selected.map(code=>{
+                      const q=r.quotes[code];const prod=PRODUCTS.find(p=>p.code===code)
+                      return q?<div key={code} style={{fontSize:11,background:'#F7F9FC',border:'1px solid #E2E9F0',borderRadius:8,padding:'4px 8px',color:'#5A7A9A'}}>{prod?.icon} R{q.premium}/mo</div>:null
+                    })}
+                  </div>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:'1px solid #F0F4F8'}}>
+                    <span style={{fontSize:12,color:GREEN,fontWeight:600}}>💸 R{r.totalCB.toLocaleString()} cashback</span>
+                    <span style={{fontSize:11,color:'#8FA3BE'}}>Excess from R{r.minExcess.toLocaleString()}</span>
+                  </div>
+                  {isSelected&&<div style={{marginTop:10,padding:'8px 10px',background:'rgba(0,184,169,0.08)',borderRadius:8,fontSize:12,color:TEAL,fontWeight:600}}>
+                    ✓ Selected — cashback earned on first premium collected
+                  </div>}
+                </div>
+              )
+            })
+          })()}
 
           <div style={{background:'#fff',border:'1px solid #E2E9F0',borderRadius:12,padding:14,marginBottom:8}}>
-            <div style={{fontSize:12,color:'rgba(255,255,255,0.4)',lineHeight:1.6}}>
+            <div style={{fontSize:12,color:'#8FA3BE',lineHeight:1.6}}>
               Quotes are indicative and subject to final underwriting. Muḽo Financial Services (Pty) Ltd, FSP 49169, obtains these quotes on your behalf.
             </div>
           </div>
@@ -1153,7 +1214,7 @@ export default function InsurePage() {
             <span style={{fontSize:13,color:'#8FA3BE'}}>Total monthly premium</span>
             <span style={{fontSize:18,fontWeight:700,color:'#0A1628'}}>R{totalPremium.toLocaleString()}/mo</span>
           </div>
-          <button className="ip-btn" onClick={goNextJourney}>Review & confirm →</button>
+          <button className="ip-btn" onClick={goNextJourney}>Continue →</button>
         </div>
       </>
     )
@@ -1193,16 +1254,28 @@ export default function InsurePage() {
         })}
 
         {/* Totals */}
-        <div style={{background:'rgba(29,185,122,0.08)',border:'1px solid rgba(29,185,122,0.15)',borderRadius:14,padding:14,marginBottom:16}}>
-          <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
-            <span style={{fontSize:14,color:'#5A7A9A'}}>Total monthly premium</span>
-            <span style={{fontSize:16,fontWeight:700,color:'#0A1628'}}>R{totalPremium.toLocaleString()}</span>
+        <div style={{background:'rgba(29,185,122,0.06)',border:'1px solid rgba(29,185,122,0.15)',borderRadius:14,padding:14,marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+            <span style={{fontSize:13,color:'#8FA3BE'}}>Base premium</span>
+            <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>R{totalPremium.toLocaleString()}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+            <span style={{fontSize:13,color:'#8FA3BE'}}>SASRIA levy <span style={{fontSize:10}}>(statutory)</span></span>
+            <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>R{Math.max(15,Math.round(totalPremium*0.003)).toLocaleString()}</span>
+          </div>
+          {selectedVaps.length>0&&<div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+            <span style={{fontSize:13,color:'#8FA3BE'}}>VAPs</span>
+            <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>+R{selectedVaps.reduce((s,c)=>s+(VAPS.find(v=>v.code===c)?.premium||0),0)}</span>
+          </div>}
+          <div style={{display:'flex',justifyContent:'space-between',paddingTop:8,borderTop:'1px solid rgba(29,185,122,0.2)',marginTop:4,marginBottom:8}}>
+            <span style={{fontSize:14,fontWeight:700,color:'#0A1628'}}>Total monthly</span>
+            <span style={{fontSize:16,fontWeight:800,color:'#0A1628'}}>R{(totalPremium+Math.max(15,Math.round(totalPremium*0.003))+selectedVaps.reduce((s,c)=>s+(VAPS.find(v=>v.code===c)?.premium||0),0)).toLocaleString()}</span>
           </div>
           <div style={{display:'flex',justifyContent:'space-between'}}>
             <span style={{fontSize:14,color:GREEN,fontWeight:600}}>💸 Total cashback</span>
             <span style={{fontSize:16,fontWeight:700,color:GREEN}}>R{totalCashback.toLocaleString()}</span>
           </div>
-          <div style={{fontSize:11,color:'#5A7A9A',marginTop:8,lineHeight:1.5}}>Cashback paid within 30 days of policy start. 12-month lock-in applies.</div>
+          <div style={{fontSize:11,color:'#5A7A9A',marginTop:8,lineHeight:1.5}}>Cashback earned on first premium collected. 12-month lock-in applies. SASRIA is a statutory levy.</div>
         </div>
 
         {/* Client details */}
@@ -1382,6 +1455,7 @@ export default function InsurePage() {
       case 'home':   return renderHome()
       case 'car':    return renderCar()
       case 'cardriver': return renderCarDriver()
+      case 'vaps':      return renderVaps()
       case 'quotes': return renderQuotes()
       case 'review': return renderReview()
       case 'debit':  return renderDebit()
