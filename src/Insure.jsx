@@ -745,89 +745,92 @@ export default function Insure({ client, onBack }) {
     )
   }
   const renderLanding = () => (
-    <div className="screen fade-in" style={{background:'#F7F9FC',display:'flex',flexDirection:'column',overflow:'hidden'}}>
+    <div style={{
+      height:'100%', background:'linear-gradient(160deg,#0A1628 0%,#0E2344 60%,#0B3040 100%)',
+      display:'flex', flexDirection:'column', position:'relative',
+    }}>
+      {/* glow blobs */}
+      <div style={{position:'absolute',width:300,height:300,borderRadius:'50%',background:'radial-gradient(circle,rgba(0,184,169,0.18) 0%,transparent 70%)',top:-80,right:-80,pointerEvents:'none'}}/>
+      <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',background:'radial-gradient(circle,rgba(26,115,232,0.15) 0%,transparent 70%)',bottom:40,left:-60,pointerEvents:'none'}}/>
 
-      <div className="screen-scroll" style={{flex:1,overflowY:'auto'}}>
-
-        {/* ── Hero ── */}
-        <div style={{background:'linear-gradient(160deg,#0A1628 0%,#0E2344 60%,#0B3040 100%)',padding:'28px 24px 0',position:'relative',overflow:'hidden'}}>
-          <div style={{position:'absolute',width:300,height:300,borderRadius:'50%',background:'radial-gradient(circle,rgba(0,184,169,0.18) 0%,transparent 70%)',top:-80,right:-80,pointerEvents:'none'}}/>
-          <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',background:'radial-gradient(circle,rgba(26,115,232,0.15) 0%,transparent 70%)',bottom:40,left:-60,pointerEvents:'none'}}/>
-
-          {/* logo row */}
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:32,position:'relative',zIndex:1}}>
-            <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <div className="mulo-logo">Mu<span>ḽ</span>o</div>
-              <div style={{fontSize:11,fontWeight:600,color:'rgba(255,255,255,0.4)',letterSpacing:0.5,marginTop:2}}>insure</div>
-            </div>
-            <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <div style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>FSP 49169</div>
-              <span style={{fontSize:18,color:'rgba(255,255,255,0.5)',cursor:'pointer',padding:'4px 8px'}} onClick={onBack}>←</span>
-            </div>
+      {/* scrollable content */}
+      <div style={{flex:1,overflowY:'auto',padding:'28px 24px 0',position:'relative',zIndex:1}}>
+        {/* header */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28}}>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div className="mulo-logo" style={{color:'#fff'}}>Mu<span style={{color:'#00B8A9'}}>ḽ</span>o</div>
+            <div style={{fontSize:11,fontWeight:600,color:'rgba(255,255,255,0.4)'}}>insure</div>
           </div>
-
-          <div className={"hero-eyebrow"} style={{position:"relative",zIndex:1}}>🏆 South Africa's only cashback insurance platform</div>
-          <h1 className={"hero-title"} style={{fontSize:22,lineHeight:1.2,position:"relative",zIndex:1}}>Anyone can compare insurance.<br/><em>Only Muḽo pays you for it.</em></h1>
-          <p className={"hero-sub"} style={{position:"relative",zIndex:1}}>Insure your car, home or contents through Muḽo and earn your first month's premium back — guaranteed. Every time.</p>
-          <p className={"hero-sub"} style={{position:"relative",zIndex:1,marginTop:-8,fontStyle:"italic",color:"rgba(255,255,255,0.65)"}}>The smart move isn't just finding a better rate. It's getting paid when you find it.</p>
-
-          <div style={{position:"relative",zIndex:1,overflow:"hidden",marginBottom:20}}>
-            <div style={{display:"flex",gap:8,animation:"insurerScroll 22s linear infinite",width:"max-content"}}>
-              {[["https://www.absa.co.za/favicon.ico","Absa"],["https://www.pineapple.co.za/favicon.ico","Pineapple"],["https://www.nedbank.co.za/favicon.ico","Nedbank"],["https://www.oldmutual.co.za/favicon.ico","Old Mutual"],["https://www.miway.co.za/favicon.ico","MiWay"],["https://www.momentum.co.za/favicon.ico","Momentum"],["https://www.kingprice.co.za/favicon.ico","King Price"],["https://www.iwyze.co.za/favicon.ico","iWYZE"],
-                ["https://www.absa.co.za/favicon.ico","Absa"],["https://www.pineapple.co.za/favicon.ico","Pineapple"],["https://www.nedbank.co.za/favicon.ico","Nedbank"],["https://www.oldmutual.co.za/favicon.ico","Old Mutual"],["https://www.miway.co.za/favicon.ico","MiWay"],["https://www.momentum.co.za/favicon.ico","Momentum"],["https://www.kingprice.co.za/favicon.ico","King Price"],["https://www.iwyze.co.za/favicon.ico","iWYZE"]
-              ].map(([src,n],idx) => (
-                <div key={idx} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:99,padding:"5px 12px",whiteSpace:"nowrap",flexShrink:0}}>
-                  <img src={src} width={18} height={18} style={{borderRadius:3,objectFit:"contain",background:"#fff",padding:2}} onError={ev=>ev.target.style.display="none"}/>
-                  <span style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,0.75)"}}>{n}</span>
-                </div>
-              ))}
-            </div>
-            <style>{`@keyframes insurerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
-          </div>
-
-          <div className="hero-stats" style={{position:'relative',zIndex:1}}>
-            {[['R0','Free to compare'],['3 min','Avg. quote time'],['1 mo','Cashback earned']].map(([v,l]) => (
-              <div className="hero-stat" key={l}><div className="hero-stat-val">{v}</div><div className="hero-stat-lbl">{l}</div></div>
-            ))}
-          </div>
-
-          <div style={{marginBottom:20,position:"relative",zIndex:1}}>
-            <button className="btn btn-primary" onClick={() => setPreStep('journey')}>Get my free quotes →</button>
-            <div style={{textAlign:"center",marginTop:8,fontSize:11,color:"rgba(255,255,255,0.5)"}}>Free to compare · No obligation · Takes 3 minutes</div>
-          </div>
-          <div className="trust-strip">
-            {[['🛡️','FSP 49169'],['🔒','POPIA Compliant'],['⚡','5 insurers']].map(([i,l]) => (
-              <div className="trust-item" key={l}><span className="trust-icon">{i}</span>{l}</div>
-            ))}
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.35)'}}>FSP 49169</div>
+            <span style={{fontSize:18,color:'rgba(255,255,255,0.5)',cursor:'pointer',padding:'4px 8px'}} onClick={onBack}>←</span>
           </div>
         </div>
 
-        {/* ── Body ── */}
+        {/* eyebrow */}
+        <div className="hero-eyebrow">🏆 South Africa's only cashback insurance platform</div>
+
+        {/* headline */}
+        <h1 className="hero-title" style={{fontSize:24,lineHeight:1.2}}>
+          Anyone can compare insurance.<br/><em>Only Muḽo pays you for it.</em>
+        </h1>
+
+        {/* body copy */}
+        <p className="hero-sub">
+          Insure your car, home or contents through Muḽo and earn your first month's premium back — guaranteed. Every time.
+        </p>
+        <p className="hero-sub" style={{marginTop:-8,fontStyle:'italic',color:'rgba(255,255,255,0.65)'}}>
+          The smart move isn't just finding a better rate. It's getting paid when you find it.
+        </p>
+
+        {/* insurer carousel */}
+        <div style={{overflow:'hidden',marginBottom:20}}>
+          <div style={{display:'flex',gap:8,animation:'insurerScroll 22s linear infinite',width:'max-content'}}>
+            {[['https://www.absa.co.za/favicon.ico','Absa'],['https://www.pineapple.co.za/favicon.ico','Pineapple'],['https://www.nedbank.co.za/favicon.ico','Nedbank'],['https://www.oldmutual.co.za/favicon.ico','Old Mutual'],['https://www.miway.co.za/favicon.ico','MiWay'],['https://www.momentum.co.za/favicon.ico','Momentum'],['https://www.kingprice.co.za/favicon.ico','King Price'],['https://www.iwyze.co.za/favicon.ico','iWYZE'],
+              ['https://www.absa.co.za/favicon.ico','Absa'],['https://www.pineapple.co.za/favicon.ico','Pineapple'],['https://www.nedbank.co.za/favicon.ico','Nedbank'],['https://www.oldmutual.co.za/favicon.ico','Old Mutual'],['https://www.miway.co.za/favicon.ico','MiWay'],['https://www.momentum.co.za/favicon.ico','Momentum'],['https://www.kingprice.co.za/favicon.ico','King Price'],['https://www.iwyze.co.za/favicon.ico','iWYZE']
+            ].map(([src,n],idx) => (
+              <div key={idx} style={{display:'flex',alignItems:'center',gap:6,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.12)',borderRadius:99,padding:'5px 12px',whiteSpace:'nowrap',flexShrink:0}}>
+                <img src={src} width={18} height={18} style={{borderRadius:3,objectFit:'contain',background:'#fff',padding:2}} onError={ev=>ev.target.style.display='none'}/>
+                <span style={{fontSize:11,fontWeight:600,color:'rgba(255,255,255,0.75)'}}>{n}</span>
+              </div>
+            ))}
+          </div>
+          <style>{`@keyframes insurerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
+        </div>
+
+        {/* stats */}
+        <div className="hero-stats">
+          {[['R0','Free to compare'],['3 min','Avg. quote time'],['R900','Avg. cashback']].map(([v,l]) => (
+            <div className="hero-stat" key={l}>
+              <div className="hero-stat-val">{v}</div>
+              <div className="hero-stat-lbl">{l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA — inside scroll, always visible */}
+        <div style={{padding:'20px 0 8px'}}>
+          <button
+            className="btn btn-primary"
+            onClick={() => setPreStep('journey')}
+            style={{width:'100%',cursor:'pointer'}}
+          >
+            Get my free quotes →
+          </button>
+          <div style={{textAlign:'center',marginTop:10,fontSize:11,color:'rgba(255,255,255,0.5)'}}>
+            Free to compare · No obligation · Takes 3 minutes
+          </div>
+        </div>
+
+        {/* trust strip */}
+        <div className="trust-strip" style={{marginTop:8,marginBottom:24}}>
+          {[['🛡️','FSP 49169'],['🔒','POPIA Compliant'],['⚡','8 insurers']].map(([i,l]) => (
+            <div className="trust-item" key={l}><span className="trust-icon">{i}</span>{l}</div>
+          ))}
+        </div>
       </div>
     </div>
   )
-
-  // Simulate quote fetching when screen 6 appears
-  useEffect(() => {
-    if (currentScreen === 6 && !quotesLoaded) {
-      setQuotesLoading(true)
-      const timer = setTimeout(() => {
-        // Auto-select best (first) quote per product
-        const defaults = {}
-        selected.forEach(code => {
-          if (MOCK_QUOTES[code]?.[0]) defaults[code] = MOCK_QUOTES[code][0]
-        })
-        setSelectedQuotes(defaults)
-        setQuotesLoading(false)
-        setQuotesLoaded(true)
-      }, 1800)
-      return () => clearTimeout(timer)
-    }
-  }, [currentScreen, quotesLoaded, selected])
-
-  // Totals
-  const totalPremium  = Object.values(selectedQuotes).reduce((s, q) => s + (q?.premium || 0), 0)
-  const totalCashback = Object.values(selectedQuotes).reduce((s, q) => s + (q?.cashback || 0), 0)
 
   // ── Screen renderers ──────────────────────────────────────────────────────────
 

@@ -62,10 +62,10 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
-html,body{margin:0;padding:0;height:100vh;overflow:hidden}body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8}
+html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans',sans-serif;background:#F0F4F8}
 
 /* ── SHELL ── */
-.shell{display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:16px}
+.shell{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0A1628 0%,#1B3A5E 50%,#0D2440 100%);padding:16px;box-sizing:border-box}
 .phone{width:390px;height:min(780px,92vh);min-height:600px;background:#F7F9FC;border-radius:0;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.25);position:relative;display:flex;flex-direction:column}
 .phone-notch{display:none}
 
