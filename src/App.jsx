@@ -3062,6 +3062,7 @@ function ForgotPassword({ go }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [idNumber, setIdNumber] = useState("");
+  const [showPass, setShowPass] = useState(false);
 
   const handleIdSubmit = async () => {
     setLoading(true); setError("");
