@@ -3110,7 +3110,7 @@ function ForgotPassword({ go }) {
       const res = await fetch(API + '/reset-password', {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ id_number: idNumber, reset_code: resetCode, new_password: newPass })
+        body: JSON.stringify({ id_number: idNum, reset_code: resetCode, new_password: newPass })
       });
       const data = await res.json();
       if (data.reset) {
@@ -3184,16 +3184,20 @@ function ForgotPassword({ go }) {
 
           {step==="newpass" && <>
             <div className="input-group">
-              <label className="input-label">New password</label>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                <label className="input-label" style={{margin:0}}>New password</label>
+                <span style={{fontSize:12,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={()=>setShowPass(p=>!p)}>{showPass?"Hide":"Show"}</span>
+              </div>
               <input className="input-field" type={showPass ? "text" : "password"} placeholder="Min. 8 characters"
                 value={newPass} onChange={e => { setNewPass(e.target.value); setError(""); }} />
             </div>
             <div className="input-group">
               <label className="input-label">Confirm new password</label>
-              <input className="input-field" type="password" placeholder="Re-enter password"
+              <input className="input-field" type={showPass ? "text" : "password"} placeholder="Re-enter password"
                 value={confirmPass} onChange={e => { setConfirmPass(e.target.value); setError(""); }} />
             </div>
             {newPass && confirmPass && newPass===confirmPass && <div style={{fontSize:12,color:"#12C26B",marginBottom:8}}>✓ Passwords match</div>}
+            {newPass && confirmPass && newPass!==confirmPass && <div style={{fontSize:12,color:"#FF7043",marginBottom:8}}>✕ Passwords do not match</div>}
           </>}
 
           {step==="done" && <div style={{textAlign:"center",marginTop:16}}>
