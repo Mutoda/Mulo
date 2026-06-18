@@ -58,6 +58,8 @@ export default function AdminPage() {
   const [tab, setTab] = useState('dashboard')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
+  const [refinanceData, setRefinanceData] = useState([])
+  const [refinanceLoading, setRefinanceLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
 
   // ── PIN screen ────────────────────────────────────────────────────────────
@@ -197,6 +199,16 @@ export default function AdminPage() {
   }
 
   // ── Main admin shell ──────────────────────────────────────────────────────
+  // Load refinance applicants when tab selected
+  React.useEffect(()=>{
+    if(tab!=='refinance')return
+    setRefinanceLoading(true)
+    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/admin/applications')
+      .then(r=>r.json())
+      .then(d=>{ setRefinanceData(d.applicants||[]); setRefinanceLoading(false) })
+      .catch(()=>setRefinanceLoading(false))
+  },[tab])
+
   const filtered = MOCK_POLICIES.filter(p=>{
     const matchSearch = !search || p.client.name.toLowerCase().includes(search.toLowerCase()) || p.ref.includes(search) || p.insurer.toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter==='all' || p.status===statusFilter
@@ -214,7 +226,7 @@ export default function AdminPage() {
       <div style={{background:NAVY,padding:'0 24px',display:'flex',alignItems:'center',gap:24,height:56}}>
         <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:18,color:'#fff'}}>Mu<span style={{color:TEAL}}>ḽ</span>o <span style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,0.4)'}}>admin</span></div>
         <div style={{flex:1,display:'flex',gap:4}}>
-          {[['dashboard','Dashboard'],['policies','Policies'],['clients','Clients'],['payments','Payments']].map(([k,l])=>(
+          {[['dashboard','Dashboard'],['policies','Policies'],['clients','Clients'],['payments','Payments'],['refinance','Refinance']].map(([k,l])=>(
             <button key={k} onClick={()=>setTab(k)}
               style={{padding:'6px 14px',borderRadius:8,border:'none',background:tab===k?'rgba(255,255,255,0.12)':'transparent',color:tab===k?'#fff':'rgba(255,255,255,0.5)',fontSize:13,fontWeight:600,cursor:'pointer'}}>
               {l}
@@ -354,6 +366,43 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+        </>}
+
+        {/* Refinance tab */}
+        {tab==='refinance'&&<>
+          <div style={{fontSize:20,fontWeight:700,color:NAVY,marginBottom:20,fontFamily:"'Sora',sans-serif"}}>Refinance applicants</div>
+          {refinanceLoading&&<div style={{textAlign:'center',padding:40,color:'#8FA3BE'}}>Loading...</div>}
+          {!refinanceLoading&&<div style={{background:'#fff',borderRadius:16,boxShadow:'0 2px 8px rgba(0,0,0,0.06)',overflow:'hidden'}}>
+            <table style={{width:'100%',borderCollapse:'collapse'}}>
+              <thead><tr style={{background:'#F7F9FC'}}>
+                {['Applicant','DOB','Cell','Stage','Score','Loan amount','Monthly saving','Applied'].map(h=>(
+                  <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:11,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5,whiteSpace:'nowrap'}}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {refinanceData.map((a,i)=>(
+                  <tr key={a.id} style={{borderTop:'1px solid #F0F4F8'}}>
+                    <td style={{padding:'12px 16px'}}>
+                      <div style={{fontSize:13,fontWeight:600,color:NAVY}}>{a.email_plain||'—'}</div>
+                      <div style={{fontSize:11,color:'#8FA3BE'}}>{a.cellphone||'—'}</div>
+                    </td>
+                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{a.date_of_birth||'—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{a.cellphone||'—'}</td>
+                    <td style={{padding:'12px 16px'}}>
+                      <span style={{fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:99,background:a.current_screen==='dashboard'?GREEN+'22':TEAL+'22',color:a.current_screen==='dashboard'?GREEN:TEAL}}>
+                        {a.current_screen||'id-verify'}
+                      </span>
+                    </td>
+                    <td style={{padding:'12px 16px',fontSize:13,fontWeight:700,color:a.mulo_score>=700?GREEN:a.mulo_score>=600?'#F4B942':'#FF5C5C'}}>{a.mulo_score||'—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:13,fontWeight:700,color:NAVY}}>{a.loan_amount?`R${Number(a.loan_amount).toLocaleString()}`:'—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:13,fontWeight:700,color:GREEN}}>{a.monthly_saving?`R${Number(a.monthly_saving).toLocaleString()}/mo`:'—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:11,color:'#8FA3BE'}}>{a.created_at?new Date(a.created_at).toLocaleDateString('en-ZA'):'—'}</td>
+                  </tr>
+                ))}
+                {refinanceData.length===0&&<tr><td colSpan={8} style={{padding:32,textAlign:'center',color:'#8FA3BE'}}>No applicants found</td></tr>}
+              </tbody>
+            </table>
+          </div>}
         </>}
 
       </div>

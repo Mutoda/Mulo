@@ -830,6 +830,8 @@ const bcrypt = require('bcryptjs');
             a.dha_verified,
             a.date_of_birth,
             a.cellphone,
+            a.email_plain,
+            a.current_screen,
             a.created_at,
             ap.status,
             ap.mulo_score,
