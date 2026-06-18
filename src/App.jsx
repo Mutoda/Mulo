@@ -3186,7 +3186,7 @@ function ForgotPassword({ go }) {
             <div className="input-group">
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                 <label className="input-label" style={{margin:0}}>New password</label>
-                <span style={{fontSize:12,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={()=>setShowPass(p=>!p)}>{showPass?"Hide":"Show"}</span>
+                <span style={{fontSize:12,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={()=>setShowPass(p=>!p)}>{showPass?"Hide password":"Show password"}</span>
               </div>
               <input className="input-field" type={showPass ? "text" : "password"} placeholder="Min. 8 characters"
                 value={newPass} onChange={e => { setNewPass(e.target.value); setError(""); }} />

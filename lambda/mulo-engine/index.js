@@ -660,6 +660,7 @@ const bcrypt = require('bcryptjs');
         return resp(200, { found: true, maskedEmail: masked });
       } finally { await db.end(); }
     }
+
     if (path.endsWith('/reset-password') && method === 'POST') {
       const { id_number, reset_code, new_password } = body;
       if (!id_number || !reset_code || !new_password) return resp(400, { error: 'Missing fields' });
@@ -678,6 +679,11 @@ const bcrypt = require('bcryptjs');
         if (crypto.createHash('sha256').update(reset_code).digest('hex') !== storedHash) return resp(400, { error: 'Invalid reset code' });
         const newHash = await bcrypt.hash(new_password, 12);
         await db.query('UPDATE applicants SET password_hash = $1 WHERE id_number_hash = $2', [newHash, hashId(id_number)]);
+        const emailRow = await db.query('SELECT email_plain FROM applicants WHERE id_number_hash = $1 LIMIT 1', [hashId(id_number)]);
+        if (emailRow.rows[0]?.email_plain) {
+          const eHash = crypto.createHash('sha256').update(emailRow.rows[0].email_plain.toLowerCase()).digest('hex');
+          await db.query('UPDATE applicants SET password_hash = $1 WHERE email = $2', [newHash, eHash]);
+        }
         return resp(200, { reset: true });
       } finally { await db.end(); }
     }
