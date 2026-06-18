@@ -573,7 +573,7 @@ function Landing({ go }) {
             <div className="mulo-logo">Mu<span>ḽ</span>o</div>
             <div style={{display:"flex",alignItems:"center",gap:16}}>
               <div style={{fontSize:13,color:"rgba(255,255,255,0.7)",cursor:"pointer",fontWeight:500}} onClick={() => setFaqOpen(true)}>FAQ</div>
-              <div style={{fontSize:13,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => go("insure")}>Insure</div>
+              <div style={{fontSize:13,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => window.location.href='/insure'}>Insure</div>
               <div className="login-link" onClick={() => go("login")}>Sign in →</div>
             </div>
           </div>
@@ -3460,7 +3460,7 @@ function Dashboard({ go }) {
         {[
           {label:"Home",     svg:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10", key:"home",     action:()=>setTab("home")},
           {label:"Tranches", svg:"M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",    key:"tranches",  action:()=>go("disbursement")},
-          {label:"Insure",   svg:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",              key:"insure",    action:()=>go("insure")},
+          {label:"Insure",   svg:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",              key:"insure",    action:()=>window.location.href='/insure'},
           {label:"Support",  svg:"M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z", key:"support",   action:()=>setTab("support")},
           {label:"Profile",  svg:"M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z",  key:"profile",   action:()=>setTab("profile")},
         ].map(({label,svg,key,action}) => (
