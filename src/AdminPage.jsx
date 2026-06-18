@@ -263,27 +263,59 @@ export default function AdminPage() {
         {/* Clients tab */}
         {tab==='clients'&&<>
           <div style={{fontSize:20,fontWeight:700,color:NAVY,marginBottom:20,fontFamily:"'Sora',sans-serif"}}>Clients</div>
-          <div style={{background:'#fff',borderRadius:16,boxShadow:'0 2px 8px rgba(0,0,0,0.06)',overflow:'hidden'}}>
-            <table style={{width:'100%',borderCollapse:'collapse'}}>
-              <thead><tr style={{background:'#F7F9FC'}}>
-                {['Name','ID number','Email','Mobile','Policies','Total premium'].map(h=>(
-                  <th key={h} style={{padding:'12px 16px',textAlign:'left',fontSize:11,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5}}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
-                {MOCK_POLICIES.map(p=>(
-                  <tr key={p.id} onClick={()=>setSelected(p)} style={{borderTop:'1px solid #F0F4F8',cursor:'pointer'}} onMouseEnter={e=>e.currentTarget.style.background='#F7F9FC'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                    <td style={{padding:'12px 16px',fontSize:14,fontWeight:600,color:NAVY}}>{p.client.name}</td>
-                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{p.client.id_number}</td>
-                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{p.client.email}</td>
-                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{p.client.cell}</td>
-                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{p.products.length}</td>
-                    <td style={{padding:'12px 16px',fontSize:14,fontWeight:700,color:NAVY}}>R{p.total.toLocaleString()}/mo</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {(()=>{
+            // Group policies by client ID number
+            const clients = {}
+            MOCK_POLICIES.forEach(p=>{
+              const key = p.client.id_number
+              if(!clients[key]) clients[key] = {client:p.client, policies:[]}
+              clients[key].policies.push(p)
+            })
+            return Object.values(clients).map(({client,policies})=>{
+              const totalPremium = policies.reduce((s,p)=>s+p.total,0)
+              const totalCashback = policies.reduce((s,p)=>s+p.cashback,0)
+              const allActive = policies.every(p=>p.status==='active')
+              return(
+                <div key={client.id_number} style={{background:'#fff',borderRadius:16,boxShadow:'0 2px 8px rgba(0,0,0,0.06)',marginBottom:16,overflow:'hidden'}}>
+                  {/* Client header */}
+                  <div style={{padding:'16px 20px',borderBottom:'1px solid #F0F4F8',display:'flex',alignItems:'center',gap:16}}>
+                    <div style={{width:44,height:44,borderRadius:14,background:`linear-gradient(135deg,${TEAL},#1A73E8)`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Sora',sans-serif",fontSize:16,fontWeight:700,color:'#fff',flexShrink:0}}>
+                      {client.name.split(' ').map(n=>n[0]).join('').slice(0,2)}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:16,fontWeight:700,color:NAVY}}>{client.name}</div>
+                      <div style={{fontSize:12,color:'#8FA3BE',marginTop:2}}>{client.id_number} · {client.email} · {client.cell}</div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontSize:16,fontWeight:800,color:NAVY}}>R{totalPremium.toLocaleString()}/mo</div>
+                      <div style={{fontSize:11,color:GREEN,fontWeight:600}}>💸 R{totalCashback.toLocaleString()} cashback</div>
+                    </div>
+                  </div>
+                  {/* Policies for this client */}
+                  <div style={{padding:'8px 20px 16px'}}>
+                    <div style={{fontSize:11,fontWeight:700,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.5,margin:'10px 0 8px'}}>{policies.length} polic{policies.length===1?'y':'ies'}</div>
+                    {policies.map(p=>(
+                      <div key={p.id} onClick={()=>setSelected(p)} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 12px',borderRadius:12,border:'1.5px solid #E2E9F0',marginBottom:8,cursor:'pointer',transition:'all .15s'}}
+                        onMouseEnter={e=>e.currentTarget.style.background='#F7F9FC'}
+                        onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                        <div style={{flex:1}}>
+                          <div style={{fontSize:13,fontWeight:600,color:NAVY}}>{p.insurer} · {p.products.join(', ')}</div>
+                          <div style={{fontSize:11,color:'#8FA3BE',marginTop:2}}>{p.ref} · Start: {p.cover_start}</div>
+                        </div>
+                        <div style={{textAlign:'right',flexShrink:0}}>
+                          <div style={{fontSize:14,fontWeight:700,color:NAVY}}>R{p.total.toLocaleString()}/mo</div>
+                          <div style={{display:'flex',gap:6,justifyContent:'flex-end',marginTop:4}}>
+                            <span style={{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:99,background:STATUS_COLOUR[p.status]+'22',color:STATUS_COLOUR[p.status]}}>{p.status.toUpperCase()}</span>
+                            <span style={{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:99,background:CASHBACK_COLOUR[p.cashback_status]+'22',color:CASHBACK_COLOUR[p.cashback_status]}}>{p.cashback_status}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })
+          })()}
         </>}
 
         {/* Payments tab */}
