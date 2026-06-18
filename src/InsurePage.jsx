@@ -39,34 +39,53 @@ const PRODUCTS = [
 ]
 
 // ─── Mock quotes per product ───────────────────────────────────────────────
+const INSURERS = [
+  {name:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico'},
+  {name:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico'},
+  {name:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico'},
+  {name:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico'},
+  {name:'MiWay',           logo:'https://www.miway.co.za/favicon.ico'},
+  {name:'Old Mutual',      logo:'https://www.oldmutual.co.za/favicon.ico'},
+]
+
 const MOCK_QUOTES = {
   BUILDINGS:[
-    {insurer:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico',  colour:'#CC0000',premium:521, excess:5000,rating:4.3,cashback:521, highlight:'Best for bond holders'},
-    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', colour:'#FF6B35',premium:548, excess:4000,rating:4.7,cashback:548, highlight:'Best value'},
-    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',colour:'#FFD700',premium:576, excess:5000,rating:4.5,cashback:576, highlight:null},
-    {insurer:'Old Mutual',      logo:'https://www.oldmutual.co.za/favicon.ico',colour:'#006B3F',premium:612, excess:5000,rating:4.2,cashback:612, highlight:null},
+    {insurer:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico',  premium:521, excess:5000,rating:4.3,cashback:521, highlight:'Best for bond holders'},
+    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', premium:548, excess:4000,rating:4.7,cashback:548, highlight:'Best value'},
+    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',premium:576, excess:5000,rating:4.5,cashback:576, highlight:'Decreasing premium'},
+    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',premium:598, excess:4500,rating:4.6,cashback:598, highlight:'Top rated claims'},
+    {insurer:'MiWay',           logo:'https://www.miway.co.za/favicon.ico',  premium:612, excess:5000,rating:4.1,cashback:612, highlight:null},
+    {insurer:'Old Mutual',      logo:'https://www.oldmutual.co.za/favicon.ico',premium:634, excess:5000,rating:4.2,cashback:634, highlight:null},
   ],
   CONTENTS:[
-    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',colour:'#FFD93D',premium:312, excess:1500,rating:4.6,cashback:312, highlight:'Top rated claims'},
-    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', colour:'#FF6B35',premium:328, excess:2000,rating:4.7,cashback:328, highlight:'Best value'},
-    {insurer:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico',  colour:'#CC0000',premium:345, excess:2500,rating:4.3,cashback:345, highlight:null},
-    {insurer:'MiWay',           logo:'https://www.miway.co.za/favicon.ico',  colour:'#E8003D',premium:367, excess:2000,rating:4.1,cashback:367, highlight:null},
+    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', premium:298, excess:2000,rating:4.7,cashback:298, highlight:'Best value'},
+    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',premium:312, excess:1500,rating:4.6,cashback:312, highlight:'Top rated claims'},
+    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',premium:324, excess:2000,rating:4.5,cashback:324, highlight:'Decreasing premium'},
+    {insurer:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico',  premium:345, excess:2500,rating:4.3,cashback:345, highlight:null},
+    {insurer:'MiWay',           logo:'https://www.miway.co.za/favicon.ico',  premium:358, excess:2000,rating:4.1,cashback:358, highlight:null},
+    {insurer:'Old Mutual',      logo:'https://www.oldmutual.co.za/favicon.ico',premium:372, excess:2500,rating:4.2,cashback:372, highlight:null},
   ],
   CAR:[
-    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', colour:'#FF6B35',premium:689, excess:3500,rating:4.7,cashback:689, highlight:'Best value'},
-    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',colour:'#FFD700',premium:712, excess:3000,rating:4.5,cashback:712, highlight:'Decreasing premium'},
-    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',colour:'#FFD93D',premium:741, excess:2500,rating:4.6,cashback:741, highlight:'Top rated claims'},
-    {insurer:'MiWay',           logo:'https://www.miway.co.za/favicon.ico',  colour:'#E8003D',premium:768, excess:3500,rating:4.1,cashback:768, highlight:null},
+    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',premium:672, excess:3000,rating:4.5,cashback:672, highlight:'Decreasing premium'},
+    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', premium:689, excess:3500,rating:4.7,cashback:689, highlight:'Best value'},
+    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',premium:718, excess:2500,rating:4.6,cashback:718, highlight:'Top rated claims'},
+    {insurer:'MiWay',           logo:'https://www.miway.co.za/favicon.ico',  premium:745, excess:3500,rating:4.1,cashback:745, highlight:null},
+    {insurer:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico',  premium:761, excess:4000,rating:4.3,cashback:761, highlight:null},
+    {insurer:'Old Mutual',      logo:'https://www.oldmutual.co.za/favicon.ico',premium:789, excess:4000,rating:4.2,cashback:789, highlight:null},
   ],
   ALLRISK:[
-    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', colour:'#FF6B35',premium:189, excess:1000,rating:4.7,cashback:189, highlight:'Best value'},
-    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',colour:'#FFD93D',premium:210, excess:1000,rating:4.6,cashback:210, highlight:null},
+    {insurer:'Naked Insurance', logo:'https://www.naked.insure/favicon.ico', premium:189, excess:1000,rating:4.7,cashback:189, highlight:'Best value'},
+    {insurer:'Pineapple',       logo:'https://www.pineapple.co.za/favicon.ico',premium:198, excess:1000,rating:4.6,cashback:198, highlight:null},
+    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',premium:210, excess:1500,rating:4.5,cashback:210, highlight:null},
+    {insurer:'Absa Insurance',  logo:'https://www.absa.co.za/favicon.ico',  premium:224, excess:1500,rating:4.3,cashback:224, highlight:null},
+    {insurer:'MiWay',           logo:'https://www.miway.co.za/favicon.ico',  premium:235, excess:2000,rating:4.1,cashback:235, highlight:null},
+    {insurer:'Old Mutual',      logo:'https://www.oldmutual.co.za/favicon.ico',premium:248, excess:2000,rating:4.2,cashback:248, highlight:null},
   ],
   CARAVAN:[
-    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',colour:'#FFD700',premium:245, excess:2000,rating:4.5,cashback:245, highlight:'Only provider'},
+    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',premium:245, excess:2000,rating:4.5,cashback:245, highlight:'Only provider'},
   ],
   TRAILER:[
-    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',colour:'#FFD700',premium:145, excess:1500,rating:4.5,cashback:145, highlight:'Only provider'},
+    {insurer:'King Price',      logo:'https://www.kingprice.co.za/favicon.ico',premium:145, excess:1500,rating:4.5,cashback:145, highlight:'Only provider'},
   ],
 }
 
