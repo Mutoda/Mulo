@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const NAVY = '#0A1628'
 const TEAL = '#00B8A9'
@@ -200,7 +200,7 @@ export default function AdminPage() {
 
   // ── Main admin shell ──────────────────────────────────────────────────────
   // Load refinance applicants when tab selected
-  React.useEffect(()=>{
+  useEffect(()=>{
     if(tab!=='refinance')return
     setRefinanceLoading(true)
     fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/admin/applications')
