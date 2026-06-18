@@ -311,11 +311,19 @@ export default function InsurePage() {
         data[code] = MOCK_QUOTES[code] || []
       })
       setQuotesData(data)
-      // Auto-select best (first) quote per product
-      const autoSelect = {}
-      selected.forEach(code=>{
-        if(MOCK_QUOTES[code]?.[0]) autoSelect[code] = MOCK_QUOTES[code][0]
-      })
+      // Auto-select best insurer by lowest total premium across all selected products
+      const insurerNames = [...new Set(Object.values(data).flat().map(q=>q.insurer))]
+      const ranked = insurerNames.map(insurer=>{
+        const quotes = {}
+        let total = 0
+        selected.forEach(code=>{
+          const q = (data[code]||[]).find(q=>q.insurer===insurer)
+          if(q){quotes[code]=q;total+=q.premium}
+        })
+        return{insurer,quotes,total,covered:Object.keys(quotes).length}
+      }).filter(r=>r.covered===selected.length).sort((a,b)=>a.total-b.total)
+      const bestInsurer = ranked[0]
+      const autoSelect = bestInsurer ? bestInsurer.quotes : {}
       setSelectedQuotes(autoSelect)
       setQuotesLoading(false)
     }, 2000)
