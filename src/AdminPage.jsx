@@ -60,7 +60,19 @@ export default function AdminPage() {
   const [selected, setSelected] = useState(null)
   const [refinanceData, setRefinanceData] = useState([])
   const [refinanceLoading, setRefinanceLoading] = useState(false)
+  const [realPolicies, setRealPolicies] = useState([])
+  const [policiesLoading, setPoliciesLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
+
+  // Load real insure policies
+  useEffect(()=>{
+    if(!authed)return
+    setPoliciesLoading(true)
+    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/insure/policies')
+      .then(r=>r.json())
+      .then(d=>{ setRealPolicies(d.policies||[]); setPoliciesLoading(false) })
+      .catch(()=>setPoliciesLoading(false))
+  },[authed])
 
   // Load refinance applicants when tab selected
   useEffect(()=>{
@@ -209,16 +221,47 @@ export default function AdminPage() {
   }
 
   // ── Main admin shell ──────────────────────────────────────────────────────
-  const filtered = MOCK_POLICIES.filter(p=>{
+  // Use real policies if available, fall back to mock
+  const allPolicies = realPolicies.length > 0 ? realPolicies.map(p=>({
+    id: p.id,
+    ref: p.reference,
+    status: p.status || 'active',
+    client: {
+      name: p.first_name && p.last_name ? `${p.first_name} ${p.last_name}` : p.email_plain || 'Unknown',
+      id_number: p.id_number_hash?.slice(0,8)+'...',
+      email: p.email_plain || '—',
+      cell: p.cellphone || '—'
+    },
+    insurer: p.insurer,
+    products: p.products || [],
+    premium: Number(p.base_premium) || 0,
+    sasria: Number(p.sasria_levy) || 0,
+    vaps: Number(p.vaps_premium) || 0,
+    total: Number(p.total_premium) || 0,
+    cashback: Number(p.cashback_amount) || Number(p.base_premium) || 0,
+    cashback_status: p.cashback_status || 'pending',
+    cashback_due: p.cashback_due,
+    cover_start: p.cover_start_date,
+    debit_day: p.debit_day,
+    bank: {bank: p.bank_name||'—', account: p.bank_account||'—', type: p.bank_account_type||'—'},
+    payments: [],
+    risk: {
+      property: p.risk_property,
+      vehicle: p.risk_vehicle,
+      driver: p.risk_driver
+    }
+  })) : MOCK_POLICIES
+
+  const filtered = allPolicies.filter(p=>{
     const matchSearch = !search || p.client.name.toLowerCase().includes(search.toLowerCase()) || p.ref.includes(search) || p.insurer.toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter==='all' || p.status===statusFilter
     return matchSearch && matchStatus
   })
 
-  const totalPremium = MOCK_POLICIES.filter(p=>p.status==='active').reduce((s,p)=>s+p.total,0)
-  const totalCashbackLiability = MOCK_POLICIES.filter(p=>p.cashback_status==='pending').reduce((s,p)=>s+p.cashback,0)
-  const totalPolicies = MOCK_POLICIES.length
-  const activePolicies = MOCK_POLICIES.filter(p=>p.status==='active').length
+  const totalPremium = allPolicies.filter(p=>p.status==='active').reduce((s,p)=>s+p.total,0)
+  const totalCashbackLiability = allPolicies.filter(p=>p.cashback_status==='pending').reduce((s,p)=>s+p.cashback,0)
+  const totalPolicies = allPolicies.length
+  const activePolicies = allPolicies.filter(p=>p.status==='active').length
 
   return (
     <div style={{minHeight:'100vh',background:'#F0F4F8',fontFamily:"'IBM Plex Sans',sans-serif"}}>

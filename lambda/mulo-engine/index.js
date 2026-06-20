@@ -862,6 +862,26 @@ const bcrypt = require('bcryptjs');
         await db.end();
       }
     }
+    if (path.endsWith('/insure/policies') && method === 'GET') {
+      const db = await getDb();
+      try {
+        const result = await db.query(`
+          SELECT p.id, p.reference, p.status, p.insurer, p.products,
+                 p.base_premium, p.sasria_levy, p.vaps_premium, p.total_premium,
+                 p.bank_name, p.bank_account, p.bank_account_type, p.debit_day,
+                 p.cover_start_date, p.risk_property, p.risk_vehicle, p.risk_driver,
+                 p.created_at,
+                 c.id_number_hash, c.email_plain, c.cellphone, c.first_name, c.last_name,
+                 cb.amount as cashback_amount, cb.status as cashback_status, cb.due_date as cashback_due
+          FROM insure_policies p
+          LEFT JOIN insure_clients c ON c.id = p.client_id
+          LEFT JOIN insure_cashback cb ON cb.policy_id = p.id
+          ORDER BY p.created_at DESC
+          LIMIT 100
+        `);
+        return resp(200, { policies: result.rows, total: result.rowCount });
+      } finally { await db.end(); }
+    }
     if (path.endsWith('/insure/bind') && method === 'POST') {
       const { id_number, insurer, products, selectedQuotes, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver } = body;
       if (!id_number || !insurer || !products) return resp(400, { error: 'Missing required fields' });
