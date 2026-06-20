@@ -62,6 +62,16 @@ export default function AdminPage() {
   const [refinanceLoading, setRefinanceLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
 
+  // Load refinance applicants when tab selected
+  useEffect(()=>{
+    if(!authed||tab!=='refinance')return
+    setRefinanceLoading(true)
+    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/admin/applications')
+      .then(r=>r.json())
+      .then(d=>{ setRefinanceData(d.applicants||[]); setRefinanceLoading(false) })
+      .catch(()=>setRefinanceLoading(false))
+  },[tab,authed])
+
   // ── PIN screen ────────────────────────────────────────────────────────────
   if (!authed) return (
     <div style={{minHeight:'100vh',background:`linear-gradient(135deg,${NAVY},#1B3A5E)`,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
@@ -199,16 +209,6 @@ export default function AdminPage() {
   }
 
   // ── Main admin shell ──────────────────────────────────────────────────────
-  // Load refinance applicants when tab selected
-  useEffect(()=>{
-    if(tab!=='refinance')return
-    setRefinanceLoading(true)
-    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/admin/applications')
-      .then(r=>r.json())
-      .then(d=>{ setRefinanceData(d.applicants||[]); setRefinanceLoading(false) })
-      .catch(()=>setRefinanceLoading(false))
-  },[tab])
-
   const filtered = MOCK_POLICIES.filter(p=>{
     const matchSearch = !search || p.client.name.toLowerCase().includes(search.toLowerCase()) || p.ref.includes(search) || p.insurer.toLowerCase().includes(search.toLowerCase())
     const matchStatus = statusFilter==='all' || p.status===statusFilter
