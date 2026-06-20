@@ -756,7 +756,13 @@ const bcrypt = require('bcryptjs');
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS email_plain TEXT');
         await db.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS current_screen TEXT DEFAULT 'id-verify'");
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS password_hash TEXT');
-        return resp(200, { migrated: true });
+        // Insure tables
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), id_number_hash TEXT NOT NULL, email_plain TEXT, cellphone TEXT, first_name TEXT, last_name TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_policies (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_id UUID REFERENCES insure_clients(id), reference TEXT UNIQUE NOT NULL, status TEXT DEFAULT 'active', insurer TEXT NOT NULL, products TEXT[], base_premium NUMERIC, sasria_levy NUMERIC, vaps_premium NUMERIC, total_premium NUMERIC, cover_start_date DATE, debit_day INTEGER, bank_name TEXT, bank_account TEXT, bank_account_type TEXT, risk_property JSONB, risk_vehicle JSONB, risk_driver JSONB, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_cashback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, status TEXT DEFAULT 'pending', due_date DATE, paid_date DATE, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_payments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, debit_date DATE, status TEXT DEFAULT 'pending', created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_quotes (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_id UUID REFERENCES insure_clients(id), products TEXT[], risk_data JSONB, quotes_response JSONB, selected_insurer TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        return resp(200, { migrated: true, insure_tables: 'created' });
       } finally { await db.end(); }
     }
     if (path.endsWith('/save-screen') && method === 'POST') {
