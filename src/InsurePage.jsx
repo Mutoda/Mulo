@@ -644,8 +644,6 @@ export default function InsurePage() {
     const handlePaste=e=>{const p=e.clipboardData.getData('text').replace(/\D/g,'').slice(0,6);if(p.length===6){setAuthOtp(p.split(''));otpRefs.current[5]?.focus()}}
     const verify=async()=>{
       if(code.length<6)return
-      // DEV BYPASS: accept 000000 locally
-      if(code==='000000'){window._muloVerifiedToken='dev-token';setAuthPhase('done');setTimeout(()=>setStep('register'),700);return}
       setAuthPhase('checking')
       try{
         const res=await fetch(`${API}/otp/verify`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id_number:authId,otp:code})})
