@@ -1327,21 +1327,35 @@ export default function InsurePage() {
     const canContinue = bankDetails.bank && bankDetails.accountNumber && bankDetails.accountType
     const handleBind = async () => {
       setAuthPhase('checking')
+      const insurer = selectedQuotes[selected[0]]?.insurer || 'Unknown'
+      const basePremium = Object.values(selectedQuotes).reduce((s,q)=>s+(q?.premium||0),0)
+      const vapsPremium = selectedVaps.reduce((s,v)=>s+(VAPS.find(x=>x.code===v)?.price||0),0)
+      const sasriaLevy = Math.max(15,Math.round(basePremium*0.003))
+      const totalPrem = basePremium + sasriaLevy + vapsPremium
       try{
         const res = await fetch(`${API}/insure/bind`,{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             id_number: authId,
+            insurer,
             products: selected,
             selectedQuotes,
-            bankNameCode: bankDetails.bank,
-            bankAccountNumber: bankDetails.accountNumber,
-            bankAccountTypeCode: bankDetails.accountType,
-            coverStartDate: new Date(Date.now()+86400000).toISOString().slice(0,10),
+            base_premium: basePremium,
+            sasria_levy: sasriaLevy,
+            vaps_premium: vapsPremium,
+            total_premium: totalPrem,
+            bank_name: bankDetails.bank,
+            bank_account: bankDetails.accountNumber,
+            bank_account_type: bankDetails.accountType,
+            debit_day: bankDetails.debitDay,
+            cover_start_date: new Date(Date.now()+86400000).toISOString().slice(0,10),
+            risk_property: home,
+            risk_vehicle: vehicle,
+            risk_driver: carDriver,
           })
         })
         const data = await res.json()
-        setPolicyRef(data.policyNumber||`MULO-${Date.now()}`)
+        setPolicyRef(data.policyRef||`MULO-${Date.now()}`)
       }catch{
         setPolicyRef(`MULO-${Date.now()}`)
       }

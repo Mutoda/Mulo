@@ -757,7 +757,8 @@ const bcrypt = require('bcryptjs');
         await db.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS current_screen TEXT DEFAULT 'id-verify'");
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS password_hash TEXT');
         // Insure tables
-        await db.query(`CREATE TABLE IF NOT EXISTS insure_clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), id_number_hash TEXT NOT NULL, email_plain TEXT, cellphone TEXT, first_name TEXT, last_name TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), id_number_hash TEXT NOT NULL UNIQUE, email_plain TEXT, cellphone TEXT, first_name TEXT, last_name TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`ALTER TABLE insure_clients DROP CONSTRAINT IF EXISTS insure_clients_id_number_hash_key`); await db.query(`ALTER TABLE insure_clients ADD CONSTRAINT insure_clients_id_number_hash_key UNIQUE (id_number_hash)`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_policies (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_id UUID REFERENCES insure_clients(id), reference TEXT UNIQUE NOT NULL, status TEXT DEFAULT 'active', insurer TEXT NOT NULL, products TEXT[], base_premium NUMERIC, sasria_levy NUMERIC, vaps_premium NUMERIC, total_premium NUMERIC, cover_start_date DATE, debit_day INTEGER, bank_name TEXT, bank_account TEXT, bank_account_type TEXT, risk_property JSONB, risk_vehicle JSONB, risk_driver JSONB, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_cashback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, status TEXT DEFAULT 'pending', due_date DATE, paid_date DATE, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_payments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, debit_date DATE, status TEXT DEFAULT 'pending', created_at TIMESTAMPTZ DEFAULT NOW())`);
@@ -860,6 +861,41 @@ const bcrypt = require('bcryptjs');
       } finally {
         await db.end();
       }
+    }
+    if (path.endsWith('/insure/bind') && method === 'POST') {
+      const { id_number, insurer, products, selectedQuotes, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver } = body;
+      if (!id_number || !insurer || !products) return resp(400, { error: 'Missing required fields' });
+      const db = await getDb();
+      try {
+        const policyRef = 'MULO-' + Date.now();
+        // Upsert client
+        const clientRes = await db.query(
+          `INSERT INTO insure_clients (id_number_hash, cellphone)
+           VALUES ($1, $2)
+           ON CONFLICT (id_number_hash) DO UPDATE SET cellphone = EXCLUDED.cellphone
+           RETURNING id`,
+          [hashId(id_number), body.cellphone || null]
+        );
+        const clientId = clientRes.rows[0]?.id;
+        // Insert policy
+        const policyRes = await db.query(
+          `INSERT INTO insure_policies (client_id, reference, insurer, products, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+           RETURNING id`,
+          [clientId, policyRef, insurer, products, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date,
+           risk_property ? JSON.stringify(risk_property) : null,
+           risk_vehicle ? JSON.stringify(risk_vehicle) : null,
+           risk_driver ? JSON.stringify(risk_driver) : null]
+        );
+        const policyId = policyRes.rows[0]?.id;
+        // Insert cashback record
+        await db.query(
+          `INSERT INTO insure_cashback (policy_id, amount, status, due_date)
+           VALUES ($1, $2, 'pending', $3)`,
+          [policyId, base_premium, new Date(Date.now() + 30*24*60*60*1000).toISOString().slice(0,10)]
+        );
+        return resp(200, { bound: true, policyRef });
+      } finally { await db.end(); }
     }
     return resp(404, { error: `Route not found: ${method} ${path}` });
   } catch (err) {
