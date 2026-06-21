@@ -780,15 +780,8 @@ const bcrypt = require('bcryptjs');
         const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
         const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         await db.query('UPDATE admin_users SET otp_hash = $1, otp_expires = $2 WHERE id = $3', [otpHash, expires, user.id]);
-        // Send WhatsApp OTP
-        const waRes = await fetch('https://graph.facebook.com/v18.0/' + process.env.WA_PHONE_NUMBER_ID + '/messages', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json','Authorization':'Bearer ' + process.env.WA_TOKEN},
-          body: JSON.stringify({
-            messaging_product: 'whatsapp', to: user.cellphone,
-            type: 'text', text: { body: `Your Muḽo admin verification code is: ${otp}. Valid for 10 minutes.` }
-          })
-        });
+        // Send WhatsApp OTP using template
+        await sendWhatsAppOtp(user.cellphone, otp);
         return resp(200, { otpSent: true, name: user.name, maskedCell: user.cellphone.slice(0,3)+'****'+user.cellphone.slice(-3) });
       } finally { await db.end(); }
     }
