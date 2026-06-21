@@ -1373,6 +1373,8 @@ export default function InsurePage() {
         setPolicyRef(`MULO-${Date.now()}`)
       }
       setAuthPhase('idle')
+      // Store client session for dashboard
+      localStorage.setItem('mulo_insure_id', authId)
       goNextJourney()
     }
     return(
@@ -1492,6 +1494,7 @@ export default function InsurePage() {
         <button className="ip-btn" onClick={()=>window.location.href='/'} style={{marginBottom:12}}>
           Back to Muḽo →
         </button>
+        <button onClick={()=>window.location.href='/insure/dashboard'} style={{width:'100%',padding:'15px',background:'linear-gradient(135deg,#00B8A9,#1A73E8)',border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',marginBottom:12,boxShadow:'0 8px 24px rgba(0,184,169,0.35)'}}>Go to my dashboard →</button>
         <div style={{fontSize:11,color:'#8FA3BE',lineHeight:1.6}}>
           Muḽo Financial Services (Pty) Ltd · FSP 49169<br/>Authorised Financial Services Provider
         </div>

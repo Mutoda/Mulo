@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.jsx'
 import InsurePage from './InsurePage.jsx'
 import AdminPage from './AdminPage.jsx'
+import InsureDashboard from './InsureDashboard.jsx'
 
 export default function Router() {
   return (

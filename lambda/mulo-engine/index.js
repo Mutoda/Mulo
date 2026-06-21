@@ -827,8 +827,12 @@ const bcrypt = require('bcryptjs');
         await db.query("ALTER TABLE applicants ADD COLUMN IF NOT EXISTS current_screen TEXT DEFAULT 'id-verify'");
         await db.query('ALTER TABLE applicants ADD COLUMN IF NOT EXISTS password_hash TEXT');
         // Insure tables
-        await db.query(`CREATE TABLE IF NOT EXISTS insure_clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), id_number_hash TEXT NOT NULL UNIQUE, email_plain TEXT, cellphone TEXT, first_name TEXT, last_name TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        await db.query(`CREATE TABLE IF NOT EXISTS insure_clients (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), id_number_hash TEXT NOT NULL UNIQUE, email_plain TEXT, cellphone TEXT, first_name TEXT, last_name TEXT, otp_hash TEXT, otp_expires TIMESTAMPTZ, session_token TEXT, session_expires TIMESTAMPTZ, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`ALTER TABLE insure_clients DROP CONSTRAINT IF EXISTS insure_clients_id_number_hash_key`); await db.query(`ALTER TABLE insure_clients ADD CONSTRAINT insure_clients_id_number_hash_key UNIQUE (id_number_hash)`);
+        await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS otp_hash TEXT`);
+        await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS otp_expires TIMESTAMPTZ`);
+        await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS session_token TEXT`);
+        await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS session_expires TIMESTAMPTZ`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_policies (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_id UUID REFERENCES insure_clients(id), reference TEXT UNIQUE NOT NULL, status TEXT DEFAULT 'active', insurer TEXT NOT NULL, products TEXT[], base_premium NUMERIC, sasria_levy NUMERIC, vaps_premium NUMERIC, total_premium NUMERIC, cover_start_date DATE, debit_day INTEGER, bank_name TEXT, bank_account TEXT, bank_account_type TEXT, risk_property JSONB, risk_vehicle JSONB, risk_driver JSONB, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_cashback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, status TEXT DEFAULT 'pending', due_date DATE, paid_date DATE, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_payments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, debit_date DATE, status TEXT DEFAULT 'pending', created_at TIMESTAMPTZ DEFAULT NOW())`);
@@ -944,6 +948,58 @@ const bcrypt = require('bcryptjs');
       } finally {
         await db.end();
       }
+    }
+    if (path.endsWith('/insure/client-auth') && method === 'POST') {
+      const { id_number } = body;
+      if (!id_number) return resp(400, { error: 'ID number required' });
+      const db = await getDb();
+      try {
+        const result = await db.query('SELECT id, cellphone, first_name, last_name FROM insure_clients WHERE id_number_hash = $1', [hashId(id_number)]);
+        if (!result.rows.length) return resp(404, { error: 'No account found. Please get a quote first.' });
+        const client = result.rows[0];
+        if (!client.cellphone) return resp(404, { error: 'No cellphone on file. Please contact support.' });
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+        const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+        await db.query('UPDATE insure_clients SET otp_hash = $1, otp_expires = $2 WHERE id = $3', [otpHash, expires, client.id]);
+        await sendWhatsAppOtp(client.cellphone, otp);
+        let masked = client.cellphone;
+        if (masked.length >= 6) masked = masked.slice(0,3) + '****' + masked.slice(-3);
+        return resp(200, { otpSent: true, maskedCell: masked });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/insure/client-verify') && method === 'POST') {
+      const { id_number, otp } = body;
+      if (!id_number || !otp) return resp(400, { error: 'ID number and OTP required' });
+      const db = await getDb();
+      try {
+        const result = await db.query('SELECT id, first_name, last_name, email_plain, cellphone, otp_hash, otp_expires FROM insure_clients WHERE id_number_hash = $1', [hashId(id_number)]);
+        if (!result.rows.length) return resp(404, { error: 'Account not found' });
+        const client = result.rows[0];
+        if (!client.otp_hash) return resp(401, { error: 'No OTP requested' });
+        if (new Date() > new Date(client.otp_expires)) return resp(401, { error: 'OTP expired' });
+        if (crypto.createHash('sha256').update(otp).digest('hex') !== client.otp_hash) return resp(401, { error: 'Invalid OTP' });
+        const token = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        await db.query('UPDATE insure_clients SET otp_hash = NULL, otp_expires = NULL, session_token = $1, session_expires = $2 WHERE id = $3', [tokenHash, tokenExpires, client.id]);
+        const policies = await db.query('SELECT p.*, cb.amount as cashback_amount, cb.status as cashback_status FROM insure_policies p LEFT JOIN insure_cashback cb ON cb.policy_id = p.id WHERE p.client_id = $1 ORDER BY p.created_at DESC', [client.id]);
+        return resp(200, { token, client: {first_name: client.first_name, last_name: client.last_name, email: client.email_plain}, policies: policies.rows });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/insure/client-policies') && method === 'POST') {
+      const { id_number, token } = body;
+      if (!id_number || !token) return resp(401, { error: 'Unauthorised' });
+      const db = await getDb();
+      try {
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const result = await db.query('SELECT id, first_name, last_name, email_plain, session_expires FROM insure_clients WHERE id_number_hash = $1 AND session_token = $2', [hashId(id_number), tokenHash]);
+        if (!result.rows.length) return resp(401, { error: 'Invalid session' });
+        const client = result.rows[0];
+        if (new Date() > new Date(client.session_expires)) return resp(401, { error: 'Session expired' });
+        const policies = await db.query('SELECT p.*, cb.amount as cashback_amount, cb.status as cashback_status FROM insure_policies p LEFT JOIN insure_cashback cb ON cb.policy_id = p.id WHERE p.client_id = $1 ORDER BY p.created_at DESC', [client.id]);
+        return resp(200, { client: {first_name: client.first_name, last_name: client.last_name, email: client.email_plain}, policies: policies.rows });
+      } finally { await db.end(); }
     }
     if (path.endsWith('/insure/clients') && method === 'GET') {
       const db = await getDb();
