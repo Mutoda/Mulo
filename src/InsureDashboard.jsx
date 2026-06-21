@@ -181,7 +181,7 @@ export default function InsureDashboard() {
             <div style={{background:'#FFF8E7',border:'1.5px solid #F4B942',borderRadius:16,padding:20,marginBottom:16}}>
               <div style={{fontSize:15,fontWeight:700,color:'#854F0B',marginBottom:6}}>⏰ Renewal in {daysToAnniversary} days</div>
               <div style={{fontSize:13,color:'#854F0B',marginBottom:12}}>Your policy renews soon. We'll find you the best rates automatically.</div>
-              <button onClick={()=>window.location.href='/insure'}
+              <button onClick={()=>window.location.href='/insure?start=1'}
                 style={{padding:'10px 20px',background:'#F4B942',border:'none',borderRadius:12,color:'#fff',fontWeight:600,fontSize:13,cursor:'pointer'}}>
                 Compare quotes now →
               </button>
@@ -228,7 +228,7 @@ export default function InsureDashboard() {
               </div>
             ))}
           </div>
-          <button onClick={()=>window.location.href='/insure'}
+          <button onClick={()=>window.location.href='/insure?start=1'}
             style={{width:'100%',padding:'15px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',boxShadow:'0 8px 24px rgba(0,184,169,0.35)'}}>
             Get comparative quotes →
           </button>
@@ -274,7 +274,7 @@ export default function InsureDashboard() {
             <div style={{fontSize:32,marginBottom:12}}>🛡️</div>
             <div style={{fontSize:15,fontWeight:600,color:NAVY,marginBottom:8}}>No active policies</div>
             <div style={{fontSize:13,color:'#8FA3BE',marginBottom:20}}>Get covered today and earn cashback on your first premium.</div>
-            <button onClick={()=>window.location.href='/insure'}
+            <button onClick={()=>window.location.href='/insure?start=1'}
               style={{padding:'12px 24px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontWeight:600,fontSize:14,cursor:'pointer'}}>
               Get quotes →
             </button>
@@ -313,7 +313,7 @@ export default function InsureDashboard() {
         ))}
 
         {/* CTA */}
-        <button onClick={()=>window.location.href='/insure'}
+        <button onClick={()=>window.location.href='/insure?start=1'}
           style={{width:'100%',padding:'16px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:16,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',boxShadow:'0 8px 24px rgba(0,184,169,0.35)',marginTop:8}}>
           Get comparative quotes →
         </button>

@@ -269,7 +269,7 @@ const VAPS = [
 
 // ─── Main component ────────────────────────────────────────────────────────
 export default function InsurePage() {
-  const [step, setStep]           = useState('landing')
+  const [step, setStep]           = useState(new URLSearchParams(window.location.search).get('start')==='1'?'products':'landing')
   const [selected, setSelected]   = useState([])
 
   // Auth state
@@ -292,7 +292,7 @@ export default function InsurePage() {
   const otpRefs = useRef([])
 
   // Journey state
-  const [journeyStep, setJourneyStep] = useState('home') // home|car|quotes|review|debit|done
+  const [journeyStep, setJourneyStep] = useState(new URLSearchParams(window.location.search).get('start')==='1'?'home':'home') // home|car|quotes|review|debit|done
   const [property, setProperty]   = useState({address:'',buildingValue:'',contentsValue:'',roofType:'Tiles',wallType:'Brick & plaster',alarmSystem:'Yes — monitored',armedResponse:'No'})
   const [vehicle, setVehicle]     = useState({make:'',model:'',variant:'',year:'',colour:'',reg:'',bodyType:'',fuelType:'',transmission:'',engineSize:'',use:'private',financed:false,financeHouse:''})
   const [carDriver, setCarDriver]   = useState({coverType:'Comprehensive',regularDriver:'Myself',driverIdNumber:'',driverFirstName:'',driverLastName:'',driverAge:'',licence:'Code 8',licenceDate:'',claims:'No',parkingAddress:'',parkingType:'Garage',tracking:'No',trackingProvider:''})
