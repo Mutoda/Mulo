@@ -501,7 +501,7 @@ export default function InsurePage() {
             const isDis=(p.code==='ALLRISK'&&selected.filter(c=>c!=='ALLRISK').length===0)||((p.code==='CARAVAN'||p.code==='TRAILER')&&!selected.includes('CAR'))
             return(
               <div key={p.code} className={`ip-product${isSel?' sel':''}${isDis?' dis':''}`} onClick={()=>!isDis&&toggle(p.code)}>
-                <ProductIcon product={p} color={selected.includes(p.code)?'#00B8A9':'#5A7A9A'} bg={selected.includes(p.code)?'#0A1628':'#F0F4F8'}/>
+                <ProductIcon product={p} color={selected.includes(p.code)?'#00B8A9':'rgba(255,255,255,0.4)'} bg='#0A1628'/>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{p.label}</div>
                   <div style={{fontSize:12,color:'#8FA3BE',marginTop:2}}>{p.sub}</div>
