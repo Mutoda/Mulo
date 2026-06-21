@@ -30,12 +30,12 @@ function validateSAID(id) {
 
 // ─── Products ──────────────────────────────────────────────────────────────
 const PRODUCTS = [
-  {code:'BUILDINGS',label:'Buildings',     icon:'🏠',sub:'Cover the structure of your home'},
-  {code:'CONTENTS', label:'Home contents', icon:'📦',sub:'Furniture, appliances & valuables'},
-  {code:'CAR',      label:'Car insurance', icon:'🚗',sub:'Comprehensive vehicle cover'},
-  {code:'ALLRISK',  label:'All risk',      icon:'💎',sub:'Jewellery, devices & portable items'},
-  {code:'CARAVAN',  label:'Caravan',       icon:'🚐',sub:'Cover for your caravan'},
-  {code:'TRAILER',  label:'Trailer',       icon:'🔗',sub:'Cover for your trailer'},
+  {code:'BUILDINGS',label:'Buildings',     icon:null, svg:'M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z M9 21V12h6v9', sub:'Cover the structure of your home'},
+  {code:'CONTENTS', label:'Home contents', icon:null, svg:'M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z M8 12h8 M12 8v8', sub:'Furniture, appliances & valuables'},
+  {code:'CAR',      label:'Car insurance', icon:null, svg:'M5 17H3v-5l2-5h14l2 5v5h-2 M5 17a2 2 0 104 0 2 2 0 00-4 0z M15 17a2 2 0 104 0 2 2 0 00-4 0z', sub:'Comprehensive vehicle cover'},
+  {code:'ALLRISK',  label:'All risk',      icon:null, svg:'M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z', sub:'Jewellery, devices & portable items'},
+  {code:'CARAVAN',  label:'Caravan',       icon:null, svg:'M3 12h18M3 8h18a2 2 0 012 2v6H1v-6a2 2 0 012-2z M6 18a2 2 0 104 0 2 2 0 00-4 0z M14 18a2 2 0 104 0 2 2 0 00-4 0z', sub:'Cover for your caravan'},
+  {code:'TRAILER',  label:'Trailer',       icon:null, svg:'M1 10h20v8H1z M5 18a2 2 0 104 0 2 2 0 00-4 0z M15 18a2 2 0 104 0 2 2 0 00-4 0z M21 14h2', sub:'Cover for your trailer'},
 ]
 
 // ─── Mock quotes per product ───────────────────────────────────────────────
@@ -253,6 +253,16 @@ const VEHICLE_FINANCE_HOUSES = ['ABSA Vehicle Finance','FNB Vehicle Finance','Ne
 const VEHICLE_YEARS = Array.from({length:2026-1990+1},(_,i)=>String(2026-i))
 
 // ─── VAPs (Value Added Products) ──────────────────────────────────────────
+const ProductIcon = ({product, size=24, color='currentColor'}) => {
+  if (!product) return null
+  if (product.svg) return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      {product.svg.split(' M').map((d,i)=><path key={i} d={(i===0?'':' M')+d}/>)}
+    </svg>
+  )
+  return <span style={{fontSize:size}}>{product.icon}</span>
+}
+
 const VAPS = [
   {code:'CAR_HIRE',     label:'Car hire',          icon:'🚘', sub:'Rental car while yours is being repaired',    premium:89},
   {code:'CREDIT_SHORT', label:'Credit shortfall',  icon:'💳', sub:'Covers the gap between settlement & payout',  premium:65},
@@ -492,7 +502,7 @@ export default function InsurePage() {
             const isDis=(p.code==='ALLRISK'&&selected.filter(c=>c!=='ALLRISK').length===0)||((p.code==='CARAVAN'||p.code==='TRAILER')&&!selected.includes('CAR'))
             return(
               <div key={p.code} className={`ip-product${isSel?' sel':''}${isDis?' dis':''}`} onClick={()=>!isDis&&toggle(p.code)}>
-                <span style={{fontSize:26}}>{p.icon}</span>
+                <ProductIcon product={p} size={26} color={selected.includes(p.code)?'#00B8A9':'#8FA3BE'}/>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{p.label}</div>
                   <div style={{fontSize:12,color:'#8FA3BE',marginTop:2}}>{p.sub}</div>
@@ -1213,7 +1223,7 @@ export default function InsurePage() {
                   <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:10}}>
                     {selected.map(code=>{
                       const q=r.quotes[code];const prod=PRODUCTS.find(p=>p.code===code)
-                      return q?<div key={code} style={{fontSize:11,background:'#F7F9FC',border:'1px solid #E2E9F0',borderRadius:8,padding:'4px 8px',color:'#5A7A9A'}}>{prod?.icon} R{q.premium}/mo</div>:null
+                      return q?<div key={code} style={{fontSize:11,background:'#F7F9FC',border:'1px solid #E2E9F0',borderRadius:8,padding:'4px 8px',color:'#5A7A9A',display:'flex',alignItems:'center',gap:4}}><ProductIcon product={prod} size={12} color='#5A7A9A'/> R{q.premium}/mo</div>:null
                     })}
                   </div>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:'1px solid #F0F4F8'}}>
@@ -1260,7 +1270,7 @@ export default function InsurePage() {
           return(
             <div key={code} style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:14,padding:14,marginBottom:12}}>
               <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                <span style={{fontSize:20}}>{product?.icon}</span>
+                <ProductIcon product={product} size={20} color='#00B8A9'/>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{product?.label}</div>
                   <div style={{fontSize:12,color:'#8FA3BE'}}>{q.insurer}</div>
@@ -1438,7 +1448,7 @@ export default function InsurePage() {
             if(!q)return null
             return(
               <div key={code} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-                <span style={{fontSize:13,color:'#0A1628'}}>{product?.icon} {product?.label}</span>
+                <span style={{fontSize:13,color:'#0A1628',display:'flex',alignItems:'center',gap:6}}><ProductIcon product={product} size={14} color='#0A1628'/>{product?.label}</span>
                 <span style={{fontSize:13,fontWeight:600,color:'#0A1628'}}>R{q.premium.toLocaleString()}/mo via {q.insurer}</span>
               </div>
             )
@@ -1474,7 +1484,7 @@ export default function InsurePage() {
                 setJourneyStep(p.code==='CAR'?'car':p.code==='BUILDINGS'||p.code==='CONTENTS'?'home':'quotes')
                 setStep('journey')
               }} style={{display:'flex',alignItems:'center',gap:6,padding:'8px 12px',borderRadius:10,border:'1.5px solid #E2E9F0',background:'#F7F9FC',cursor:'pointer',fontSize:13,fontWeight:600,color:'#0A1628'}}>
-                <span>{p.icon}</span>{p.label}
+                <ProductIcon product={p} size={16} color='#00B8A9'/>{p.label}
               </button>
             ))}
           </div>
