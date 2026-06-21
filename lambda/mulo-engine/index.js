@@ -862,6 +862,56 @@ const bcrypt = require('bcryptjs');
         await db.end();
       }
     }
+    if (path.endsWith('/insure/clients') && method === 'GET') {
+      const db = await getDb();
+      try {
+        const result = await db.query(`
+          SELECT c.id, c.id_number_hash, c.first_name, c.last_name, c.email_plain, c.cellphone, c.created_at,
+                 COUNT(p.id) as policy_count,
+                 SUM(p.total_premium) as total_premium,
+                 SUM(cb.amount) as total_cashback,
+                 json_agg(json_build_object(
+                   'id', p.id, 'reference', p.reference, 'insurer', p.insurer,
+                   'products', p.products, 'total_premium', p.total_premium,
+                   'status', p.status, 'cover_start_date', p.cover_start_date,
+                   'cashback_status', cb.status, 'cashback_amount', cb.amount
+                 )) as policies
+          FROM insure_clients c
+          LEFT JOIN insure_policies p ON p.client_id = c.id
+          LEFT JOIN insure_cashback cb ON cb.policy_id = p.id
+          GROUP BY c.id
+          ORDER BY c.created_at DESC
+          LIMIT 100
+        `);
+        return resp(200, { clients: result.rows, total: result.rowCount });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/insure/payments') && method === 'GET') {
+      const db = await getDb();
+      try {
+        const result = await db.query(`
+          SELECT pay.id, pay.amount, pay.debit_date, pay.status, pay.created_at,
+                 p.reference, p.insurer, p.total_premium,
+                 c.first_name, c.last_name, c.email_plain
+          FROM insure_payments pay
+          LEFT JOIN insure_policies p ON p.id = pay.policy_id
+          LEFT JOIN insure_clients c ON c.id = p.client_id
+          ORDER BY pay.created_at DESC
+          LIMIT 100
+        `);
+        const cashback = await db.query(`
+          SELECT cb.id, cb.amount, cb.status, cb.due_date, cb.paid_date,
+                 p.reference, p.insurer,
+                 c.first_name, c.last_name
+          FROM insure_cashback cb
+          LEFT JOIN insure_policies p ON p.id = cb.policy_id
+          LEFT JOIN insure_clients c ON c.id = p.client_id
+          ORDER BY cb.created_at DESC
+          LIMIT 100
+        `);
+        return resp(200, { payments: result.rows, cashback: cashback.rows });
+      } finally { await db.end(); }
+    }
     if (path.endsWith('/insure/policies') && method === 'GET') {
       const db = await getDb();
       try {

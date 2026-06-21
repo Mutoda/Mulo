@@ -62,7 +62,19 @@ export default function AdminPage() {
   const [refinanceLoading, setRefinanceLoading] = useState(false)
   const [realPolicies, setRealPolicies] = useState([])
   const [policiesLoading, setPoliciesLoading] = useState(false)
+  const [realClients, setRealClients] = useState([])
+  const [realPayments, setRealPayments] = useState([])
+  const [realCashback, setRealCashback] = useState([])
   const [statusFilter, setStatusFilter] = useState('all')
+
+  // Load real insure clients and payments
+  useEffect(()=>{
+    if(!authed)return
+    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/insure/clients')
+      .then(r=>r.json()).then(d=>setRealClients(d.clients||[])).catch(()=>{})
+    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/insure/payments')
+      .then(r=>r.json()).then(d=>{ setRealPayments(d.payments||[]); setRealCashback(d.cashback||[]) }).catch(()=>{})
+  },[authed])
 
   // Load real insure policies
   useEffect(()=>{
@@ -319,14 +331,14 @@ export default function AdminPage() {
         {tab==='clients'&&<>
           <div style={{fontSize:20,fontWeight:700,color:NAVY,marginBottom:20,fontFamily:"'Sora',sans-serif"}}>Clients</div>
           {(()=>{
-            // Group policies by client ID number
-            const clients = {}
-            MOCK_POLICIES.forEach(p=>{
-              const key = p.client.id_number
-              if(!clients[key]) clients[key] = {client:p.client, policies:[]}
-              clients[key].policies.push(p)
-            })
-            return Object.values(clients).map(({client,policies})=>{
+            // Use real clients if available, fall back to mock
+            const clients = realClients.length>0
+              ? realClients.map(c=>({
+                  client:{name:c.first_name&&c.last_name?`${c.first_name} ${c.last_name}`:c.email_plain||'Unknown',id_number:c.id_number_hash?.slice(0,8)+'...',email:c.email_plain||'—',cell:c.cellphone||'—'},
+                  policies:(c.policies||[]).filter(p=>p&&p.id).map(p=>({id:p.id,ref:p.reference,insurer:p.insurer,products:p.products||[],total:Number(p.total_premium)||0,status:p.status||'active',cover_start:p.cover_start_date,cashback_status:p.cashback_status||'pending',cashback:Number(p.cashback_amount)||0}))
+                }))
+              : Object.values(MOCK_POLICIES.reduce((acc,p)=>{const k=p.client.id_number;if(!acc[k])acc[k]={client:p.client,policies:[]};acc[k].policies.push(p);return acc},{}))
+            return clients.map(({client,policies})=>{
               const totalPremium = policies.reduce((s,p)=>s+p.total,0)
               const totalCashback = policies.reduce((s,p)=>s+p.cashback,0)
               const allActive = policies.every(p=>p.status==='active')
@@ -377,9 +389,9 @@ export default function AdminPage() {
         {tab==='payments'&&<>
           <div style={{fontSize:20,fontWeight:700,color:NAVY,marginBottom:20,fontFamily:"'Sora',sans-serif"}}>Payments</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:16,marginBottom:24}}>
-            {[['Collected this month',`R${MOCK_POLICIES.filter(p=>p.status==='active').reduce((s,p)=>s+p.total,0).toLocaleString()}`,'💰',GREEN],
-              ['Cashback paid',`R${MOCK_POLICIES.filter(p=>p.cashback_status==='paid').reduce((s,p)=>s+p.cashback,0).toLocaleString()}`,'💸',TEAL],
-              ['Failed debits','1','⚠️','#FF5C5C']].map(([l,v,icon,col])=>(
+            {[['Collected this month',`R${allPolicies.filter(p=>p.status==='active').reduce((s,p)=>s+p.total,0).toLocaleString()}`,'💰',GREEN],
+              ['Cashback paid',`R${realCashback.filter(c=>c.status==='paid').reduce((s,c)=>s+Number(c.amount),0).toLocaleString()}`,'💸',TEAL],
+              ['Failed debits',`${realPayments.filter(p=>p.status==='failed').length}`,'⚠️','#FF5C5C']].map(([l,v,icon,col])=>(
               <div key={l} style={{background:'#fff',borderRadius:16,padding:20,boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
                 <div style={{fontSize:22,marginBottom:8}}>{icon}</div>
                 <div style={{fontSize:24,fontWeight:800,color:col,fontFamily:"'Sora',sans-serif"}}>{v}</div>
