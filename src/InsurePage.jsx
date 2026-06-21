@@ -30,12 +30,12 @@ function validateSAID(id) {
 
 // ─── Products ──────────────────────────────────────────────────────────────
 const PRODUCTS = [
-  {code:'BUILDINGS',label:'Buildings',     icon:null, svg:'M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z M9 21V12h6v9', sub:'Cover the structure of your home'},
-  {code:'CONTENTS', label:'Home contents', icon:null, svg:'M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z M8 12h8 M12 8v8', sub:'Furniture, appliances & valuables'},
-  {code:'CAR',      label:'Car insurance', icon:null, svg:'M5 17H3v-5l2-5h14l2 5v5h-2 M5 17a2 2 0 104 0 2 2 0 00-4 0z M15 17a2 2 0 104 0 2 2 0 00-4 0z', sub:'Comprehensive vehicle cover'},
-  {code:'ALLRISK',  label:'All risk',      icon:null, svg:'M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z', sub:'Jewellery, devices & portable items'},
-  {code:'CARAVAN',  label:'Caravan',       icon:null, svg:'M3 12h18M3 8h18a2 2 0 012 2v6H1v-6a2 2 0 012-2z M6 18a2 2 0 104 0 2 2 0 00-4 0z M14 18a2 2 0 104 0 2 2 0 00-4 0z', sub:'Cover for your caravan'},
-  {code:'TRAILER',  label:'Trailer',       icon:null, svg:'M1 10h20v8H1z M5 18a2 2 0 104 0 2 2 0 00-4 0z M15 18a2 2 0 104 0 2 2 0 00-4 0z M21 14h2', sub:'Cover for your trailer'},
+  {code:'BUILDINGS',label:'Buildings',     ti:'ti-home',     sub:'Cover the structure of your home'},
+  {code:'CONTENTS', label:'Home contents', ti:'ti-sofa',     sub:'Furniture, appliances & valuables'},
+  {code:'CAR',      label:'Car insurance', ti:'ti-car',      sub:'Comprehensive vehicle cover'},
+  {code:'ALLRISK',  label:'All risk',      ti:'ti-device-mobile', sub:'Jewellery, devices & portable items'},
+  {code:'CARAVAN',  label:'Caravan',       ti:'ti-caravan',  sub:'Cover for your caravan'},
+  {code:'TRAILER',  label:'Trailer',       ti:'ti-tir',      sub:'Cover for your trailer'},
 ]
 
 // ─── Mock quotes per product ───────────────────────────────────────────────
@@ -253,14 +253,13 @@ const VEHICLE_FINANCE_HOUSES = ['ABSA Vehicle Finance','FNB Vehicle Finance','Ne
 const VEHICLE_YEARS = Array.from({length:2026-1990+1},(_,i)=>String(2026-i))
 
 // ─── VAPs (Value Added Products) ──────────────────────────────────────────
-const ProductIcon = ({product, size=24, color='currentColor'}) => {
+const ProductIcon = ({product, size=22, color='#00B8A9', bg='#0A1628', boxSize=48}) => {
   if (!product) return null
-  if (product.svg) return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      {product.svg.split(' M').map((d,i)=><path key={i} d={(i===0?'':' M')+d}/>)}
-    </svg>
+  return (
+    <div style={{width:boxSize,height:boxSize,borderRadius:14,background:bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+      <i className={`ti ${product.ti||'ti-shield'}`} style={{fontSize:size,color}}/>
+    </div>
   )
-  return <span style={{fontSize:size}}>{product.icon}</span>
 }
 
 const VAPS = [
@@ -502,7 +501,7 @@ export default function InsurePage() {
             const isDis=(p.code==='ALLRISK'&&selected.filter(c=>c!=='ALLRISK').length===0)||((p.code==='CARAVAN'||p.code==='TRAILER')&&!selected.includes('CAR'))
             return(
               <div key={p.code} className={`ip-product${isSel?' sel':''}${isDis?' dis':''}`} onClick={()=>!isDis&&toggle(p.code)}>
-                <ProductIcon product={p} size={26} color={selected.includes(p.code)?'#00B8A9':'#8FA3BE'}/>
+                <ProductIcon product={p} color={selected.includes(p.code)?'#00B8A9':'#5A7A9A'} bg={selected.includes(p.code)?'#0A1628':'#F0F4F8'}/>
                 <div style={{flex:1}}>
                   <div style={{fontSize:14,fontWeight:600,color:'#0A1628'}}>{p.label}</div>
                   <div style={{fontSize:12,color:'#8FA3BE',marginTop:2}}>{p.sub}</div>
