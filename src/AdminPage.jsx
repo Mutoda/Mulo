@@ -54,6 +54,7 @@ const API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod'
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
   const [adminName, setAdminName] = useState('')
+  const [sessionChecked, setSessionChecked] = useState(false)
   const [loginStep, setLoginStep] = useState('credentials') // credentials | otp
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -73,6 +74,21 @@ export default function AdminPage() {
   const [realPayments, setRealPayments] = useState([])
   const [realCashback, setRealCashback] = useState([])
   const [statusFilter, setStatusFilter] = useState('all')
+
+  // Check stored session token on load
+  useEffect(()=>{
+    const token = localStorage.getItem('mulo_admin_token')
+    const name = localStorage.getItem('mulo_admin_name')
+    if (!token) { setSessionChecked(true); return }
+    fetch('https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/admin/verify-token', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({token})
+    }).then(r=>r.json()).then(d=>{
+      if (d.valid) { setAdminName(d.name); setAuthed(true) }
+      else { localStorage.removeItem('mulo_admin_token'); localStorage.removeItem('mulo_admin_name') }
+      setSessionChecked(true)
+    }).catch(()=>setSessionChecked(true))
+  },[])
 
   // Load real insure clients and payments
   useEffect(()=>{
@@ -102,6 +118,9 @@ export default function AdminPage() {
       .then(d=>{ setRefinanceData(d.applicants||[]); setRefinanceLoading(false) })
       .catch(()=>setRefinanceLoading(false))
   },[tab,authed])
+
+  // Show nothing while checking session
+  if (!sessionChecked) return <div style={{minHeight:'100vh',background:`linear-gradient(135deg,#0A1628,#1B3A5E)`,display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{color:'#fff',fontSize:14,opacity:.6}}>Loading…</div></div>
 
   // ── Login handlers ───────────────────────────────────────────────────────
   const handleLogin = async () => {
@@ -487,14 +506,16 @@ export default function AdminPage() {
                 ))}
               </tr></thead>
               <tbody>
-                {MOCK_POLICIES.flatMap(p=>p.payments.map(pay=>({...pay,client:p.client.name,ref:p.ref}))).sort((a,b)=>b.date.localeCompare(a.date)).map((pay,i)=>(
+                {realPayments.length===0
+                  ? <tr><td colSpan={5} style={{padding:32,textAlign:'center',color:'#8FA3BE',fontSize:13}}>No payment history yet — debit orders will appear here once processed</td></tr>
+                  : realPayments.map((pay,i)=>(
                   <tr key={i} style={{borderTop:'1px solid #F0F4F8'}}>
-                    <td style={{padding:'12px 16px',fontSize:14,fontWeight:600,color:NAVY}}>{pay.client}</td>
-                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{pay.date}</td>
-                    <td style={{padding:'12px 16px',fontSize:14,fontWeight:700,color:NAVY}}>R{pay.amount.toLocaleString()}</td>
+                    <td style={{padding:'12px 16px',fontSize:14,fontWeight:600,color:NAVY}}>{pay.first_name&&pay.last_name?`${pay.first_name} ${pay.last_name}`:pay.email_plain||'—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>{pay.debit_date||'—'}</td>
+                    <td style={{padding:'12px 16px',fontSize:14,fontWeight:700,color:NAVY}}>R{Number(pay.amount).toLocaleString()}</td>
                     <td style={{padding:'12px 16px',fontSize:13,color:'#5A7A9A'}}>Debit order</td>
                     <td style={{padding:'12px 16px'}}>
-                      <span style={{fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:99,background:pay.status==='paid'?GREEN+'22':'#FF5C5C22',color:pay.status==='paid'?GREEN:'#FF5C5C'}}>{pay.status.toUpperCase()}</span>
+                      <span style={{fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:99,background:pay.status==='paid'?GREEN+'22':'#FF5C5C22',color:pay.status==='paid'?GREEN:'#FF5C5C'}}>{pay.status?.toUpperCase()}</span>
                     </td>
                   </tr>
                 ))}
