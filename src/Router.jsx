@@ -4,11 +4,11 @@ import App from './App.jsx'
 import InsurePage from './InsurePage.jsx'
 import AdminPage from './AdminPage.jsx'
 import InsureDashboard from './InsureDashboard.jsx'
-
 export default function Router() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/insure/dashboard" element={<InsureDashboard />} />
         <Route path="/insure" element={<InsurePage />} />
         <Route path="/insure/*" element={<InsurePage />} />
         <Route path="/admin" element={<AdminPage />} />
