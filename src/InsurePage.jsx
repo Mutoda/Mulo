@@ -1349,6 +1349,7 @@ export default function InsurePage() {
             first_name: authFirstName,
             last_name: authLastName,
             email: authEmail,
+            password: authPass,
             cellphone: window._muloCellphone,
             insurer,
             products: selected,

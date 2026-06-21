@@ -16,7 +16,9 @@ const PRODUCT_ICONS = {
 
 export default function InsureDashboard() {
   const [phase, setPhase] = useState('loading') // loading|auth|otp|dashboard
-  const [idNumber, setIdNumber] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
   const [otp, setOtp] = useState('')
   const [maskedCell, setMaskedCell] = useState('')
   const [error, setError] = useState('')
@@ -28,20 +30,21 @@ export default function InsureDashboard() {
   // Check stored session
   useEffect(() => {
     const token = localStorage.getItem('mulo_insure_token')
-    const idNum = localStorage.getItem('mulo_insure_id')
-    if (token && idNum) {
-      loadDashboard(idNum, token)
+    const savedEmail = localStorage.getItem('mulo_insure_email')
+    if (token && savedEmail) {
+      setEmail(savedEmail)
+      loadDashboard(savedEmail, token)
     } else {
       setPhase('auth')
     }
   }, [])
 
-  const loadDashboard = async (idNum, token) => {
+  const loadDashboard = async (savedEmail, token) => {
     try {
       const res = await fetch(`${API}/insure/client-policies`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_number: idNum, token })
+        body: JSON.stringify({ email: savedEmail, token })
       })
       const data = await res.json()
       if (data.error) {
@@ -58,21 +61,21 @@ export default function InsureDashboard() {
     }
   }
 
-  const handleIdSubmit = async () => {
-    if (idNumber.length !== 13) return
+  const handleLogin = async () => {
+    if (!email || !password) return
     setLoading(true); setError('')
     try {
       const res = await fetch(`${API}/insure/client-auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_number: idNumber })
+        body: JSON.stringify({ email, password })
       })
       const data = await res.json()
       if (data.otpSent) {
         setMaskedCell(data.maskedCell)
         setPhase('otp')
       } else {
-        setError(data.error || 'No account found for this ID number')
+        setError(data.error || 'Invalid email or password')
       }
     } catch { setError('Connection error') }
     setLoading(false)
@@ -84,12 +87,12 @@ export default function InsureDashboard() {
       const res = await fetch(`${API}/insure/client-verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_number: idNumber, otp })
+        body: JSON.stringify({ email, otp })
       })
       const data = await res.json()
       if (data.token) {
         localStorage.setItem('mulo_insure_token', data.token)
-        localStorage.setItem('mulo_insure_id', idNumber)
+        localStorage.setItem('mulo_insure_email', email)
         setClient(data.client)
         setPolicies(data.policies || [])
         setPhase('dashboard')
@@ -124,14 +127,22 @@ export default function InsureDashboard() {
         <div style={{fontSize:13,color:'#8FA3BE',marginBottom:28}}>View your policies & coverage</div>
 
         {phase === 'auth' && <>
-          <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:6}}>SA ID number</div>
-          <input type="tel" inputMode="numeric" maxLength={13} placeholder="13-digit ID number"
-            value={idNumber} onChange={e=>{ setIdNumber(e.target.value.replace(/\D/g,'')); setError('') }}
-            onKeyDown={e=>e.key==='Enter'&&idNumber.length===13&&handleIdSubmit()}
-            style={{width:'100%',padding:'13px 16px',border:`1.5px solid ${error?'#FF5C5C':'#E2E9F0'}`,borderRadius:14,fontSize:16,outline:'none',background:'#fff',color:NAVY,marginBottom:16,boxSizing:'border-box',letterSpacing:2}}/>
+          <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:6}}>Email</div>
+          <input type="email" placeholder="you@example.com" value={email}
+            onChange={e=>{ setEmail(e.target.value); setError('') }}
+            onKeyDown={e=>e.key==='Enter'&&handleLogin()}
+            style={{width:'100%',padding:'13px 16px',border:'1.5px solid #E2E9F0',borderRadius:14,fontSize:14,outline:'none',background:'#fff',color:NAVY,marginBottom:12,boxSizing:'border-box'}}/>
+          <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:6}}>Password</div>
+          <div style={{position:'relative',marginBottom:16}}>
+            <input type={showPass?'text':'password'} placeholder="Password" value={password}
+              onChange={e=>{ setPassword(e.target.value); setError('') }}
+              onKeyDown={e=>e.key==='Enter'&&handleLogin()}
+              style={{width:'100%',padding:'13px 16px',border:`1.5px solid ${error?'#FF5C5C':'#E2E9F0'}`,borderRadius:14,fontSize:14,outline:'none',background:'#fff',color:NAVY,boxSizing:'border-box'}}/>
+            <span onClick={()=>setShowPass(p=>!p)} style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',fontSize:12,color:TEAL,cursor:'pointer',fontWeight:600}}>{showPass?'Hide':'Show'}</span>
+          </div>
           {error&&<div style={{fontSize:12,color:'#FF5C5C',marginBottom:10}}>{error}</div>}
-          <button onClick={handleIdSubmit} disabled={idNumber.length!==13||loading}
-            style={{width:'100%',padding:'15px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',opacity:idNumber.length!==13?0.5:1}}>
+          <button onClick={handleLogin} disabled={!email||!password||loading}
+            style={{width:'100%',padding:'15px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',opacity:!email||!password?0.5:1}}>
             {loading?'Sending OTP…':'Continue →'}
           </button>
           <div style={{textAlign:'center',marginTop:16}}>

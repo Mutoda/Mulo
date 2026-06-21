@@ -833,6 +833,8 @@ const bcrypt = require('bcryptjs');
         await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS otp_expires TIMESTAMPTZ`);
         await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS session_token TEXT`);
         await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS session_expires TIMESTAMPTZ`);
+        await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS password_hash TEXT`);
+        await db.query(`ALTER TABLE insure_clients ADD COLUMN IF NOT EXISTS email TEXT`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_policies (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_id UUID REFERENCES insure_clients(id), reference TEXT UNIQUE NOT NULL, status TEXT DEFAULT 'active', insurer TEXT NOT NULL, products TEXT[], base_premium NUMERIC, sasria_levy NUMERIC, vaps_premium NUMERIC, total_premium NUMERIC, cover_start_date DATE, debit_day INTEGER, bank_name TEXT, bank_account TEXT, bank_account_type TEXT, risk_property JSONB, risk_vehicle JSONB, risk_driver JSONB, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_cashback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, status TEXT DEFAULT 'pending', due_date DATE, paid_date DATE, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_payments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, debit_date DATE, status TEXT DEFAULT 'pending', created_at TIMESTAMPTZ DEFAULT NOW())`);
@@ -950,30 +952,33 @@ const bcrypt = require('bcryptjs');
       }
     }
     if (path.endsWith('/insure/client-auth') && method === 'POST') {
-      const { id_number } = body;
-      if (!id_number) return resp(400, { error: 'ID number required' });
+      const { email, password } = body;
+      if (!email || !password) return resp(400, { error: 'Email and password required' });
+      const bcrypt = require('bcryptjs');
       const db = await getDb();
       try {
-        const result = await db.query('SELECT id, cellphone, first_name, last_name FROM insure_clients WHERE id_number_hash = $1', [hashId(id_number)]);
-        if (!result.rows.length) return resp(404, { error: 'No account found. Please get a quote first.' });
+        const result = await db.query('SELECT id, cellphone, first_name, last_name, password_hash FROM insure_clients WHERE email_plain = $1', [email.toLowerCase()]);
+        if (!result.rows.length) return resp(401, { error: 'Invalid email or password' });
         const client = result.rows[0];
-        if (!client.cellphone) return resp(404, { error: 'No cellphone on file. Please contact support.' });
+        if (!client.password_hash) return resp(401, { error: 'Invalid email or password' });
+        const match = await bcrypt.compare(password, client.password_hash);
+        if (!match) return resp(401, { error: 'Invalid email or password' });
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
         const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
         await db.query('UPDATE insure_clients SET otp_hash = $1, otp_expires = $2 WHERE id = $3', [otpHash, expires, client.id]);
         await sendWhatsAppOtp(client.cellphone, otp);
-        let masked = client.cellphone;
+        let masked = client.cellphone || '';
         if (masked.length >= 6) masked = masked.slice(0,3) + '****' + masked.slice(-3);
-        return resp(200, { otpSent: true, maskedCell: masked });
+        return resp(200, { otpSent: true, maskedCell: masked, name: client.first_name });
       } finally { await db.end(); }
     }
     if (path.endsWith('/insure/client-verify') && method === 'POST') {
-      const { id_number, otp } = body;
-      if (!id_number || !otp) return resp(400, { error: 'ID number and OTP required' });
+      const { email, otp } = body;
+      if (!email || !otp) return resp(400, { error: 'Email and OTP required' });
       const db = await getDb();
       try {
-        const result = await db.query('SELECT id, first_name, last_name, email_plain, cellphone, otp_hash, otp_expires FROM insure_clients WHERE id_number_hash = $1', [hashId(id_number)]);
+        const result = await db.query('SELECT id, first_name, last_name, email_plain, cellphone, otp_hash, otp_expires FROM insure_clients WHERE email_plain = $1', [email.toLowerCase()]);
         if (!result.rows.length) return resp(404, { error: 'Account not found' });
         const client = result.rows[0];
         if (!client.otp_hash) return resp(401, { error: 'No OTP requested' });
@@ -988,12 +993,12 @@ const bcrypt = require('bcryptjs');
       } finally { await db.end(); }
     }
     if (path.endsWith('/insure/client-policies') && method === 'POST') {
-      const { id_number, token } = body;
-      if (!id_number || !token) return resp(401, { error: 'Unauthorised' });
+      const { email, token } = body;
+      if (!email || !token) return resp(401, { error: 'Unauthorised' });
       const db = await getDb();
       try {
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-        const result = await db.query('SELECT id, first_name, last_name, email_plain, session_expires FROM insure_clients WHERE id_number_hash = $1 AND session_token = $2', [hashId(id_number), tokenHash]);
+        const result = await db.query('SELECT id, first_name, last_name, email_plain, session_expires FROM insure_clients WHERE email_plain = $1 AND session_token = $2', [email.toLowerCase(), tokenHash]);
         if (!result.rows.length) return resp(401, { error: 'Invalid session' });
         const client = result.rows[0];
         if (new Date() > new Date(client.session_expires)) return resp(401, { error: 'Session expired' });
@@ -1072,18 +1077,18 @@ const bcrypt = require('bcryptjs');
       } finally { await db.end(); }
     }
     if (path.endsWith('/insure/bind') && method === 'POST') {
-      const { id_number, first_name, last_name, email, cellphone, insurer, products, selectedQuotes, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver } = body;
+      const { id_number, first_name, last_name, email, password, cellphone, insurer, products, selectedQuotes, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver } = body;
       if (!id_number || !insurer || !products) return resp(400, { error: 'Missing required fields' });
       const db = await getDb();
       try {
         const policyRef = 'MULO-' + Date.now();
         // Upsert client
         const clientRes = await db.query(
-          `INSERT INTO insure_clients (id_number_hash, first_name, last_name, email_plain, cellphone)
-           VALUES ($1, $2, $3, $4, $5)
-           ON CONFLICT (id_number_hash) DO UPDATE SET first_name=EXCLUDED.first_name, last_name=EXCLUDED.last_name, email_plain=EXCLUDED.email_plain, cellphone=EXCLUDED.cellphone
+          `INSERT INTO insure_clients (id_number_hash, first_name, last_name, email_plain, cellphone, password_hash)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (id_number_hash) DO UPDATE SET first_name=EXCLUDED.first_name, last_name=EXCLUDED.last_name, email_plain=EXCLUDED.email_plain, cellphone=EXCLUDED.cellphone, password_hash=COALESCE(EXCLUDED.password_hash, insure_clients.password_hash)
            RETURNING id`,
-          [hashId(id_number), first_name||null, last_name||null, email||null, cellphone||null]
+          [hashId(id_number), first_name||null, last_name||null, email||null, cellphone||null, password ? await require('bcryptjs').hash(password, 12) : null]
         );
         const clientId = clientRes.rows[0]?.id;
         // Insert policy
