@@ -748,6 +748,83 @@ const bcrypt = require('bcryptjs');
         return resp(200, { verified });
       } finally { await db.end(); }
     }
+    if (path.endsWith('/admin/setup') && method === 'POST') {
+      const { secret, email, name, password, cellphone } = body;
+      if (secret !== 'MULO_ADMIN_SETUP_2026') return resp(401, { error: 'Invalid setup secret' });
+      const bcrypt = require('bcryptjs');
+      const db = await getDb();
+      try {
+        const hash = await bcrypt.hash(password, 12);
+        await db.query(
+          `INSERT INTO admin_users (email, name, password_hash, cellphone)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT (email) DO UPDATE SET name=EXCLUDED.name, password_hash=EXCLUDED.password_hash, cellphone=EXCLUDED.cellphone`,
+          [email.toLowerCase(), name, hash, cellphone]
+        );
+        return resp(200, { created: true });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/admin/login') && method === 'POST') {
+      const { email, password } = body;
+      if (!email || !password) return resp(400, { error: 'Email and password required' });
+      const bcrypt = require('bcryptjs');
+      const db = await getDb();
+      try {
+        const result = await db.query('SELECT id, email, password_hash, cellphone, name FROM admin_users WHERE email = $1', [email.toLowerCase()]);
+        if (!result.rows.length) return resp(401, { error: 'Invalid email or password' });
+        const user = result.rows[0];
+        const match = await bcrypt.compare(password, user.password_hash);
+        if (!match) return resp(401, { error: 'Invalid email or password' });
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+        const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+        await db.query('UPDATE admin_users SET otp_hash = $1, otp_expires = $2 WHERE id = $3', [otpHash, expires, user.id]);
+        // Send WhatsApp OTP
+        const waRes = await fetch('https://graph.facebook.com/v18.0/' + process.env.WHATSAPP_PHONE_ID + '/messages', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json','Authorization':'Bearer ' + process.env.WHATSAPP_TOKEN},
+          body: JSON.stringify({
+            messaging_product: 'whatsapp', to: user.cellphone,
+            type: 'text', text: { body: `Your Muḽo admin verification code is: ${otp}. Valid for 10 minutes.` }
+          })
+        });
+        return resp(200, { otpSent: true, name: user.name, maskedCell: user.cellphone.slice(0,3)+'****'+user.cellphone.slice(-3) });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/admin/verify-otp') && method === 'POST') {
+      const { email, otp } = body;
+      if (!email || !otp) return resp(400, { error: 'Email and OTP required' });
+      const db = await getDb();
+      try {
+        const result = await db.query('SELECT id, otp_hash, otp_expires, name FROM admin_users WHERE email = $1', [email.toLowerCase()]);
+        if (!result.rows.length) return resp(401, { error: 'Invalid request' });
+        const user = result.rows[0];
+        if (!user.otp_hash) return resp(401, { error: 'No OTP requested' });
+        if (new Date() > new Date(user.otp_expires)) return resp(401, { error: 'OTP expired' });
+        const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+        if (otpHash !== user.otp_hash) return resp(401, { error: 'Invalid OTP' });
+        // Clear OTP and return session token
+        const token = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const tokenExpires = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+        await db.query('UPDATE admin_users SET otp_hash = NULL, otp_expires = NULL, session_token = $1, session_expires = $2 WHERE id = $3', [tokenHash, tokenExpires, user.id]);
+        return resp(200, { authenticated: true, token, name: user.name });
+      } finally { await db.end(); }
+    }
+    if (path.endsWith('/admin/verify-token') && method === 'POST') {
+      const { token } = body;
+      if (!token) return resp(401, { error: 'Token required' });
+      const db = await getDb();
+      try {
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const result = await db.query('SELECT id, name, email, session_expires FROM admin_users WHERE session_token = $1', [tokenHash]);
+        if (!result.rows.length) return resp(401, { error: 'Invalid token' });
+        const user = result.rows[0];
+        if (new Date() > new Date(user.session_expires)) return resp(401, { error: 'Session expired' });
+        return resp(200, { valid: true, name: user.name, email: user.email });
+      } finally { await db.end(); }
+    }
     if (path.endsWith('/admin/migrate') && method === 'POST') {
       const db = await getDb();
       try {
@@ -763,6 +840,19 @@ const bcrypt = require('bcryptjs');
         await db.query(`CREATE TABLE IF NOT EXISTS insure_cashback (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, status TEXT DEFAULT 'pending', due_date DATE, paid_date DATE, created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_payments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), policy_id UUID REFERENCES insure_policies(id), amount NUMERIC NOT NULL, debit_date DATE, status TEXT DEFAULT 'pending', created_at TIMESTAMPTZ DEFAULT NOW())`);
         await db.query(`CREATE TABLE IF NOT EXISTS insure_quotes (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), client_id UUID REFERENCES insure_clients(id), products TEXT[], risk_data JSONB, quotes_response JSONB, selected_insurer TEXT, created_at TIMESTAMPTZ DEFAULT NOW())`);
+        // Admin users table
+        await db.query(`CREATE TABLE IF NOT EXISTS admin_users (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          email TEXT UNIQUE NOT NULL,
+          name TEXT NOT NULL,
+          password_hash TEXT NOT NULL,
+          cellphone TEXT NOT NULL,
+          otp_hash TEXT,
+          otp_expires TIMESTAMPTZ,
+          session_token TEXT,
+          session_expires TIMESTAMPTZ,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        )`);
         return resp(200, { migrated: true, insure_tables: 'created' });
       } finally { await db.end(); }
     }

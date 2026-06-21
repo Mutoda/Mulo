@@ -49,12 +49,19 @@ const MOCK_POLICIES = [
 const STATUS_COLOUR = {active:GREEN, lapsed:'#FF5C5C', pending:'#F4B942', cancelled:'#8FA3BE'}
 const CASHBACK_COLOUR = {paid:GREEN, pending:'#F4B942', clawback:'#FF5C5C'}
 
-const PIN = '1234' // replace with env var later
+const API = 'https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod'
 
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false)
-  const [pin, setPin] = useState('')
-  const [pinError, setPinError] = useState(false)
+  const [adminName, setAdminName] = useState('')
+  const [loginStep, setLoginStep] = useState('credentials') // credentials | otp
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [otp, setOtp] = useState('')
+  const [maskedCell, setMaskedCell] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
   const [tab, setTab] = useState('dashboard')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState(null)
@@ -96,23 +103,96 @@ export default function AdminPage() {
       .catch(()=>setRefinanceLoading(false))
   },[tab,authed])
 
-  // ── PIN screen ────────────────────────────────────────────────────────────
+  // ── Login handlers ───────────────────────────────────────────────────────
+  const handleLogin = async () => {
+    setLoginLoading(true); setLoginError('')
+    try {
+      const res = await fetch(`${API}/admin/login`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
+      })
+      const data = await res.json()
+      if (data.otpSent) {
+        setMaskedCell(data.maskedCell)
+        setAdminName(data.name)
+        setLoginStep('otp')
+      } else {
+        setLoginError(data.error || 'Login failed')
+      }
+    } catch { setLoginError('Connection error') }
+    setLoginLoading(false)
+  }
+
+  const handleOtp = async () => {
+    setLoginLoading(true); setLoginError('')
+    try {
+      const res = await fetch(`${API}/admin/verify-otp`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, otp})
+      })
+      const data = await res.json()
+      if (data.authenticated) {
+        localStorage.setItem('mulo_admin_token', data.token)
+        localStorage.setItem('mulo_admin_name', data.name)
+        setAdminName(data.name)
+        setAuthed(true)
+      } else {
+        setLoginError(data.error || 'Invalid OTP')
+      }
+    } catch { setLoginError('Connection error') }
+    setLoginLoading(false)
+  }
+
+  // ── Login screen ──────────────────────────────────────────────────────────
   if (!authed) return (
     <div style={{minHeight:'100vh',background:`linear-gradient(135deg,${NAVY},#1B3A5E)`,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
-      <div style={{background:'#F7F9FC',borderRadius:24,padding:32,width:'100%',maxWidth:360,boxShadow:'0 8px 40px rgba(0,0,0,0.25)'}}>
+      <div style={{background:'#F7F9FC',borderRadius:24,padding:32,width:'100%',maxWidth:380,boxShadow:'0 8px 40px rgba(0,0,0,0.25)'}}>
         <div style={{fontFamily:"'Sora',sans-serif",fontWeight:800,fontSize:22,color:NAVY,marginBottom:4}}>Mu<span style={{color:TEAL}}>ḽ</span>o <span style={{fontSize:14,fontWeight:600,color:'#8FA3BE'}}>Admin</span></div>
         <div style={{fontSize:13,color:'#8FA3BE',marginBottom:28}}>Policy Administration System</div>
-        <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:8}}>Access PIN</div>
-        <input type="password" inputMode="numeric" maxLength={6} placeholder="Enter PIN"
-          value={pin} onChange={e=>{setPin(e.target.value);setPinError(false)}}
-          onKeyDown={e=>e.key==='Enter'&&(pin===PIN?setAuthed(true):setPinError(true))}
-          style={{width:'100%',padding:'14px 16px',border:`1.5px solid ${pinError?'#FF5C5C':'#E2E9F0'}`,borderRadius:14,fontSize:18,letterSpacing:8,outline:'none',background:'#fff',color:NAVY,marginBottom:8,boxSizing:'border-box'}}/>
-        {pinError&&<div style={{fontSize:12,color:'#FF5C5C',marginBottom:8}}>Incorrect PIN</div>}
-        <button onClick={()=>pin===PIN?setAuthed(true):setPinError(true)}
-          style={{width:'100%',padding:'15px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',boxShadow:'0 8px 24px rgba(0,184,169,0.35)'}}>
-          Sign in →
-        </button>
-        <div style={{fontSize:11,color:'#C5D0DC',textAlign:'center',marginTop:16}}>Muḽo Financial Services (Pty) Ltd · FSP 49169</div>
+
+        {loginStep==='credentials' && <>
+          <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:6}}>Email</div>
+          <input type="email" placeholder="mutoda@mulo.co.za" value={email}
+            onChange={e=>{setEmail(e.target.value);setLoginError('')}}
+            onKeyDown={e=>e.key==='Enter'&&handleLogin()}
+            style={{width:'100%',padding:'13px 16px',border:'1.5px solid #E2E9F0',borderRadius:14,fontSize:14,outline:'none',background:'#fff',color:NAVY,marginBottom:12,boxSizing:'border-box'}}/>
+          <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:6}}>Password</div>
+          <div style={{position:'relative',marginBottom:16}}>
+            <input type={showPass?'text':'password'} placeholder="Password" value={password}
+              onChange={e=>{setPassword(e.target.value);setLoginError('')}}
+              onKeyDown={e=>e.key==='Enter'&&handleLogin()}
+              style={{width:'100%',padding:'13px 16px',border:'1.5px solid #E2E9F0',borderRadius:14,fontSize:14,outline:'none',background:'#fff',color:NAVY,boxSizing:'border-box'}}/>
+            <span onClick={()=>setShowPass(p=>!p)} style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',fontSize:12,color:TEAL,cursor:'pointer',fontWeight:600}}>{showPass?'Hide':'Show'}</span>
+          </div>
+          {loginError&&<div style={{fontSize:12,color:'#FF5C5C',marginBottom:10}}>{loginError}</div>}
+          <button onClick={handleLogin} disabled={!email||!password||loginLoading}
+            style={{width:'100%',padding:'15px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',opacity:!email||!password?0.5:1}}>
+            {loginLoading?'Sending OTP…':'Continue →'}
+          </button>
+        </>}
+
+        {loginStep==='otp' && <>
+          <div style={{textAlign:'center',marginBottom:20}}>
+            <div style={{fontSize:32,marginBottom:8}}>💬</div>
+            <div style={{fontSize:15,fontWeight:700,color:NAVY,marginBottom:4}}>Check WhatsApp</div>
+            <div style={{fontSize:13,color:'#8FA3BE'}}>We sent a 6-digit code to {maskedCell}</div>
+          </div>
+          <div style={{fontSize:11,fontWeight:600,color:'#8FA3BE',textTransform:'uppercase',letterSpacing:.8,marginBottom:6}}>Verification code</div>
+          <input type="tel" inputMode="numeric" maxLength={6} placeholder="000000" value={otp}
+            onChange={e=>{setOtp(e.target.value.replace(/\D/g,''));setLoginError('')}}
+            onKeyDown={e=>e.key==='Enter'&&otp.length===6&&handleOtp()}
+            style={{width:'100%',padding:'14px 16px',border:`1.5px solid ${loginError?'#FF5C5C':'#E2E9F0'}`,borderRadius:14,fontSize:22,letterSpacing:8,outline:'none',background:'#fff',color:NAVY,marginBottom:8,boxSizing:'border-box',textAlign:'center'}}/>
+          {loginError&&<div style={{fontSize:12,color:'#FF5C5C',marginBottom:8}}>{loginError}</div>}
+          <button onClick={handleOtp} disabled={otp.length<6||loginLoading}
+            style={{width:'100%',padding:'15px',background:`linear-gradient(135deg,${TEAL},#1A73E8)`,border:'none',borderRadius:14,color:'#fff',fontSize:15,fontWeight:600,cursor:'pointer',opacity:otp.length<6?0.5:1}}>
+            {loginLoading?'Verifying…':'Sign in →'}
+          </button>
+          <div style={{textAlign:'center',marginTop:12}}>
+            <span onClick={()=>{setLoginStep('credentials');setOtp('');setLoginError('')}} style={{fontSize:12,color:TEAL,cursor:'pointer'}}>← Back</span>
+          </div>
+        </>}
+
+        <div style={{fontSize:11,color:'#C5D0DC',textAlign:'center',marginTop:20}}>Muḽo Financial Services (Pty) Ltd · FSP 49169</div>
       </div>
     </div>
   )
