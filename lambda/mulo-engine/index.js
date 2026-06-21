@@ -883,18 +883,18 @@ const bcrypt = require('bcryptjs');
       } finally { await db.end(); }
     }
     if (path.endsWith('/insure/bind') && method === 'POST') {
-      const { id_number, insurer, products, selectedQuotes, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver } = body;
+      const { id_number, first_name, last_name, email, cellphone, insurer, products, selectedQuotes, base_premium, sasria_levy, vaps_premium, total_premium, bank_name, bank_account, bank_account_type, debit_day, cover_start_date, risk_property, risk_vehicle, risk_driver } = body;
       if (!id_number || !insurer || !products) return resp(400, { error: 'Missing required fields' });
       const db = await getDb();
       try {
         const policyRef = 'MULO-' + Date.now();
         // Upsert client
         const clientRes = await db.query(
-          `INSERT INTO insure_clients (id_number_hash, cellphone)
-           VALUES ($1, $2)
-           ON CONFLICT (id_number_hash) DO UPDATE SET cellphone = EXCLUDED.cellphone
+          `INSERT INTO insure_clients (id_number_hash, first_name, last_name, email_plain, cellphone)
+           VALUES ($1, $2, $3, $4, $5)
+           ON CONFLICT (id_number_hash) DO UPDATE SET first_name=EXCLUDED.first_name, last_name=EXCLUDED.last_name, email_plain=EXCLUDED.email_plain, cellphone=EXCLUDED.cellphone
            RETURNING id`,
-          [hashId(id_number), body.cellphone || null]
+          [hashId(id_number), first_name||null, last_name||null, email||null, cellphone||null]
         );
         const clientId = clientRes.rows[0]?.id;
         // Insert policy

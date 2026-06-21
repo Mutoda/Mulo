@@ -1337,6 +1337,10 @@ export default function InsurePage() {
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             id_number: authId,
+            first_name: authFirstName,
+            last_name: authLastName,
+            email: authEmail,
+            cellphone: window._muloCellphone,
             insurer,
             products: selected,
             selectedQuotes,
