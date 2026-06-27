@@ -325,6 +325,7 @@ export default function Insure({ client, onBack }) {
   const [selectedQuotes, setSelectedQuotes]     = useState({})
   const [quotesLoading, setQuotesLoading]       = useState(false)
   const [quotesLoaded, setQuotesLoaded]         = useState(false)
+  const [driveScore, setDriveScore]             = useState(null)
 
   // Debit order state (screen 8)
   const [debit, setDebit] = useState({
@@ -1231,8 +1232,73 @@ export default function Insure({ client, onBack }) {
             <CashbackTag amount={totalCashback} />
           </div>
 
+          {/* Drive Score banner — only shown when score is available */}
+          {driveScore && selected.includes('CAR') && (
+            <div style={{
+              background: driveScore.score_band === 'Platinum' ? `#1DB97A18` :
+                          driveScore.score_band === 'Gold'     ? `#00B8A918` :
+                          driveScore.score_band === 'Bronze'   ? `#FF980018` : `#00B8A918`,
+              border: `1px solid ${
+                          driveScore.score_band === 'Platinum' ? '#1DB97A44' :
+                          driveScore.score_band === 'Gold'     ? '#00B8A944' :
+                          driveScore.score_band === 'Bronze'   ? '#FF980044' : '#00B8A944'}`,
+              borderRadius: 12, padding: '14px 16px', marginBottom: 20,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>
+                  🚗 Your Muḽo Drive Score
+                </div>
+                <div style={{
+                  fontSize: 22, fontWeight: 800,
+                  color: driveScore.score_band === 'Platinum' ? C.green :
+                         driveScore.score_band === 'Gold'     ? C.teal  :
+                         driveScore.score_band === 'Bronze'   ? '#FF9800' : C.teal,
+                }}>
+                  {driveScore.drive_score}/100
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{
+                  background: driveScore.score_band === 'Platinum' ? C.green :
+                              driveScore.score_band === 'Gold'     ? C.teal  : '#FF9800',
+                  color: C.navy, borderRadius: 20, padding: '2px 10px',
+                  fontSize: 11, fontWeight: 700,
+                }}>
+                  {driveScore.score_band}
+                </span>
+                <span style={{ fontSize: 12, color: C.muted }}>
+                  Based on {driveScore.trip_count} trips · {driveScore.total_km?.toLocaleString()} km
+                </span>
+              </div>
+              {driveScore.premium_adjustment < 0 && (
+                <div style={{ fontSize: 13, color: C.green, fontWeight: 600 }}>
+                  ✓ Your driving score has reduced your car insurance quotes by {Math.abs(Math.round(driveScore.premium_adjustment * 100))}%
+                </div>
+              )}
+              {driveScore.premium_adjustment > 0 && (
+                <div style={{ fontSize: 13, color: '#FF9800', fontWeight: 600 }}>
+                  ⚠ Your driving score has increased your car insurance quotes by {Math.round(driveScore.premium_adjustment * 100)}%
+                </div>
+              )}
+              <div style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>
+                Powered by Muḽo Telematics · Tracker: {driveScore.tracker_source}
+              </div>
+            </div>
+          )}
+
           {selected.map(code => {
-            const quotes   = MOCK_QUOTES[code] || []
+            const rawQuotes = MOCK_QUOTES[code] || []
+            // Apply Drive Score premium adjustment to CAR quotes
+            const quotes = (driveScore && code === 'CAR' && driveScore.premium_adjustment !== null)
+              ? rawQuotes.map(q => ({
+                  ...q,
+                  premium:  Math.round(q.premium  * (1 + driveScore.premium_adjustment)),
+                  cashback: Math.round(q.cashback * (1 + driveScore.premium_adjustment)),
+                  highlight: driveScore.premium_adjustment < 0
+                    ? (q.highlight ? `${q.highlight} · Drive Score applied` : 'Drive Score applied')
+                    : q.highlight,
+                }))
+              : rawQuotes
             const product  = PRODUCTS.find(p => p.code === code)
             const selQuote = selectedQuotes[code]
 
