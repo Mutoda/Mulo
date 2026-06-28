@@ -1,5 +1,4 @@
-import DashboardNative from '../../src/DashboardNative'
-
+import ClientDashboard from '../../src/ClientDashboard'
 export default function DashboardScreen() {
-  return <DashboardNative firstName="Thabo" lastName="Nkosi" onSignOut={() => {}} />
+  return <ClientDashboard />
 }
