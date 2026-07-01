@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Muḽo",
+    "slug": "mulo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "co.za.mulo.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "co.za.mulo.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "./app"
+        }
+      ],
+      "expo-splash-screen"
+    ],
+    "scheme": "mulo",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5a08a576-34bc-4cf4-b6e4-c15b2f86bdd4"
+      }
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
