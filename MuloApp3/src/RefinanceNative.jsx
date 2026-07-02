@@ -207,6 +207,18 @@ export default function RefinanceNative() {
   ])
   const otpRefs = useRef([])
 
+  // Doc upload state
+  const [payslipDone, setPayslipDone]     = useState(false)
+  const [addressDone, setAddressDone]     = useState(false)
+
+  // Liveness state
+  const [livenessPhase, setLivenessPhase] = useState('idle')
+  const [livenessStep, setLivenessStep]   = useState(0)
+
+  // Loan sign state
+  const [initialed, setInitialed]         = useState(false)
+  const [signed, setSigned]               = useState(false)
+
   // Consent toggles
   const [consentTruId, setConsentTruId]     = useState(false)
   const [consentTransUnion, setConsentTransUnion] = useState(false)
@@ -938,7 +950,7 @@ export default function RefinanceNative() {
           <Card style={{ marginBottom:12 }}>
             <Text style={{ fontSize:11, color:C.textMid, textTransform:'uppercase', letterSpacing:0.8, marginBottom:12 }}>Debts to be settled</Text>
             {DEMO.debts.map((d,i)=>(
-              <View key={i} style={[s.detailRow, i===DEMO.debts.length-1&&{ borderBottomWidth:0, marginBottom:0, paddingBottom:0 }]}>
+              <View key={i} style={[s.detailRow, i===DEMO.debts.length-1?{ borderBottomWidth:0, marginBottom:0, paddingBottom:0 }:{}]}>
                 <View style={{ flex:1 }}>
                   <Text style={{ fontSize:13, color:C.textDark, fontWeight:'500' }}>{d.label}</Text>
                   <Text style={{ fontSize:11, color:C.textMid }}>{d.rate}% p.a. · R{d.monthly}/mo</Text>
@@ -968,9 +980,6 @@ export default function RefinanceNative() {
 
   // ── DOC UPLOAD ─────────────────────────────────────────────────────────────
   if (screen==='doc-upload') {
-    const [payslipDone, setPayslipDone]   = useState(false)
-    const [addressDone, setAddressDone]   = useState(false)
-
     return (
       <NScreen bg={C.lightBg}>
         <TopBar title="Document upload" step={5} total={6} onBack={()=>go('offer')} />
@@ -1020,8 +1029,6 @@ export default function RefinanceNative() {
 
   // ── LIVENESS ───────────────────────────────────────────────────────────────
   if (screen==='liveness') {
-    const [livenessPhase, setLivenessPhase] = useState('idle')
-    const [livenessStep, setLivenessStep]   = useState(0)
     const checks = ['Detecting face…','Checking liveness…','Matching to Home Affairs…','Confirming identity…']
 
     const startScan = () => {
@@ -1107,9 +1114,6 @@ export default function RefinanceNative() {
 
   // ── LOAN SIGN ──────────────────────────────────────────────────────────────
   if (screen==='loan-sign') {
-    const [initialed, setInitialed]   = useState(false)
-    const [signed, setSigned]         = useState(false)
-
     return (
       <NScreen bg={C.lightBg}>
         <TopBar title="Loan agreement" step={6} total={6} onBack={()=>go('liveness')} />
