@@ -563,64 +563,67 @@ function FaqItem({ q, a }) {
 }
 
 function Landing({ go }) {
-  const [faqOpen, setFaqOpen] = React.useState(false);
+  const [email, setEmail] = React.useState("");
+  const [submitted, setSubmitted] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const handleSubmit = async () => {
+    if (!email || !email.includes("@")) return;
+    setLoading(true);
+    try {
+      await fetch("https://z30zl849k8.execute-api.af-south-1.amazonaws.com/prod/waitlist", {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email })
+      });
+    } catch(e) {}
+    setLoading(false);
+    setSubmitted(true);
+  };
   return (
-    <div className="screen fade-in">
-      {faqOpen && <FaqModal onClose={() => setFaqOpen(false)} />}
-      <div className="screen-scroll">
-        <div className="landing-hero">
-          <div className="logo-row">
-            <div className="mulo-logo">Mu<span>ḽ</span>o</div>
-            <div style={{display:"flex",alignItems:"center",gap:16}}>
-              <div style={{fontSize:13,color:"rgba(255,255,255,0.7)",cursor:"pointer",fontWeight:500}} onClick={() => setFaqOpen(true)}>FAQ</div>
-              <div style={{fontSize:13,color:"#00B8A9",cursor:"pointer",fontWeight:600}} onClick={() => window.location.href='/insure'}>Insure</div>
-              <div className="login-link" onClick={() => go("login")}>Sign in →</div>
-            </div>
-          </div>
-          <div className="hero-eyebrow">🇿🇦 South Africa's #1 Refinance Platform</div>
-          <h1 className="hero-title">
-            The smart way to<br />
-            <em>refinance and settle expensive debt.</em>
-          </h1>
-          <p className="hero-sub">Use your home's equity to pay off expensive debt at a lower interest rate — fully digital.</p>
-          <div className="hero-stats">
-            {[["R2.8B+","Refinanced"],["5 min","Avg. approval"],["98%","Satisfaction"]].map(([v,l]) => (
-              <div className="hero-stat" key={l}><div className="hero-stat-val">{v}</div><div className="hero-stat-lbl">{l}</div></div>
-            ))}
-          </div>
-          <div className="trust-strip">
-            {[["🔒","NCR Compliant"],["🏦","FSCA Registered"],["⚡","256-bit SSL"]].map(([i,l]) => (
-              <div className="trust-item" key={l}><span className="trust-icon">{i}</span>{l}</div>
-            ))}
-          </div>
+    <div style={{minHeight:"100vh",background:"#0A1628",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
+      <div style={{textAlign:"center",maxWidth:420,width:"100%"}}>
+        <div style={{fontSize:42,fontWeight:800,color:"#fff",letterSpacing:-1,marginBottom:8}}>
+          Mu<span style={{color:"#00B8A9"}}>ḽ</span>o
         </div>
-        <div className="landing-body">
-          <div className="section-title">How it works</div>
-          {[
-            ["1","Verify your identity","Enter your SA ID — we check homeowner status instantly"],
-            ["2","Connect your data","TruID · TransUnion · Lightstone — secure & read-only"],
-            ["3","Get your offer","See your equity loan offer in under 5 minutes"],
-            ["4","Settle your debt","Funds paid directly to creditors. One simple repayment."],
-          ].map(([n,t,s]) => (
-            <div className="step-card" key={n}>
-              <div className="step-num">{n}</div>
-              <div><div className="step-content-title">{t}</div><div className="step-content-sub">{s}</div></div>
+        <div style={{fontSize:12,fontWeight:600,color:"#00B8A9",letterSpacing:3,textTransform:"uppercase",marginBottom:32}}>Coming Soon</div>
+        <div style={{width:48,height:2,background:"#00B8A9",margin:"0 auto 32px"}} />
+        <h1 style={{fontSize:26,fontWeight:700,color:"#fff",lineHeight:1.35,marginBottom:16}}>
+          The smart way to refinance and settle expensive debt.
+        </h1>
+        <p style={{fontSize:15,color:"rgba(255,255,255,0.55)",lineHeight:1.7,marginBottom:36}}>
+          Use your home equity to pay off expensive debt at a lower interest rate. Fully digital. No branch visit. Launching soon.
+        </p>
+        {!submitted ? (
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            <input type="email" placeholder="Enter your email to be notified" value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleSubmit()}
+              style={{width:"100%",padding:"14px 18px",borderRadius:12,border:"1.5px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.06)",color:"#fff",fontSize:15,outline:"none",boxSizing:"border-box"}} />
+            <button onClick={handleSubmit} disabled={loading}
+              style={{width:"100%",padding:"14px",borderRadius:12,background:"#00B8A9",border:"none",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",opacity:loading?0.7:1}}>
+              {loading ? "Joining..." : "Notify me when we launch →"}
+            </button>
+          </div>
+        ) : (
+          <div style={{background:"rgba(0,184,169,0.12)",border:"1px solid rgba(0,184,169,0.3)",borderRadius:12,padding:"20px 24px",color:"#00B8A9",fontSize:15,fontWeight:600}}>
+            ✓ You are on the list. We will be in touch soon.
+          </div>
+        )}
+        <div style={{marginTop:40,display:"flex",justifyContent:"center",gap:32}}>
+          {[["🔒","NCR Registered"],["🏦","FSP Licensed"],["⚡","256-bit SSL"]].map(([i,l]) => (
+            <div key={l} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+              <span style={{fontSize:20}}>{i}</span>
+              <span style={{fontSize:10,color:"rgba(255,255,255,0.4)",fontWeight:600,letterSpacing:0.5}}>{l}</span>
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="bottom-cta">
-        <button className="btn btn-primary" onClick={() => go("id-verify")}>Check if you qualify →</button>
-        <div style={{textAlign:"center",marginTop:10,fontSize:11,color:"#8FA3BE"}}>No credit check · Takes 5 minutes · Free to apply</div>
+        <div style={{marginTop:40,fontSize:11,color:"rgba(255,255,255,0.2)"}}>
+          © 2026 Muḽo Financial Technologies (Pty) Ltd ·{" "}
+          <span style={{color:"rgba(255,255,255,0.3)",cursor:"pointer"}} onClick={() => go("login")}>Team login</span>
+        </div>
       </div>
     </div>
   );
 }
-
-/* ─────────────────────────────────────────────
-   SA ID VALIDATION UTILITIES
-───────────────────────────────────────────── */
 function validateSAID(id) {
   if (!/^\d{13}$/.test(id)) return { valid: false, error: "Must be exactly 13 digits" };
 
