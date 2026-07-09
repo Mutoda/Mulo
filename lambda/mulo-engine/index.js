@@ -855,6 +855,29 @@ const bcrypt = require('bcryptjs');
         return resp(200, { migrated: true, insure_tables: 'created' });
       } finally { await db.end(); }
     }
+    if (path.endsWith('/waitlist') && method === 'POST') {
+      const { email } = body;
+      if (!email || !email.includes('@')) return resp(400, { error: 'Valid email required' });
+      const db = await getDb();
+      try {
+        await db.query(
+          `CREATE TABLE IF NOT EXISTS waitlist (
+            id SERIAL PRIMARY KEY,
+            email TEXT NOT NULL UNIQUE,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+          )`
+        );
+        await db.query(
+          `INSERT INTO waitlist (email) VALUES ($1) ON CONFLICT (email) DO NOTHING`,
+          [email.toLowerCase().trim()]
+        );
+        return resp(200, { success: true });
+      } catch(e) {
+        console.error('Waitlist error:', e);
+        return resp(500, { error: 'Failed to save email' });
+      } finally { await db.end(); }
+    }
+
     if (path.endsWith('/save-screen') && method === 'POST') {
       const { id_number, screen } = body;
       if (!id_number || !screen) return resp(400, { error: 'id_number and screen required' });
@@ -950,6 +973,17 @@ const bcrypt = require('bcryptjs');
       } finally {
         await db.end();
       }
+    }
+    if (path.endsWith('/insure/set-password') && method === 'POST') {
+      const { secret, email, password } = body;
+      if (secret !== 'MULO_CLIENT_SETUP_2026') return resp(401, { error: 'Unauthorised' });
+      const bcrypt = require('bcryptjs');
+      const db = await getDb();
+      try {
+        const hash = await bcrypt.hash(password, 12);
+        await db.query('UPDATE insure_clients SET password_hash = $1 WHERE email_plain = $2', [hash, email.toLowerCase()]);
+        return resp(200, { updated: true });
+      } finally { await db.end(); }
     }
     if (path.endsWith('/insure/client-auth') && method === 'POST') {
       const { email, password } = body;
