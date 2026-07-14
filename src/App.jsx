@@ -427,38 +427,36 @@ html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans',sans-serif;backgro
 .savings-title{font-size:12px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px}
 
 /* ── Design 5.0 — editorial offer screen ── */
-.d5-hero{background:linear-gradient(160deg,#0A1628 0%,#0E2A44 100%);padding:32px 24px 36px;position:relative;overflow:hidden}
-.d5-eyebrow{font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45)}
-.d5-name{font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.55);margin-top:6px;margin-bottom:26px}
-.d5-amount-label{font-family:'IBM Plex Sans',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#D4AF6A;margin-bottom:6px}
-.d5-amount{font-family:'Fraunces',serif;font-weight:400;font-size:44px;letter-spacing:-0.02em;color:#fff;line-height:1;margin-bottom:8px}
-.d5-amount .rand{color:#D4AF6A;font-size:24px;margin-right:6px}
-.d5-rate-line{display:flex;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:22px}
-.d5-rate-line .rule{width:22px;height:1px;background:rgba(212,175,106,0.6);flex-shrink:0}
-.d5-terms{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;margin-bottom:18px}
-.d5-term-cell{background:rgba(255,255,255,0.05);padding:12px 10px}
-.d5-term-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4)}
-.d5-term-val{font-family:'Fraunces',serif;font-size:15px;color:#fff;margin-top:5px}
-.d5-term-note{font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px}
-.d5-freed{background:rgba(134,232,184,0.08);border:1px solid rgba(134,232,184,0.25);border-radius:16px;padding:18px}
-.d5-freed-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#86E8B8;display:flex;align-items:center;gap:7px}
-.d5-freed-dot{width:6px;height:6px;border-radius:50%;background:#86E8B8;animation:d5pulse 2.2s ease-in-out infinite}
+.d5-hero{background:#090E12;padding:32px 24px 36px;position:relative;overflow:hidden}
+.d5-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% 0%,rgba(60,80,140,0.28),transparent 60%),radial-gradient(80% 50% at 90% 100%,rgba(200,150,50,0.14),transparent 60%)}
+.d5-eyebrow{position:relative;font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#A49D92}
+.d5-name{position:relative;font-family:'Geist',sans-serif;font-size:13px;color:#A49D92;margin-top:6px;margin-bottom:26px}
+.d5-amount-label{position:relative;font-family:'Geist',sans-serif;font-size:10.9px;letter-spacing:0.22em;text-transform:uppercase;color:#E1B25F;margin-bottom:6px}
+.d5-amount{position:relative;font-family:'Fraunces',serif;font-weight:400;font-size:44px;letter-spacing:-0.045em;font-feature-settings:'lnum','tnum';color:#F4F0E7;line-height:1;margin-bottom:8px}
+.d5-amount .rand{color:#E1B25F;font-size:24px;margin-right:6px}
+.d5-rate-line{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;color:#A49D92;margin-bottom:22px}
+.d5-rate-line .rule{width:22px;height:1px;background:rgba(225,178,95,0.6);flex-shrink:0}
+.d5-terms{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.d5-term-cell{background:#12181D;padding:12px 10px}
+.d5-term-label{font-family:'Geist',sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#A49D92}
+.d5-term-val{font-family:'Fraunces',serif;font-size:15px;font-feature-settings:'lnum','tnum';letter-spacing:-0.045em;color:#F4F0E7;margin-top:5px}
+.d5-term-note{font-size:9px;color:#A49D92;margin-top:3px}
+.d5-freed{position:relative;background:rgba(89,224,173,0.08);border:1px solid rgba(89,224,173,0.25);border-radius:16px;padding:18px}
+.d5-freed-label{font-family:'Geist',sans-serif;font-size:10.9px;letter-spacing:0.22em;text-transform:uppercase;color:#59E0AD;display:flex;align-items:center;gap:7px}
+.d5-freed-dot{width:6px;height:6px;border-radius:50%;background:#59E0AD;animation:d5pulse 2.2s ease-in-out infinite}
 @keyframes d5pulse{0%,100%{opacity:.45;transform:scale(0.85)}50%{opacity:1;transform:scale(1.2)}}
-.d5-freed-amount{font-family:'Fraunces',serif;font-size:30px;color:#fff;margin-top:8px;letter-spacing:-0.02em}
-.d5-freed-amount span{font-size:13px;color:rgba(255,255,255,0.45);margin-left:4px;font-family:'IBM Plex Sans',sans-serif}
-.d5-freed-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:8px;line-height:1.5}
-.d5-body{padding:22px 24px;background:#0E1420;flex:1}
-.d5-section-title{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4)}
-.d5-debt-group{margin-bottom:16px}
-.d5-debt-group-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:8px}
-.d5-debt-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
-.d5-debt-name{font-size:13px;color:#fff}
-.d5-debt-meta{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
-.d5-debt-val{font-family:'Fraunces',serif;font-size:13px;color:#fff}
-.d5-total-row{display:flex;justify-content:space-between;padding:14px 0 0;border-top:1px solid rgba(255,255,255,0.1);margin-top:6px}
-.d5-total-label{font-size:12px;color:rgba(255,255,255,0.6)}
-.d5-total-val{font-family:'Fraunces',serif;font-size:16px;color:#D4AF6A}
-.d5-details-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;color:rgba(255,255,255,0.7);font-size:12px;margin-top:4px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif}
+.d5-freed-amount{font-family:'Fraunces',serif;font-size:30px;font-feature-settings:'lnum','tnum';color:#F4F0E7;margin-top:8px;letter-spacing:-0.045em}
+.d5-freed-amount span{font-size:13px;color:#A49D92;margin-left:4px;font-family:'Geist',sans-serif;letter-spacing:normal}
+.d5-freed-sub{font-size:11px;color:#A49D92;margin-top:8px;line-height:1.5}
+.d5-body{padding:22px 24px;background:#090E12;flex:1}
+.d5-section-title{font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#A49D92}
+.d5-debt-group-label{font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#F4F0E7;margin-bottom:8px}
+.d5-debt-name{font-size:13px;color:#F4F0E7}
+.d5-debt-meta{font-size:10px;color:#A49D92;margin-top:2px}
+.d5-debt-val{font-family:'Fraunces',serif;font-size:13px;font-feature-settings:'lnum','tnum';letter-spacing:-0.03em;color:#F4F0E7}
+.d5-total-label{font-size:12px;color:#A49D92}
+.d5-total-val{font-family:'Fraunces',serif;font-size:16px;font-feature-settings:'lnum','tnum';letter-spacing:-0.03em;color:#E1B25F}
+.d5-details-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:#12181D;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;color:#A49D92;font-size:12px;margin-top:4px;cursor:pointer;font-family:'Geist',sans-serif}
 .d5-details-panel{margin-top:16px}
 .savings-bar-wrap{margin-bottom:10px}
 .savings-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
@@ -2002,7 +2000,7 @@ if (loading) return (
         {/* ── HERO ── */}
         <div className="d5-hero">
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:22}}>
-            <div style={{fontFamily:"'Fraunces',serif",fontSize:20,color:"#fff"}}>Mu<span style={{color:"#D4AF6A"}}>ḽ</span>o</div>
+            <div style={{fontFamily:"'Fraunces',serif",fontSize:20,color:"#F4F0E7"}}>Mu<span style={{color:"#E1B25F"}}>ḽ</span>o</div>
             <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Offer valid 48 hrs</div>
           </div>
 
@@ -2045,7 +2043,7 @@ if (loading) return (
           <div style={{marginBottom:20}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
               <div className="d5-section-title">Settlement plan</div>
-              <div style={{fontSize:11,fontWeight:600,color:"#86E8B8"}}>{settled.length} accounts</div>
+              <div style={{fontSize:11,fontWeight:600,color:"#59E0AD"}}>{settled.length} accounts</div>
             </div>
             <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:14,lineHeight:1.5}}>
               Settled in priority order: personal loans → credit cards → vehicle finance
@@ -2066,7 +2064,7 @@ if (loading) return (
                       </div>
                       <div style={{textAlign:"right"}}>
                         <div className="d5-debt-val">{fmt(d.balance)}</div>
-                        <div style={{fontSize:9,color:"#86E8B8",fontWeight:600,marginTop:3}}>✓ Settled</div>
+                        <div style={{fontSize:9,color:"#59E0AD",fontWeight:600,marginTop:3}}>✓ Settled</div>
                       </div>
                     </div>
                   ))}
@@ -2083,13 +2081,13 @@ if (loading) return (
           {/* Excluded debts warning */}
           {excluded.length > 0 && (
             <div style={{background:"rgba(255,112,67,0.08)",border:"1px solid rgba(255,112,67,0.25)",borderRadius:14,padding:16,marginBottom:20}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#FF7043",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+              <div style={{fontSize:11,fontWeight:600,color:"#FA6863",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
                 <span>⚠</span> Not included — equity cap reached
               </div>
               {excluded.map(d => (
                 <div key={d.name} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,112,67,0.1)"}}>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:12,color:"#fff"}}>{d.name}</div>
+                    <div style={{fontSize:12,color:"#F4F0E7"}}>{d.name}</div>
                     <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>{fmt(d.balance)} · {d.reason}</div>
                   </div>
                 </div>
@@ -2112,7 +2110,7 @@ if (loading) return (
                 const MULO_SCORE = 82;
                 const PD = 3.2;
                 const PD_BAND = PD < 5 ? "Very Low" : PD < 10 ? "Low" : PD < 15 ? "Medium" : "High";
-                const PD_COLOR = PD < 5 ? "#86E8B8" : PD < 10 ? "#00B8A9" : PD < 15 ? "#D4AF6A" : "#FF7043";
+                const PD_COLOR = PD < 5 ? "#59E0AD" : PD < 10 ? "#00B8A9" : PD < 15 ? "#E1B25F" : "#FA6863";
                 const SHAP = [
                   { label:"Credit score (TransUnion)", pct:34, direction:"positive", val:"Score 724" },
                   { label:"LTV ratio post-loan",        pct:22, direction:"positive", val:"56% LTV" },
@@ -2131,17 +2129,17 @@ if (loading) return (
                             <svg className="score-svg" viewBox="0 0 56 56">
                               <defs>
                                 <linearGradient id="scoreGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                                  <stop offset="0%" stopColor="#D4AF6A"/>
-                                  <stop offset="100%" stopColor="#86E8B8"/>
+                                  <stop offset="0%" stopColor="#E1B25F"/>
+                                  <stop offset="100%" stopColor="#59E0AD"/>
                                 </linearGradient>
                               </defs>
                               <circle className="score-track" cx="28" cy="28" r="22"/>
                               <circle className="score-fill" cx="28" cy="28" r="22" style={{stroke:"url(#scoreGrad2)"}}/>
                             </svg>
-                            <div className="score-num" style={{color:"#fff"}}>{MULO_SCORE}</div>
+                            <div className="score-num" style={{color:"#F4F0E7"}}>{MULO_SCORE}</div>
                           </div>
                           <div>
-                            <div style={{fontSize:12,fontWeight:700,color:"#fff"}}>Excellent</div>
+                            <div style={{fontSize:12,fontWeight:700,color:"#F4F0E7"}}>Excellent</div>
                             <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>Top 15%<br/>of applicants</div>
                           </div>
                         </div>
@@ -2179,15 +2177,15 @@ if (loading) return (
                         <div key={i} style={{marginBottom:8}}>
                           <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
                             <div style={{fontSize:10,color:"rgba(255,255,255,0.6)"}}>{f.label}</div>
-                            <div style={{fontSize:10,fontWeight:600,color:f.direction==="positive"?"#86E8B8":"#FF7043"}}>{f.direction==="positive"?"▲":"▼"} {f.val}</div>
+                            <div style={{fontSize:10,fontWeight:600,color:f.direction==="positive"?"#59E0AD":"#FA6863"}}>{f.direction==="positive"?"▲":"▼"} {f.val}</div>
                           </div>
                           <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:99,overflow:"hidden"}}>
                             <div style={{
                               height:"100%",
                               width:`${f.pct}%`,
                               background:f.direction==="positive"
-                                ? "linear-gradient(90deg,#D4AF6A,#86E8B8)"
-                                : "linear-gradient(90deg,#FF7043,#FF8A65)",
+                                ? "linear-gradient(90deg,#E1B25F,#59E0AD)"
+                                : "linear-gradient(90deg,#FA6863,#FA9490)",
                               borderRadius:99,
                             }}/>
                           </div>
@@ -2206,16 +2204,16 @@ if (loading) return (
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
                   <div style={{width:32,height:32,borderRadius:10,background:"rgba(212,175,106,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🏡</div>
                   <div>
-                    <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>Property & equity breakdown</div>
+                    <div style={{fontSize:13,fontWeight:600,color:"#F4F0E7"}}>Property & equity breakdown</div>
                     <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Source: Lightstone AVM · Apr 2026</div>
                   </div>
                 </div>
 
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
                   {[
-                    { label:"Home value",  val:fmt(HOME_VALUE),   sub:"Lightstone AVM", color:"#fff" },
-                    { label:"Bond owed",   val:fmt(BOND_BALANCE), sub:"Current mortgage", color:"#FF8A65" },
-                    { label:"Your equity", val:fmt(EQUITY),       sub:"Value minus bond", color:"#86E8B8" },
+                    { label:"Home value",  val:fmt(HOME_VALUE),   sub:"Lightstone AVM", color:"#F4F0E7" },
+                    { label:"Bond owed",   val:fmt(BOND_BALANCE), sub:"Current mortgage", color:"#FA9490" },
+                    { label:"Your equity", val:fmt(EQUITY),       sub:"Value minus bond", color:"#59E0AD" },
                   ].map(c => (
                     <div key={c.label} style={{background:"rgba(255,255,255,0.04)",borderRadius:12,padding:"12px 10px",textAlign:"center"}}>
                       <div style={{fontFamily:"'Fraunces',serif",fontSize:13,color:c.color,lineHeight:1.2,marginBottom:4}}>{c.val}</div>
@@ -2228,17 +2226,17 @@ if (loading) return (
                 <div style={{marginBottom:10}}>
                   <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:6}}>
                     <span>Equity utilisation</span>
-                    <span style={{fontWeight:600,color:"#fff"}}>{EQUITY_USED_PCT}% of equity used</span>
+                    <span style={{fontWeight:600,color:"#F4F0E7"}}>{EQUITY_USED_PCT}% of equity used</span>
                   </div>
                   <div style={{height:12,borderRadius:99,overflow:"hidden",display:"flex",background:"rgba(255,255,255,0.06)"}}>
                     <div style={{width:`${bondPct}%`,background:"rgba(255,255,255,0.25)"}} title="Bond balance"/>
-                    <div style={{width:`${loanPct}%`,background:"linear-gradient(90deg,#D4AF6A,#86E8B8)"}} title="Muḽo loan"/>
+                    <div style={{width:`${loanPct}%`,background:"linear-gradient(90deg,#E1B25F,#59E0AD)"}} title="Muḽo loan"/>
                     <div style={{flex:1,background:"rgba(134,232,184,0.12)"}} title="Remaining equity"/>
                   </div>
                   <div style={{display:"flex",gap:16,marginTop:8,fontSize:10}}>
                     {[
                       {c:"rgba(255,255,255,0.25)", l:`Bond (${bondPct}%)`},
-                      {c:"#D4AF6A", l:`Muḽo loan (${loanPct}%)`},
+                      {c:"#E1B25F", l:`Muḽo loan (${loanPct}%)`},
                       {c:"rgba(134,232,184,0.5)", l:`Free equity (${freePct}%)`},
                     ].map(x=>(
                       <div key={x.l} style={{display:"flex",alignItems:"center",gap:4,color:"rgba(255,255,255,0.5)"}}>
@@ -2252,10 +2250,10 @@ if (loading) return (
                 <div style={{background:"rgba(134,232,184,0.06)",border:"1px solid rgba(134,232,184,0.2)",borderRadius:12,padding:"10px 14px",fontSize:12,color:"rgba(255,255,255,0.7)",display:"flex",gap:10,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0}}>📐</span>
                   <div>
-                    <strong style={{color:"#fff"}}>75% equity rule applied</strong>
+                    <strong style={{color:"#F4F0E7"}}>75% equity rule applied</strong>
                     <div style={{color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.5}}>
-                      Max loan = {fmt(EQUITY)} × 75% = <strong style={{color:"#86E8B8"}}>{fmt(MAX_LOAN)}</strong>.
-                      Your approved amount of <strong style={{color:"#fff"}}>{fmt(LOAN_AMOUNT)}</strong> is within this limit.
+                      Max loan = {fmt(EQUITY)} × 75% = <strong style={{color:"#59E0AD"}}>{fmt(MAX_LOAN)}</strong>.
+                      Your approved amount of <strong style={{color:"#F4F0E7"}}>{fmt(LOAN_AMOUNT)}</strong> is within this limit.
                     </div>
                   </div>
                 </div>
