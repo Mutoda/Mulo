@@ -425,39 +425,6 @@ html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans',sans-serif;backgro
 .offer-body{padding:20px 24px;background:#F7F9FC;flex:1}
 .savings-card{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
 .savings-title{font-size:12px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px}
-
-/* ── Design 5.0 — editorial offer screen ── */
-.d5-hero{background:#090E12;padding:32px 24px 36px;position:relative;overflow:hidden}
-.d5-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% 0%,rgba(60,80,140,0.28),transparent 60%),radial-gradient(80% 50% at 90% 100%,rgba(200,150,50,0.14),transparent 60%)}
-.d5-eyebrow{position:relative;font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#A49D92}
-.d5-name{position:relative;font-family:'Geist',sans-serif;font-size:13px;color:#A49D92;margin-top:6px;margin-bottom:26px}
-.d5-amount-label{position:relative;font-family:'Geist',sans-serif;font-size:10.9px;letter-spacing:0.22em;text-transform:uppercase;color:#E1B25F;margin-bottom:6px}
-.d5-amount{position:relative;font-family:'Fraunces',serif;font-weight:400;font-size:44px;letter-spacing:-0.045em;font-feature-settings:'lnum','tnum';color:#F4F0E7;line-height:1;margin-bottom:8px}
-.d5-amount .rand{color:#E1B25F;font-size:24px;margin-right:6px}
-.d5-rate-line{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;color:#A49D92;margin-bottom:22px}
-.d5-rate-line .rule{width:22px;height:1px;background:rgba(225,178,95,0.6);flex-shrink:0}
-.d5-terms{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;margin-bottom:18px}
-.d5-term-cell{background:#12181D;padding:12px 10px}
-.d5-term-label{font-family:'Geist',sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#A49D92}
-.d5-term-val{font-family:'Fraunces',serif;font-size:15px;font-feature-settings:'lnum','tnum';letter-spacing:-0.045em;color:#F4F0E7;margin-top:5px}
-.d5-term-note{font-size:9px;color:#A49D92;margin-top:3px}
-.d5-freed{position:relative;background:rgba(89,224,173,0.08);border:1px solid rgba(89,224,173,0.25);border-radius:16px;padding:18px}
-.d5-freed-label{font-family:'Geist',sans-serif;font-size:10.9px;letter-spacing:0.22em;text-transform:uppercase;color:#59E0AD;display:flex;align-items:center;gap:7px}
-.d5-freed-dot{width:6px;height:6px;border-radius:50%;background:#59E0AD;animation:d5pulse 2.2s ease-in-out infinite}
-@keyframes d5pulse{0%,100%{opacity:.45;transform:scale(0.85)}50%{opacity:1;transform:scale(1.2)}}
-.d5-freed-amount{font-family:'Fraunces',serif;font-size:30px;font-feature-settings:'lnum','tnum';color:#F4F0E7;margin-top:8px;letter-spacing:-0.045em}
-.d5-freed-amount span{font-size:13px;color:#A49D92;margin-left:4px;font-family:'Geist',sans-serif;letter-spacing:normal}
-.d5-freed-sub{font-size:11px;color:#A49D92;margin-top:8px;line-height:1.5}
-.d5-body{padding:22px 24px;background:#090E12;flex:1}
-.d5-section-title{font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#A49D92}
-.d5-debt-group-label{font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:#F4F0E7;margin-bottom:8px}
-.d5-debt-name{font-size:13px;color:#F4F0E7}
-.d5-debt-meta{font-size:10px;color:#A49D92;margin-top:2px}
-.d5-debt-val{font-family:'Fraunces',serif;font-size:13px;font-feature-settings:'lnum','tnum';letter-spacing:-0.03em;color:#F4F0E7}
-.d5-total-label{font-size:12px;color:#A49D92}
-.d5-total-val{font-family:'Fraunces',serif;font-size:16px;font-feature-settings:'lnum','tnum';letter-spacing:-0.03em;color:#E1B25F}
-.d5-details-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:#12181D;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;color:#A49D92;font-size:12px;margin-top:4px;cursor:pointer;font-family:'Geist',sans-serif}
-.d5-details-panel{margin-top:16px}
 .savings-bar-wrap{margin-bottom:10px}
 .savings-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
 .savings-bar-key{color:#8FA3BE;display:flex;align-items:center;gap:5px}
@@ -1915,7 +1882,6 @@ function Offer({ go }) {
   const [engineResult, setEngineResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     fetch(MULO_API, {
@@ -1998,73 +1964,268 @@ if (loading) return (
       <div className="screen-scroll">
 
         {/* ── HERO ── */}
-        <div className="d5-hero">
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:22}}>
-            <div style={{fontFamily:"'Fraunces',serif",fontSize:20,color:"#F4F0E7"}}>Mu<span style={{color:"#E1B25F"}}>ḽ</span>o</div>
+        <div className="offer-hero">
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+            <div className="mulo-logo" style={{color:"#fff"}}>Mu<span style={{color:"#00B8A9"}}>ḽ</span>o</div>
             <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Offer valid 48 hrs</div>
           </div>
+          <div className="offer-eyebrow">PERSONALISED EQUITY OFFER</div>
+          <div className="offer-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')} · 34 Jacaranda Ave, Kempton Park</div>
 
-          <div className="d5-eyebrow">Your private offer</div>
-          <div className="d5-name">{(window._muloFirstName && window._muloLastName ? window._muloFirstName + ' ' + window._muloLastName : 'Thabo Nkosi')} · 34 Jacaranda Ave, Kempton Park</div>
+          {/* ── ML ENGINE SCORES ── */}
+          {(() => {
+            // ML Engine inputs (simulated from bureau data)
+            const MULO_SCORE = 82;
+            const PD = 3.2; // Probability of Default %
+            const PD_BAND = PD < 5 ? "Very Low" : PD < 10 ? "Low" : PD < 15 ? "Medium" : "High";
+            const PD_COLOR = PD < 5 ? "#12C26B" : PD < 10 ? "#00B8A9" : PD < 15 ? "#F4B942" : "#FF7043";
 
-          <div className="d5-amount-label">Approved equity loan</div>
-          <div className="d5-amount"><span className="rand">R</span>{LOAN_AMOUNT.toLocaleString("en-ZA")}</div>
-          <div className="d5-rate-line"><span className="rule"/>{rateLabel || "Prime"} · {rateAnnual}% p.a. · Approved in 8 seconds</div>
+            // SHAP feature contributions (sum to 100%)
+            const SHAP = [
+              { label:"Credit score (TransUnion)", pct:34, direction:"positive", val:"Score 724" },
+              { label:"LTV ratio post-loan",        pct:22, direction:"positive", val:"56% LTV" },
+              { label:"Salary consistency",         pct:18, direction:"positive", val:"Regular deposits" },
+              { label:"Affordability surplus",      pct:15, direction:"positive", val:"R4,200/mo" },
+              { label:"Cash withdrawal ratio",      pct:7,  direction:"negative", val:"28% of income" },
+              { label:"Months since last missed",   pct:4,  direction:"positive", val:"18 months" },
+            ];
 
-          <div className="d5-terms">
-            <div className="d5-term-cell">
-              <div className="d5-term-label">Term</div>
-              <div className="d5-term-val">{termMonths}</div>
-              <div className="d5-term-note">months</div>
+            return (
+              <>
+                {/* Dual score row */}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+
+                  {/* Muḽo Score */}
+                  <div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:16}}>
+                    <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Muḽo Score</div>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div className="score-ring-wrap">
+                        <svg className="score-svg" viewBox="0 0 56 56">
+                          <defs>
+                            <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#00B8A9"/>
+                              <stop offset="100%" stopColor="#1A73E8"/>
+                            </linearGradient>
+                          </defs>
+                          <circle className="score-track" cx="28" cy="28" r="22"/>
+                          <circle className="score-fill" cx="28" cy="28" r="22"/>
+                        </svg>
+                        <div className="score-num">{MULO_SCORE}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize:12,fontWeight:700,color:"#fff"}}>Excellent</div>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>Top 15%<br/>of applicants</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PD Score */}
+                  <div style={{background:"rgba(255,255,255,0.07)",border:`1px solid ${PD_COLOR}30`,borderRadius:16,padding:16}}>
+                    <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Prob. of Default</div>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      {/* PD gauge */}
+                      <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
+                        <svg width="56" height="56" viewBox="0 0 56 56" style={{transform:"rotate(-90deg)"}}>
+                          <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5"/>
+                          <circle cx="28" cy="28" r="22" fill="none"
+                            stroke={PD_COLOR} strokeWidth="5" strokeLinecap="round"
+                            strokeDasharray={`${2*Math.PI*22}`}
+                            strokeDashoffset={`${2*Math.PI*22 * (1 - PD/30)}`}
+                          />
+                        </svg>
+                        <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
+                          <div style={{fontFamily:"'Sora',sans-serif",fontSize:13,fontWeight:800,color:PD_COLOR,lineHeight:1}}>{PD}%</div>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{fontSize:12,fontWeight:700,color:PD_COLOR}}>{PD_BAND} Risk</div>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>XGBoost ML<br/>model · v1.0</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SHAP Explainability */}
+                <div style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:14,marginBottom:16}}>
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:12}}>
+                    Why this decision — SHAP feature contributions
+                  </div>
+                  {SHAP.map((f,i) => (
+                    <div key={i} style={{marginBottom:8}}>
+                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.6)"}}>{f.label}</div>
+                        <div style={{fontSize:10,fontWeight:600,color:f.direction==="positive"?"#12C26B":"#FF7043"}}>{f.direction==="positive"?"▲":"▼"} {f.val}</div>
+                      </div>
+                      <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:99,overflow:"hidden"}}>
+                        <div style={{
+                          height:"100%",
+                          width:`${f.pct}%`,
+                          background:f.direction==="positive"
+                            ? "linear-gradient(90deg,#00B8A9,#12C26B)"
+                            : "linear-gradient(90deg,#FF7043,#FF8A65)",
+                          borderRadius:99,
+                          transition:"width 1s ease",
+                        }}/>
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginTop:10,lineHeight:1.6}}>
+                    Powered by Amazon SageMaker · XGBoost · SHAP explainability · NCA compliant
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+
+          <div className="offer-amount-label">APPROVED EQUITY LOAN</div>
+          <div className="offer-amount"><span>R</span> {LOAN_AMOUNT.toLocaleString("en-ZA")}</div>
+          <div className="offer-rate-line">{rateLabel || "Prime"} · {rateAnnual}% p.a. · {termMonths} months</div>
+
+          <div className="offer-pills">
+            <div className="offer-pill highlight">
+              <div className="offer-pill-label">New monthly repayment</div>
+              <div className="offer-pill-val">{fmt(NEW_MONTHLY)}</div>
+              <div className="offer-pill-sub">single consolidated payment</div>
             </div>
-            <div className="d5-term-cell">
-              <div className="d5-term-label">Repayment</div>
-              <div className="d5-term-val">{fmt(NEW_MONTHLY)}</div>
-              <div className="d5-term-note">per month</div>
+            <div className="offer-pill">
+              <div className="offer-pill-label">Monthly saving</div>
+              <div className="offer-pill-val" style={{color:"#12C26B"}}>{fmt(MONTHLY_SAVING)}</div>
+              <div className="offer-pill-sub">{Math.round(MONTHLY_SAVING/CURRENT_MONTHLY*100)}% less per month</div>
             </div>
-            <div className="d5-term-cell">
-              <div className="d5-term-label">LTV after</div>
-              <div className="d5-term-val">{LTV_AFTER}%</div>
-              <div className="d5-term-note">of 75% cap</div>
+            <div className="offer-pill">
+              <div className="offer-pill-label">Interest rate</div>
+              <div className="offer-pill-val">11.25%</div>
+              <div className="offer-pill-sub">p.a. fixed · 5 yrs</div>
             </div>
-          </div>
-
-          <div className="d5-freed">
-            <div className="d5-freed-label"><span className="d5-freed-dot"/>Freed up monthly</div>
-            <div className="d5-freed-amount">{fmt(MONTHLY_SAVING)}<span>/mo · {fmt(MONTHLY_SAVING * 60)} over 5 yrs</span></div>
-            <div className="d5-freed-sub">Money that was going to high-interest debt — now yours. {Math.round(MONTHLY_SAVING/CURRENT_MONTHLY*100)}% less per month than today.</div>
+            <div className="offer-pill">
+              <div className="offer-pill-label">LTV after loan</div>
+              <div className="offer-pill-val">{LTV_AFTER}%</div>
+              <div className="offer-pill-sub">within 75% equity cap</div>
+            </div>
           </div>
         </div>
 
         {/* ── BODY ── */}
-        <div className="d5-body">
+        <div className="offer-body">
 
-          {/* Debts to be settled */}
-          <div style={{marginBottom:20}}>
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
-              <div className="d5-section-title">Settlement plan</div>
-              <div style={{fontSize:11,fontWeight:600,color:"#59E0AD"}}>{settled.length} accounts</div>
+          {/* ── PROPERTY & EQUITY BREAKDOWN ── */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+              <div style={{width:32,height:32,borderRadius:10,background:"#EBF8F5",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🏡</div>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:"#0A1628"}}>Property & equity breakdown</div>
+                <div style={{fontSize:11,color:"#8FA3BE"}}>Source: Lightstone AVM · Apr 2026</div>
+              </div>
             </div>
-            <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:14,lineHeight:1.5}}>
+
+            {/* three key numbers */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
+              {[
+                { label:"Home value",     val:fmt(HOME_VALUE),   sub:"Lightstone AVM", color:"#0A1628", bg:"#F7F9FC" },
+                { label:"Bond owed",      val:fmt(BOND_BALANCE), sub:"Current mortgage", color:"#FF7043", bg:"#FFF5F2" },
+                { label:"Your equity",    val:fmt(EQUITY),       sub:"Value minus bond", color:"#12C26B", bg:"#F0FFF8" },
+              ].map(c => (
+                <div key={c.label} style={{background:c.bg,borderRadius:12,padding:"12px 10px",textAlign:"center"}}>
+                  <div style={{fontFamily:"'Sora',sans-serif",fontSize:13,fontWeight:800,color:c.color,lineHeight:1.2,marginBottom:4}}>
+                    {c.val}
+                  </div>
+                  <div style={{fontSize:10,fontWeight:700,color:"#0A1628",marginBottom:2}}>{c.label}</div>
+                  <div style={{fontSize:9,color:"#8FA3BE"}}>{c.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* stacked equity bar */}
+            <div style={{marginBottom:10}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"#8FA3BE",marginBottom:6}}>
+                <span>Equity utilisation</span>
+                <span style={{fontWeight:600,color:"#0A1628"}}>{EQUITY_USED_PCT}% of equity used</span>
+              </div>
+              <div style={{height:14,borderRadius:99,overflow:"hidden",display:"flex",background:"#F0F4F8"}}>
+                <div style={{width:`${bondPct}%`,background:"#CBD5E0",transition:"width .8s"}} title="Bond balance"/>
+                <div style={{width:`${loanPct}%`,background:"linear-gradient(90deg,#00B8A9,#1A73E8)",transition:"width .8s"}} title="Muḽo loan"/>
+                <div style={{flex:1,background:"rgba(18,194,107,0.15)"}} title="Remaining equity"/>
+              </div>
+              <div style={{display:"flex",gap:16,marginTop:8,fontSize:10}}>
+                {[
+                  {c:"#CBD5E0", l:`Bond (${bondPct}%)`},
+                  {c:"#00B8A9", l:`Muḽo loan (${loanPct}%)`},
+                  {c:"rgba(18,194,107,0.4)", l:`Free equity (${freePct}%)`},
+                ].map(x=>(
+                  <div key={x.l} style={{display:"flex",alignItems:"center",gap:4,color:"#8FA3BE"}}>
+                    <div style={{width:8,height:8,borderRadius:2,background:x.c,flexShrink:0}}/>
+                    {x.l}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 75% rule callout */}
+            <div style={{background:"rgba(0,184,169,0.06)",border:"1px solid rgba(0,184,169,0.18)",borderRadius:12,padding:"10px 14px",fontSize:12,color:"#0A1628",display:"flex",gap:10,alignItems:"flex-start"}}>
+              <span style={{fontSize:16,flexShrink:0}}>📐</span>
+              <div>
+                <strong>75% equity rule applied</strong>
+                <div style={{color:"#8FA3BE",marginTop:2,lineHeight:1.5}}>
+                  Max loan = {fmt(EQUITY)} × 75% = <strong style={{color:"#00B8A9"}}>{fmt(MAX_LOAN)}</strong>. 
+                  Your approved amount of <strong style={{color:"#0A1628"}}>{fmt(LOAN_AMOUNT)}</strong> is within this limit.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── MONTHLY COMPARISON ── */}
+          <div className="savings-card" style={{marginBottom:14}}>
+            <div className="savings-title">Monthly payment comparison</div>
+            {[
+              { key:"current", label:"Current combined payments", val:fmt(CURRENT_MONTHLY), pct:100, color:"#FF7043" },
+              { key:"new",     label:"New Muḽo repayment",         val:fmt(NEW_MONTHLY),     pct:Math.round(NEW_MONTHLY/CURRENT_MONTHLY*100), color:"#00B8A9" },
+            ].map(r => (
+              <div className="savings-bar-wrap" key={r.key}>
+                <div className="savings-bar-label">
+                  <span className={`savings-bar-key ${r.key}`}>{r.label}</span>
+                  <span className="savings-bar-val">{r.val}</span>
+                </div>
+                <div className="bar-track"><div className="bar-fill" style={{"--c":r.color,width:`${r.pct}%`}}/></div>
+              </div>
+            ))}
+            <div className="savings-delta">
+              💚 &nbsp;Save {fmt(MONTHLY_SAVING)}/month · {fmt(MONTHLY_SAVING * 60)} over 5 years
+            </div>
+          </div>
+
+          {/* ── DEBTS TO BE SETTLED ── */}
+          <div style={{background:"#fff",borderRadius:18,padding:18,boxShadow:"0 2px 12px rgba(0,0,0,0.05)",marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+              <div style={{fontSize:12,fontWeight:700,color:"#8FA3BE",textTransform:"uppercase",letterSpacing:0.8}}>Debts to be settled</div>
+              <div style={{fontSize:11,fontWeight:600,color:"#00B8A9"}}>{settled.length} accounts</div>
+            </div>
+            <div style={{fontSize:11,color:"#8FA3BE",marginBottom:14,lineHeight:1.5}}>
               Settled in priority order: personal loans → credit cards → vehicle finance
             </div>
 
+            {/* priority group labels */}
             {["personal","credit","vehicle"].map(cat => {
               const group = settled.filter(d => d.cat === cat);
               if(!group.length) return null;
-              const labels = {personal:"1. Personal loans", credit:"2. Credit cards", vehicle:"3. Vehicle finance"};
+              const labels = {personal:"1. Personal Loans", credit:"2. Credit Cards", vehicle:"3. Vehicle Finance"};
+              const icons  = {personal:"🏦", credit:"💳", vehicle:"🚗"};
+              const colors = {personal:"#EBF0FF", credit:"#FFF0EB", vehicle:"#EBFFF5"};
               return (
-                <div key={cat} className="d5-debt-group">
-                  <div className="d5-debt-group-label">{labels[cat]}</div>
+                <div key={cat} style={{marginBottom:14}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+                    <div style={{width:6,height:6,borderRadius:50,background:"#00B8A9"}}/>
+                    <div style={{fontSize:11,fontWeight:700,color:"#0A1628",textTransform:"uppercase",letterSpacing:0.5}}>{labels[cat]}</div>
+                  </div>
                   {group.map(d => (
-                    <div key={d.name} className="d5-debt-row">
-                      <div>
-                        <div className="d5-debt-name">{d.name}</div>
-                        <div className="d5-debt-meta">{fmt(d.monthly)}/mo · Outstanding: {fmt(d.balance)}</div>
+                    <div key={d.name} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:"1px solid #F7F9FC"}}>
+                      <div style={{width:34,height:34,borderRadius:10,background:d.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{d.icon}</div>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:13,fontWeight:500,color:"#0A1628"}}>{d.name}</div>
+                        <div style={{fontSize:11,color:"#8FA3BE",marginTop:1}}>{fmt(d.monthly)}/mo · Outstanding: {fmt(d.balance)}</div>
                       </div>
-                      <div style={{textAlign:"right"}}>
-                        <div className="d5-debt-val">{fmt(d.balance)}</div>
-                        <div style={{fontSize:9,color:"#59E0AD",fontWeight:600,marginTop:3}}>✓ Settled</div>
+                      <div style={{textAlign:"right",flexShrink:0}}>
+                        <div style={{fontFamily:"'Sora',sans-serif",fontSize:13,fontWeight:700,color:"#0A1628"}}>{fmt(d.balance)}</div>
+                        <div style={{fontSize:10,color:"#12C26B",fontWeight:600,marginTop:2}}>✓ Settled</div>
                       </div>
                     </div>
                   ))}
@@ -2072,191 +2233,30 @@ if (loading) return (
               );
             })}
 
-            <div className="d5-total-row">
-              <div className="d5-total-label">Total settled</div>
-              <div className="d5-total-val">{fmt(LOAN_AMOUNT)}</div>
+            {/* total row */}
+            <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0 0",borderTop:"2px solid #F0F4F8",marginTop:4}}>
+              <div style={{fontSize:13,fontWeight:700,color:"#0A1628"}}>Total settled</div>
+              <div style={{fontFamily:"'Sora',sans-serif",fontSize:15,fontWeight:800,color:"#0A1628"}}>{fmt(LOAN_AMOUNT)}</div>
             </div>
           </div>
 
-          {/* Excluded debts warning */}
+          {/* ── EXCLUDED DEBTS (if any) ── */}
           {excluded.length > 0 && (
-            <div style={{background:"rgba(255,112,67,0.08)",border:"1px solid rgba(255,112,67,0.25)",borderRadius:14,padding:16,marginBottom:20}}>
-              <div style={{fontSize:11,fontWeight:600,color:"#FA6863",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
-                <span>⚠</span> Not included — equity cap reached
+            <div style={{background:"#FFF8F5",border:"1px solid rgba(255,112,67,0.2)",borderRadius:16,padding:16,marginBottom:14}}>
+              <div style={{fontSize:12,fontWeight:700,color:"#FF7043",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
+                <span>⚠️</span> Not included — equity cap reached
               </div>
               {excluded.map(d => (
-                <div key={d.name} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,112,67,0.1)"}}>
+                <div key={d.name} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid rgba(255,112,67,0.08)"}}>
+                  <div style={{width:30,height:30,borderRadius:9,background:"rgba(255,112,67,0.08)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>{d.icon}</div>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:12,color:"#F4F0E7"}}>{d.name}</div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>{fmt(d.balance)} · {d.reason}</div>
+                    <div style={{fontSize:12,fontWeight:500,color:"#0A1628"}}>{d.name}</div>
+                    <div style={{fontSize:11,color:"#8FA3BE"}}>{fmt(d.balance)} · {d.reason}</div>
                   </div>
                 </div>
               ))}
-              <div style={{fontSize:11,color:"rgba(255,255,255,0.4)",marginTop:10,lineHeight:1.6}}>
+              <div style={{fontSize:11,color:"#8FA3BE",marginTop:10,lineHeight:1.6}}>
                 These debts were not included as they would exceed your 75% equity limit of {fmt(MAX_LOAN)}.
-              </div>
-            </div>
-          )}
-
-          {/* Details toggle */}
-          <button className="d5-details-toggle" onClick={() => setDetailsOpen(v => !v)}>
-            <span>{detailsOpen ? "Hide" : "Show"} Muḽo Score, risk model & property breakdown</span>
-            <span>{detailsOpen ? "−" : "+"}</span>
-          </button>
-
-          {detailsOpen && (
-            <div className="d5-details-panel">
-              {(() => {
-                const MULO_SCORE = 82;
-                const PD = 3.2;
-                const PD_BAND = PD < 5 ? "Very Low" : PD < 10 ? "Low" : PD < 15 ? "Medium" : "High";
-                const PD_COLOR = PD < 5 ? "#59E0AD" : PD < 10 ? "#00B8A9" : PD < 15 ? "#E1B25F" : "#FA6863";
-                const SHAP = [
-                  { label:"Credit score (TransUnion)", pct:34, direction:"positive", val:"Score 724" },
-                  { label:"LTV ratio post-loan",        pct:22, direction:"positive", val:"56% LTV" },
-                  { label:"Salary consistency",         pct:18, direction:"positive", val:"Regular deposits" },
-                  { label:"Affordability surplus",      pct:15, direction:"positive", val:"R4,200/mo" },
-                  { label:"Cash withdrawal ratio",      pct:7,  direction:"negative", val:"28% of income" },
-                  { label:"Months since last missed",   pct:4,  direction:"positive", val:"18 months" },
-                ];
-                return (
-                  <>
-                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
-                      <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,padding:16}}>
-                        <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Muḽo Score</div>
-                        <div style={{display:"flex",alignItems:"center",gap:10}}>
-                          <div className="score-ring-wrap">
-                            <svg className="score-svg" viewBox="0 0 56 56">
-                              <defs>
-                                <linearGradient id="scoreGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-                                  <stop offset="0%" stopColor="#E1B25F"/>
-                                  <stop offset="100%" stopColor="#59E0AD"/>
-                                </linearGradient>
-                              </defs>
-                              <circle className="score-track" cx="28" cy="28" r="22"/>
-                              <circle className="score-fill" cx="28" cy="28" r="22" style={{stroke:"url(#scoreGrad2)"}}/>
-                            </svg>
-                            <div className="score-num" style={{color:"#F4F0E7"}}>{MULO_SCORE}</div>
-                          </div>
-                          <div>
-                            <div style={{fontSize:12,fontWeight:700,color:"#F4F0E7"}}>Excellent</div>
-                            <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>Top 15%<br/>of applicants</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{background:"rgba(255,255,255,0.04)",border:`1px solid ${PD_COLOR}30`,borderRadius:16,padding:16}}>
-                        <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:10}}>Prob. of default</div>
-                        <div style={{display:"flex",alignItems:"center",gap:10}}>
-                          <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
-                            <svg width="56" height="56" viewBox="0 0 56 56" style={{transform:"rotate(-90deg)"}}>
-                              <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5"/>
-                              <circle cx="28" cy="28" r="22" fill="none"
-                                stroke={PD_COLOR} strokeWidth="5" strokeLinecap="round"
-                                strokeDasharray={`${2*Math.PI*22}`}
-                                strokeDashoffset={`${2*Math.PI*22 * (1 - PD/30)}`}
-                              />
-                            </svg>
-                            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}>
-                              <div style={{fontFamily:"'Fraunces',serif",fontSize:13,fontWeight:500,color:PD_COLOR,lineHeight:1}}>{PD}%</div>
-                            </div>
-                          </div>
-                          <div>
-                            <div style={{fontSize:12,fontWeight:700,color:PD_COLOR}}>{PD_BAND} Risk</div>
-                            <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.4}}>XGBoost ML<br/>model · v1.0</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:14,marginBottom:20}}>
-                      <div style={{fontSize:9,color:"rgba(255,255,255,0.4)",textTransform:"uppercase",letterSpacing:0.8,marginBottom:12}}>
-                        Why this decision — SHAP feature contributions
-                      </div>
-                      {SHAP.map((f,i) => (
-                        <div key={i} style={{marginBottom:8}}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                            <div style={{fontSize:10,color:"rgba(255,255,255,0.6)"}}>{f.label}</div>
-                            <div style={{fontSize:10,fontWeight:600,color:f.direction==="positive"?"#59E0AD":"#FA6863"}}>{f.direction==="positive"?"▲":"▼"} {f.val}</div>
-                          </div>
-                          <div style={{height:4,background:"rgba(255,255,255,0.06)",borderRadius:99,overflow:"hidden"}}>
-                            <div style={{
-                              height:"100%",
-                              width:`${f.pct}%`,
-                              background:f.direction==="positive"
-                                ? "linear-gradient(90deg,#E1B25F,#59E0AD)"
-                                : "linear-gradient(90deg,#FA6863,#FA9490)",
-                              borderRadius:99,
-                            }}/>
-                          </div>
-                        </div>
-                      ))}
-                      <div style={{fontSize:9,color:"rgba(255,255,255,0.3)",marginTop:10,lineHeight:1.6}}>
-                        Powered by Amazon SageMaker · XGBoost · SHAP explainability · NCA compliant
-                      </div>
-                    </div>
-                  </>
-                );
-              })()}
-
-              {/* Property & equity breakdown */}
-              <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:16,padding:18,marginBottom:8}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-                  <div style={{width:32,height:32,borderRadius:10,background:"rgba(212,175,106,0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🏡</div>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:"#F4F0E7"}}>Property & equity breakdown</div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.4)"}}>Source: Lightstone AVM · Apr 2026</div>
-                  </div>
-                </div>
-
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:16}}>
-                  {[
-                    { label:"Home value",  val:fmt(HOME_VALUE),   sub:"Lightstone AVM", color:"#F4F0E7" },
-                    { label:"Bond owed",   val:fmt(BOND_BALANCE), sub:"Current mortgage", color:"#FA9490" },
-                    { label:"Your equity", val:fmt(EQUITY),       sub:"Value minus bond", color:"#59E0AD" },
-                  ].map(c => (
-                    <div key={c.label} style={{background:"rgba(255,255,255,0.04)",borderRadius:12,padding:"12px 10px",textAlign:"center"}}>
-                      <div style={{fontFamily:"'Fraunces',serif",fontSize:13,color:c.color,lineHeight:1.2,marginBottom:4}}>{c.val}</div>
-                      <div style={{fontSize:10,fontWeight:600,color:"rgba(255,255,255,0.7)",marginBottom:2}}>{c.label}</div>
-                      <div style={{fontSize:9,color:"rgba(255,255,255,0.35)"}}>{c.sub}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{marginBottom:10}}>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:"rgba(255,255,255,0.4)",marginBottom:6}}>
-                    <span>Equity utilisation</span>
-                    <span style={{fontWeight:600,color:"#F4F0E7"}}>{EQUITY_USED_PCT}% of equity used</span>
-                  </div>
-                  <div style={{height:12,borderRadius:99,overflow:"hidden",display:"flex",background:"rgba(255,255,255,0.06)"}}>
-                    <div style={{width:`${bondPct}%`,background:"rgba(255,255,255,0.25)"}} title="Bond balance"/>
-                    <div style={{width:`${loanPct}%`,background:"linear-gradient(90deg,#E1B25F,#59E0AD)"}} title="Muḽo loan"/>
-                    <div style={{flex:1,background:"rgba(134,232,184,0.12)"}} title="Remaining equity"/>
-                  </div>
-                  <div style={{display:"flex",gap:16,marginTop:8,fontSize:10}}>
-                    {[
-                      {c:"rgba(255,255,255,0.25)", l:`Bond (${bondPct}%)`},
-                      {c:"#E1B25F", l:`Muḽo loan (${loanPct}%)`},
-                      {c:"rgba(134,232,184,0.5)", l:`Free equity (${freePct}%)`},
-                    ].map(x=>(
-                      <div key={x.l} style={{display:"flex",alignItems:"center",gap:4,color:"rgba(255,255,255,0.5)"}}>
-                        <div style={{width:8,height:8,borderRadius:2,background:x.c,flexShrink:0}}/>
-                        {x.l}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{background:"rgba(134,232,184,0.06)",border:"1px solid rgba(134,232,184,0.2)",borderRadius:12,padding:"10px 14px",fontSize:12,color:"rgba(255,255,255,0.7)",display:"flex",gap:10,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>📐</span>
-                  <div>
-                    <strong style={{color:"#F4F0E7"}}>75% equity rule applied</strong>
-                    <div style={{color:"rgba(255,255,255,0.45)",marginTop:2,lineHeight:1.5}}>
-                      Max loan = {fmt(EQUITY)} × 75% = <strong style={{color:"#59E0AD"}}>{fmt(MAX_LOAN)}</strong>.
-                      Your approved amount of <strong style={{color:"#F4F0E7"}}>{fmt(LOAN_AMOUNT)}</strong> is within this limit.
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}
