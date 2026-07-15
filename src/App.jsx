@@ -687,14 +687,14 @@ function Landing({ go }) {
             Muḽo lets any South African homeowner tap the equity in their bond to settle expensive unsecured debt and consolidate it into a single, lower-rate repayment against the house they already own.
           </div>
           <div className="d5l-cta-row">
-            <a href={WA_HREF} target="_blank" rel="noopener" className="d5l-wa-cta">
+            <div className="d5l-wa-cta" onClick={() => go("id-verify")} style={{cursor:"pointer"}}>
               <div>
-                <div className="d5l-wa-cta-title">Chat to Muḽo on WhatsApp</div>
-                <div className="d5l-wa-cta-sub">We'll send you a private link · no forms</div>
+                <div className="d5l-wa-cta-title">See my offer →</div>
+                <div className="d5l-wa-cta-sub">Takes about 8 minutes · fully digital · no branch visit</div>
               </div>
               <div style={{color:"#0B121A",fontSize:16}}>→</div>
-            </a>
-            <div className="d5l-sample-link" onClick={() => go("id-verify")}>Prefer the web? Start your application →</div>
+            </div>
+            <a href={WA_HREF} target="_blank" rel="noopener" className="d5l-sample-link" style={{textDecoration:"none"}}>Prefer WhatsApp? Chat to Muḽo first →</a>
           </div>
           <div className="d5l-trust-row">
             <span>NCR registration pending</span>
