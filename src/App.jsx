@@ -425,6 +425,53 @@ html,body{margin:0;padding:0}body{font-family:'IBM Plex Sans',sans-serif;backgro
 .offer-body{padding:20px 24px;background:#F7F9FC;flex:1}
 .savings-card{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.05)}
 .savings-title{font-size:12px;font-weight:600;color:#8FA3BE;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px}
+.d5l-wrap{background:#090E12;min-height:100vh;position:relative;overflow:hidden;font-family:'Geist','IBM Plex Sans',sans-serif;color:#F4F0E7}
+.d5l-atmosphere{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 60% at 50% 0%,rgba(60,80,140,0.28),transparent 60%),radial-gradient(80% 50% at 90% 100%,rgba(200,150,50,0.14),transparent 60%)}
+.d5l-header{position:relative;max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:32px 24px 0;flex-wrap:wrap;gap:16px}
+.d5l-wordmark{font-family:'Fraunces',serif;font-size:24px;font-weight:500;letter-spacing:-0.02em}
+.d5l-wordmark .g{color:#E1B25F}
+.d5l-nav{display:flex;align-items:center;gap:32px;font-size:14px;color:#A49D92}
+.d5l-nav a{color:inherit;text-decoration:none;cursor:pointer}
+.d5l-nav a:hover{color:#F4F0E7}
+.d5l-soon{margin-left:6px;font-size:10px;letter-spacing:0.18em;color:#E1B25F}
+.d5l-wa-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(89,224,173,0.4);background:rgba(89,224,173,0.1);border-radius:999px;padding:9px 18px;font-size:14px;color:#59E0AD;text-decoration:none;cursor:pointer}
+.d5l-hero{position:relative;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;padding:64px 24px 96px;align-items:start}
+@media(max-width:900px){.d5l-hero{grid-template-columns:1fr}}
+.d5l-eyebrow-row{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.d5l-rule{width:22px;height:1px;background:rgba(225,178,95,0.6);flex-shrink:0}
+.d5l-headline{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(32px,5vw,54px);line-height:1.06;letter-spacing:-0.02em;margin-bottom:24px}
+.d5l-headline .em{font-style:italic;color:#E1B25F}
+.d5l-body-copy{font-size:15px;line-height:1.7;color:#A49D92;max-width:460px;margin-bottom:30px}
+.d5l-cta-row{display:flex;flex-direction:column;gap:14px;max-width:360px;margin-bottom:8px}
+.d5l-wa-cta{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#59E0AD;border-radius:16px;padding:16px 22px;text-decoration:none;cursor:pointer}
+.d5l-wa-cta-title{font-size:15px;font-weight:500;color:#0B121A}
+.d5l-wa-cta-sub{font-size:11px;color:#0B121A;opacity:0.75;margin-top:2px}
+.d5l-sample-link{font-size:13px;color:#A49D92;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.d5l-trust-row{display:flex;flex-wrap:wrap;gap:10px 20px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.08);margin-top:26px;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#A49D92;max-width:460px}
+.d5l-offercard{background:#12181D;border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:26px;box-shadow:0 30px 60px -20px rgba(0,0,0,0.6)}
+.d5l-section{position:relative;border-top:1px solid rgba(255,255,255,0.08);padding:80px 24px}
+.d5l-section-inner{max-width:1180px;margin:0 auto}
+.d5l-section-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:48px}
+.d5l-section-title{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(24px,3.2vw,36px);line-height:1.18;letter-spacing:-0.02em;max-width:580px}
+.d5l-section-sub{font-size:14px;line-height:1.6;color:#A49D92;max-width:360px}
+.d5l-cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.d5l-cards3{grid-template-columns:1fr}}
+.d5l-card{background:#12181D;border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:26px;box-shadow:0 20px 40px -20px rgba(0,0,0,0.5)}
+.d5l-card-eyebrow{font-family:'Geist',sans-serif;font-size:10.9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:#59E0AD;margin-bottom:14px}
+.d5l-card-title{font-family:'Fraunces',serif;font-weight:400;font-size:19px;line-height:1.35;margin-bottom:12px}
+.d5l-card-body{font-size:13px;line-height:1.65;color:#A49D92}
+.d5l-disclaimer{margin-top:36px;max-width:780px;font-size:11px;line-height:1.6;color:#A49D92}
+.d5l-eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);border-radius:20px;overflow:hidden}
+@media(max-width:900px){.d5l-eco-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.d5l-eco-grid{grid-template-columns:1fr}}
+.d5l-eco-card{background:#090E12;padding:28px}
+.d5l-eco-num{font-family:'Fraunces',serif;font-feature-settings:'lnum','tnum';font-size:14px;color:#A49D92}
+.d5l-eco-badge{border:1px solid;border-radius:999px;padding:4px 10px;font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase}
+.d5l-eco-title{font-family:'Fraunces',serif;font-weight:400;font-size:21px;margin-top:28px}
+.d5l-eco-title .g{color:#E1B25F}
+.d5l-eco-body{font-size:13px;line-height:1.6;color:#A49D92;margin-top:12px}
+.d5l-footer{border-top:1px solid rgba(255,255,255,0.08);position:relative;background:#090E12}
+.d5l-footer-inner{max-width:1180px;margin:0 auto;padding:40px 24px 16px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;font-size:13px;color:#A49D92}
 .savings-bar-wrap{margin-bottom:10px}
 .savings-bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
 .savings-bar-key{color:#8FA3BE;display:flex;align-items:center;gap:5px}
@@ -562,6 +609,14 @@ function FaqItem({ q, a }) {
   );
 }
 
+function WhatsAppGlyph({ size = 14, color = "#59E0AD" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C6.48 2 2 6.48 2 12c0 1.82.48 3.53 1.32 5.01L2 22l5.15-1.28A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm5.2 14.2c-.24.66-1.17 1.22-1.9 1.37-.5.1-1.16.18-3.38-.72-2.84-1.17-4.68-4.07-4.82-4.26-.14-.19-1.15-1.53-1.15-2.92s.72-2.08.98-2.36c.24-.28.53-.35.7-.35.18 0 .35.01.5.01.16 0 .38-.06.6.46.24.56.8 1.94.87 2.08.07.14.12.31.02.5-.1.19-.15.31-.29.48-.14.17-.3.38-.43.5-.14.14-.29.29-.13.57.17.28.75 1.24 1.6 2 1.1.98 2.03 1.29 2.31 1.43.28.14.44.12.6-.07.17-.19.7-.82.89-1.1.19-.28.38-.24.63-.14.26.1 1.63.77 1.9.91.28.14.47.21.54.33.07.12.07.68-.17 1.35Z" fill={color}/>
+    </svg>
+  );
+}
+
 function Landing({ go }) {
   const [email, setEmail] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
@@ -578,49 +633,190 @@ function Landing({ go }) {
     setLoading(false);
     setSubmitted(true);
   };
+
+  const WA_HREF = "https://wa.me/27769831448?text=" + encodeURIComponent("Hi Muḽo — show me my number.");
+
+  const ecosystem = [
+    { k: "Home",  d: "Unlock the equity in your home to retire expensive debt at a fraction of the rate.", state: "Live" },
+    { k: "Insure", d: "Compare short-term cover in one place. Cashback into your Muḽo wallet each month.", state: "Coming soon" },
+    { k: "Money", d: "Channel your freed-up cash into collective investment schemes. Consolidate, then grow.", state: "Coming soon" },
+    { k: "Bank",  d: "A full transactional home for the household you've rebuilt.", state: "On the way" },
+  ];
+
+  const safety = [
+    { eyebrow: "The honest trade-off", title: "You're moving debt, not erasing it.",
+      body: "Unsecured debt (personal loans, cards, store accounts) is expensive but not tied to your house. A further advance on your bond is cheaper, but it is secured against your home. Muḽo will only recommend this when the maths clearly works in your favour over the life of the loan — not just next month." },
+    { eyebrow: "The regulator's rules, applied", title: "A proper affordability check every time.",
+      body: "Muḽo follows the affordability assessment prescribed by the National Credit Act. Your income, expenses, existing obligations and credit profile are reviewed before any offer is finalised — the same test a bank branch would run, done in the background." },
+    { eyebrow: "When we say no", title: "There are cases Muḽo will not take.",
+      body: "If the new repayment would strain your monthly budget, if the equity in your home is too thin, if your bond is in arrears, or if the interest saved doesn't meaningfully outweigh the term and costs — Muḽo will tell you plainly and stop. A refinance you shouldn't do isn't a business we want." },
+  ];
+
   return (
-    <div style={{minHeight:"100vh",background:"#0A1628",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"40px 24px"}}>
-      <div style={{textAlign:"center",maxWidth:420,width:"100%"}}>
-        <div style={{fontSize:42,fontWeight:800,color:"#fff",letterSpacing:-1,marginBottom:8}}>
-          Mu<span style={{color:"#00B8A9"}}>ḽ</span>o
+    <div className="d5l-wrap">
+      <div className="d5l-atmosphere" />
+
+      {/* ── HEADER ── */}
+      <header className="d5l-header">
+        <div className="d5l-wordmark">Mu<span className="g">ḽ</span>o</div>
+        <nav className="d5l-nav">
+          <a href="#how">How it works</a>
+          <a href="#safety">Is this safe?</a>
+          <a href="#ecosystem">Bank <span className="d5l-soon">SOON</span></a>
+        </nav>
+        <a href={WA_HREF} target="_blank" rel="noopener" className="d5l-wa-btn">
+          <WhatsAppGlyph /> Chat now
+        </a>
+      </header>
+
+      {/* ── HERO ── */}
+      <section className="d5l-hero">
+        <div>
+          <div className="d5l-eyebrow-row">
+            <div className="d5l-rule" />
+            <div style={{fontFamily:"'Geist',sans-serif",fontSize:"10.9px",fontWeight:500,letterSpacing:"0.22em",textTransform:"uppercase",color:"#A49D92"}}>
+              For South African homeowners · pay debt down smarter
+            </div>
+          </div>
+          <div className="d5l-headline">
+            Your home loan is your<br/>
+            <span className="em">cheapest</span> line of credit.<br/>
+            Use it.
+          </div>
+          <div className="d5l-body-copy">
+            Muḽo lets any South African homeowner tap the equity in their bond to settle expensive unsecured debt and consolidate it into a single, lower-rate repayment against the house they already own.
+          </div>
+          <div className="d5l-cta-row">
+            <a href={WA_HREF} target="_blank" rel="noopener" className="d5l-wa-cta">
+              <div>
+                <div className="d5l-wa-cta-title">Chat to Muḽo on WhatsApp</div>
+                <div className="d5l-wa-cta-sub">We'll send you a private link · no forms</div>
+              </div>
+              <div style={{color:"#0B121A",fontSize:16}}>→</div>
+            </a>
+            <div className="d5l-sample-link" onClick={() => go("id-verify")}>Prefer the web? Start your application →</div>
+          </div>
+          <div className="d5l-trust-row">
+            <span>NCR registration pending</span>
+            <span>POPIA compliant</span>
+            <span>Bank-grade encryption</span>
+            <span>No credit check to see your number</span>
+          </div>
         </div>
-        <div style={{fontSize:12,fontWeight:600,color:"#00B8A9",letterSpacing:3,textTransform:"uppercase",marginBottom:32}}>Coming Soon</div>
-        <div style={{width:48,height:2,background:"#00B8A9",margin:"0 auto 32px"}} />
-        <h1 style={{fontSize:26,fontWeight:700,color:"#fff",lineHeight:1.35,marginBottom:16}}>
-          The smart way to refinance and settle expensive debt.
-        </h1>
-        <p style={{fontSize:15,color:"rgba(255,255,255,0.55)",lineHeight:1.7,marginBottom:36}}>
-          Use your home equity to pay off expensive debt at a lower interest rate. Fully digital. No branch visit. Launching soon.
-        </p>
-        {!submitted ? (
-          <div style={{display:"flex",flexDirection:"column",gap:12}}>
-            <input type="email" placeholder="Enter your email to be notified" value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSubmit()}
-              style={{width:"100%",padding:"14px 18px",borderRadius:12,border:"1.5px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.06)",color:"#fff",fontSize:15,outline:"none",boxSizing:"border-box"}} />
-            <button onClick={handleSubmit} disabled={loading}
-              style={{width:"100%",padding:"14px",borderRadius:12,background:"#00B8A9",border:"none",color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer",opacity:loading?0.7:1}}>
-              {loading ? "Joining..." : "Notify me when we launch →"}
-            </button>
+
+        {/* Hero right column — compact offer preview */}
+        <div className="d5l-offercard">
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+            <div style={{fontSize:"10.9px",letterSpacing:"0.22em",textTransform:"uppercase",color:"#E1B25F"}}>Your private offer</div>
+            <div style={{fontSize:11,color:"#A49D92"}}>Sample</div>
           </div>
-        ) : (
-          <div style={{background:"rgba(0,184,169,0.12)",border:"1px solid rgba(0,184,169,0.3)",borderRadius:12,padding:"20px 24px",color:"#00B8A9",fontSize:15,fontWeight:600}}>
-            ✓ You are on the list. We will be in touch soon.
+          <div style={{fontSize:13,color:"#A49D92",marginBottom:18}}>Thabo · 34 Jacaranda Ave, Kempton Park</div>
+          <div style={{fontFamily:"'Fraunces',serif",fontSize:38,fontFeatureSettings:"'lnum','tnum'",letterSpacing:"-0.045em",color:"#F4F0E7",marginBottom:6}}>
+            <span style={{color:"#E1B25F",fontSize:22,marginRight:6}}>R</span>517 500
           </div>
-        )}
-        <div style={{marginTop:40,display:"flex",justifyContent:"center",gap:32}}>
-          {[["🔒","NCR Registered"],["🏦","FSP Licensed"],["⚡","256-bit SSL"]].map(([i,l]) => (
-            <div key={l} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
-              <span style={{fontSize:20}}>{i}</span>
-              <span style={{fontSize:10,color:"rgba(255,255,255,0.4)",fontWeight:600,letterSpacing:0.5}}>{l}</span>
+          <div style={{fontSize:11,color:"#A49D92",marginBottom:22}}>11.25% p.a. · 60 months · Approved in 8 seconds</div>
+          <div style={{background:"rgba(89,224,173,0.08)",border:"1px solid rgba(89,224,173,0.25)",borderRadius:16,padding:16,marginBottom:20}}>
+            <div style={{fontSize:"10.9px",letterSpacing:"0.22em",textTransform:"uppercase",color:"#59E0AD",display:"flex",alignItems:"center",gap:7}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#59E0AD"}}/>Freed up monthly
+            </div>
+            <div style={{fontFamily:"'Fraunces',serif",fontSize:26,fontFeatureSettings:"'lnum','tnum'",letterSpacing:"-0.045em",color:"#F4F0E7",marginTop:8}}>
+              R 4 521<span style={{fontSize:12,color:"#A49D92",marginLeft:4,fontFamily:"'Geist',sans-serif"}}>/mo</span>
+            </div>
+          </div>
+          <div style={{fontSize:"10.9px",letterSpacing:"0.18em",textTransform:"uppercase",color:"#A49D92",marginBottom:10}}>Settled</div>
+          {[["Nedbank Personal Loan","85 000"],["FNB Credit Card","42 000"],["African Bank Loan","31 500"]].map(([n,v]) => (
+            <div key={n} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.06)",fontSize:12}}>
+              <span style={{color:"#F4F0E7"}}>{n}</span>
+              <span style={{fontFamily:"'Fraunces',serif",fontFeatureSettings:"'lnum','tnum'",color:"#F4F0E7"}}>R {v}</span>
             </div>
           ))}
         </div>
-        <div style={{marginTop:40,fontSize:11,color:"rgba(255,255,255,0.2)"}}>
-          © 2026 Muḽo Financial Technologies (Pty) Ltd ·{" "}
-          <span style={{color:"rgba(255,255,255,0.3)",cursor:"pointer"}} onClick={() => go("login")}>Team login</span>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how" className="d5l-section">
+        <div className="d5l-section-inner">
+          <div className="d5l-section-head">
+            <div className="d5l-section-title">A WhatsApp <span style={{fontStyle:"italic",color:"#E1B25F"}}>hello</span>. Eight minutes on the web. A smarter balance sheet.</div>
+            <div className="d5l-section-sub">Start the conversation on WhatsApp, or begin directly on the web — both roads lead to the same private offer.</div>
+          </div>
+          <div className="d5l-cards3">
+            {[
+              ["01","Say hello","Message Muḽo on WhatsApp with your name — takes seconds, no app to download."],
+              ["02","Verify & consent","We confirm your identity, bond and bank details securely on the web — about eight minutes."],
+              ["03","See your offer","Get your personalised equity offer, sign digitally, and we settle your debts directly."],
+            ].map(([n,t,b]) => (
+              <div key={n} className="d5l-card">
+                <div style={{fontFamily:"'Fraunces',serif",fontFeatureSettings:"'lnum','tnum'",fontSize:14,color:"#A49D92",marginBottom:16}}>{n}</div>
+                <div style={{fontFamily:"'Fraunces',serif",fontSize:19,marginBottom:10}}>{t}</div>
+                <div style={{fontSize:13,lineHeight:1.6,color:"#A49D92"}}>{b}</div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* ── SAFETY ── */}
+      <section id="safety" className="d5l-section" style={{background:"radial-gradient(90% 60% at 50% 0%, rgba(89,224,173,0.06), transparent 70%)"}}>
+        <div className="d5l-section-inner">
+          <div className="d5l-section-head">
+            <div className="d5l-section-title">A cheaper rate against your home is a <span style={{fontStyle:"italic",color:"#E1B25F"}}>powerful</span> tool. We treat it like one.</div>
+            <div className="d5l-section-sub">Turning short, unsecured debt into a longer, secured facility is the right move for many homeowners — and the wrong move for some. Here is how Muḽo decides, and where the line is drawn.</div>
+          </div>
+          <div className="d5l-cards3">
+            {safety.map(c => (
+              <div key={c.eyebrow} className="d5l-card">
+                <div className="d5l-card-eyebrow">{c.eyebrow}</div>
+                <div className="d5l-card-title">{c.title}</div>
+                <div className="d5l-card-body">{c.body}</div>
+              </div>
+            ))}
+          </div>
+          <div className="d5l-disclaimer">
+            Muḽo is a registered credit provider under the National Credit Act (registration pending). All offers are subject to affordability assessment, credit approval, valuation and bank consent. Consolidating short-term debt into a longer-term bond facility may reduce your monthly repayment while increasing the total interest paid over the full term — Muḽo will show you both figures before you sign.
+          </div>
+        </div>
+      </section>
+
+      {/* ── ECOSYSTEM ── */}
+      <section id="ecosystem" className="d5l-section">
+        <div className="d5l-section-inner">
+          <div className="d5l-section-head">
+            <div className="d5l-section-title">The client who arrives to <span style={{fontStyle:"italic",color:"#E1B25F"}}>refinance</span><br/>is the same client who, 24 months later, invests.</div>
+            <div className="d5l-section-sub">Refinancing is only the door. Muḽo is a full financial home — Home, Insure, Money, and one day, Bank.</div>
+          </div>
+          <div className="d5l-eco-grid">
+            {ecosystem.map((p,i) => {
+              const badgeColor = p.state === "Live" ? "#59E0AD" : p.state === "Coming soon" ? "#E1B25F" : "#A49D92";
+              return (
+                <div key={p.k} className="d5l-eco-card">
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:36}}>
+                    <span className="d5l-eco-num">0{i+1}</span>
+                    <span className="d5l-eco-badge" style={{borderColor:badgeColor+"66",color:badgeColor}}>{p.state}</span>
+                  </div>
+                  <div className="d5l-eco-title">Mu<span className="g">ḽ</span>o {p.k}</div>
+                  <div className="d5l-eco-body">{p.d}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="d5l-footer">
+        <div className="d5l-footer-inner">
+          <div style={{display:"flex",alignItems:"center",gap:14}}>
+            <div className="d5l-wordmark" style={{fontSize:18}}>Mu<span className="g">ḽ</span>o</div>
+            <span style={{fontSize:12}}>Tshivenda for <em style={{color:"#F4F0E7"}}>root</em>.</span>
+          </div>
+          <div style={{fontSize:12}}>Registered credit provider (pending) · Johannesburg, South Africa</div>
+        </div>
+        <div style={{maxWidth:1180,margin:"0 auto",padding:"0 24px 32px",fontSize:11,color:"#5a564e"}}>
+          © 2026 Muḽo Financial Technologies (Pty) Ltd ·{" "}
+          <span style={{color:"#7d7869",cursor:"pointer",textDecoration:"underline"}} onClick={() => go("login")}>Team login</span>
+        </div>
+      </footer>
     </div>
   );
 }
